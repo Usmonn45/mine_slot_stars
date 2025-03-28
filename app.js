@@ -107,7 +107,7 @@ function checkReferral() {
 
 // Настройка реферальной ссылки
 function setupReferralLink() {
-    const refCode = userData.id ? `https://t.me/YOUR_BOT_USERNAME?start=ref_${userData.id}` : 'Недоступно';
+    const refCode = userData.id ? `https://t.me/mine_stars_minenot_bot?start=ref_${userData.id}` : 'Недоступно';
     document.getElementById('referral-code').textContent = refCode;
     
     document.getElementById('copy-ref-btn').addEventListener('click', () => {
@@ -206,7 +206,7 @@ function requestWithdraw(amount) {
         return;
     }
     
-    const adminLink = "@Usmon110";
+    const adminLink = "https://t.me/Usmon110";
     const message = `Запрос на вывод ${amount} ⭐\nID: ${userData.id}\nНик: ${userData.username}\nСвязь: ${adminLink}`;
     document.getElementById('withdraw-message').textContent = message;
     
@@ -377,7 +377,7 @@ function requestWithdraw(amount) {
     saveGameState();
     updateUI();
     
-    const adminLink = "https://t.me/YOUR_ADMIN_USERNAME";
+    const adminLink = "https://t.me/usmon110";
     const message = `Запрос на вывод ${amount} ⭐\nID: ${userData.id}\nНик: ${userData.username}\nСвязь: ${adminLink}\nОстаток звёзд: ${userData.stars}`;
     document.getElementById('withdraw-message').textContent = message;
     
