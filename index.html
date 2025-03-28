@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MineStars</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="user-header">
+        <img src="default_avatar.png" class="user-avatar" id="user-avatar">
+        <div class="user-info">
+            <h3 id="username">Игрок</h3>
+            <div class="user-stats">
+                <span>Уровень: <span id="user-level">1</span></span>
+                <span>Рефералов: <span id="referrals-count">0</span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <!-- Вкладка Игра -->
+        <div id="game" class="tab-content active">
+            <div class="balance-container">
+                <div class="balance-item">
+                    <span class="balance-icon">🎰</span>
+                    <span class="balance-value" id="balance">10</span>
+                </div>
+                <div class="balance-item">
+                    <span class="balance-icon">⭐</span>
+                    <span class="balance-value" id="stars-count">0</span>
+                </div>
+            </div>
+
+            <div class="slot-machine">
+                <div class="slot" id="slot1">🍒</div>
+                <div class="slot" id="slot2">🍒</div>
+                <div class="slot" id="slot3">🍒</div>
+            </div>
+
+            <button id="spin-button" class="spin-button">Крутить (1 попытка)</button>
+
+            <div class="level-info">
+                <p>Текущий множитель: <span id="level">1</span>x</p>
+                <p>Выигрыш: <span id="prize-info">15⭐</span></p>
+            </div>
+
+            <div class="action-buttons">
+                <button id="buy-button" class="action-button">Купить попытки</button>
+                <button id="withdraw-button" class="action-button">Вывести звёзды</button>
+            </div>
+        </div>
+
+        <!-- Вкладка Рефералы -->
+        <div id="referrals" class="tab-content">
+            <div class="referral-section">
+                <h2>Приглашай друзей</h2>
+                <p>Твой реферальный код:</p>
+                <div class="referral-code" id="referral-code">loading...</div>
+                <p>За каждого друга получишь +1 попытку и +5 звёзд!</p>
+                
+                <div class="referral-progress">
+                    <h3>Прогресс до следующего уровня:</h3>
+                    <progress id="level-progress" value="0" max="50"></progress>
+                    <p id="level-status">Нужно ещё 50 друзей для 2 уровня</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для покупки попыток -->
+    <div id="buy-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Купить попытки</h2>
+            <p>Попытки покупаются за Telegram Stars</p>
+            
+            <div class="offer" data-offer="1" data-stars="100">
+                <div class="offer-content">
+                    <span class="offer-amount">1 попытка</span>
+                    <span class="offer-price">100 Stars</span>
+                </div>
+                <div class="offer-bonus">Без бонуса</div>
+            </div>
+            
+            <div class="offer" data-offer="5" data-stars="450">
+                <div class="offer-content">
+                    <span class="offer-amount">5 попыток</span>
+                    <span class="offer-price">450 Stars</span>
+                </div>
+                <div class="offer-bonus">Экономия 50 Stars</div>
+            </div>
+            
+            <div class="offer" data-offer="10" data-stars="800">
+                <div class="offer-content">
+                    <span class="offer-amount">10 попыток</span>
+                    <span class="offer-price">800 Stars</span>
+                </div>
+                <div class="offer-bonus">Экономия 200 Stars</div>
+            </div>
+            
+            <div class="offer" data-offer="50" data-stars="3500">
+                <div class="offer-content">
+                    <span class="offer-amount">50 попыток</span>
+                    <span class="offer-price">3500 Stars</span>
+                </div>
+                <div class="offer-bonus">Экономия 1500 Stars</div>
+            </div>
+            
+            <div class="offer" data-offer="100" data-stars="6000">
+                <div class="offer-content">
+                    <span class="offer-amount">100 попыток</span>
+                    <span class="offer-price">6000 Stars</span>
+                </div>
+                <div class="offer-bonus">Экономия 4000 Stars</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для вывода звёзд -->
+    <div id="withdraw-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Вывести звёзды</h2>
+            <p>Выберите сумму для вывода:</p>
+            
+            <div class="withdraw-option" data-amount="15">
+                <span class="withdraw-amount">15 ⭐</span>
+                <span class="withdraw-min">Мин. сумма</span>
+            </div>
+            
+            <div class="withdraw-option" data-amount="25">
+                <span class="withdraw-amount">25 ⭐</span>
+            </div>
+            
+            <div class="withdraw-option" data-amount="50">
+                <span class="withdraw-amount">50 ⭐</span>
+            </div>
+            
+            <div class="withdraw-option" data-amount="100">
+                <span class="withdraw-amount">100 ⭐</span>
+            </div>
+            
+            <div class="withdraw-info">
+                <p>После запроса отправьте это сообщение админу:</p>
+                <div class="withdraw-message" id="withdraw-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="game">🎰 Игра</button>
+        <button class="tab-btn" data-tab="referrals">👥 Рефералы</button>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
