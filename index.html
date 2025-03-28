@@ -57,7 +57,10 @@
             <div class="referral-section">
                 <h2>Приглашай друзей</h2>
                 <p>Твой реферальный код:</p>
-                <div class="referral-code" id="referral-code">loading...</div>
+                <div class="referral-code-container">
+                    <div class="referral-code" id="referral-code">loading...</div>
+                    <button id="copy-ref-btn" class="copy-btn">Копировать</button>
+                </div>
                 <p>За каждого друга получишь +1 попытку и +5 звёзд!</p>
                 
                 <div class="referral-progress">
@@ -70,56 +73,39 @@
     </div>
 
     <!-- Модальное окно для покупки попыток -->
-    <div id="buy-modal" class="modal">
+    <div id="buy-modal" class="modal compact-modal">
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>Купить попытки</h2>
             <p>Попытки покупаются за Telegram Stars</p>
             
-            <div class="offer" data-offer="1" data-stars="100">
+            <div class="offer" data-offer="1" data-stars="1">
                 <div class="offer-content">
                     <span class="offer-amount">1 попытка</span>
-                    <span class="offer-price">100 Stars</span>
+                    <span class="offer-price">1 Star</span>
                 </div>
-                <div class="offer-bonus">Без бонуса</div>
             </div>
             
-            <div class="offer" data-offer="5" data-stars="450">
+            <div class="offer" data-offer="5" data-stars="4">
                 <div class="offer-content">
                     <span class="offer-amount">5 попыток</span>
-                    <span class="offer-price">450 Stars</span>
+                    <span class="offer-price">4 Stars</span>
                 </div>
-                <div class="offer-bonus">Экономия 50 Stars</div>
+                <div class="offer-bonus">Экономия 1 Star</div>
             </div>
             
-            <div class="offer" data-offer="10" data-stars="800">
+            <div class="offer" data-offer="10" data-stars="7">
                 <div class="offer-content">
                     <span class="offer-amount">10 попыток</span>
-                    <span class="offer-price">800 Stars</span>
+                    <span class="offer-price">7 Stars</span>
                 </div>
-                <div class="offer-bonus">Экономия 200 Stars</div>
-            </div>
-            
-            <div class="offer" data-offer="50" data-stars="3500">
-                <div class="offer-content">
-                    <span class="offer-amount">50 попыток</span>
-                    <span class="offer-price">3500 Stars</span>
-                </div>
-                <div class="offer-bonus">Экономия 1500 Stars</div>
-            </div>
-            
-            <div class="offer" data-offer="100" data-stars="6000">
-                <div class="offer-content">
-                    <span class="offer-amount">100 попыток</span>
-                    <span class="offer-price">6000 Stars</span>
-                </div>
-                <div class="offer-bonus">Экономия 4000 Stars</div>
+                <div class="offer-bonus">Экономия 3 Stars</div>
             </div>
         </div>
     </div>
 
     <!-- Модальное окно для вывода звёзд -->
-    <div id="withdraw-modal" class="modal">
+    <div id="withdraw-modal" class="modal compact-modal">
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>Вывести звёзды</h2>
@@ -138,13 +124,10 @@
                 <span class="withdraw-amount">50 ⭐</span>
             </div>
             
-            <div class="withdraw-option" data-amount="100">
-                <span class="withdraw-amount">100 ⭐</span>
-            </div>
-            
             <div class="withdraw-info">
                 <p>После запроса отправьте это сообщение админу:</p>
                 <div class="withdraw-message" id="withdraw-message"></div>
+                <button id="copy-withdraw-btn" class="copy-btn">Копировать текст</button>
             </div>
         </div>
     </div>

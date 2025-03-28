@@ -234,7 +234,13 @@ body {
     box-shadow: 0 5px 18px rgba(39, 174, 96, 0.4);
 }
 
-/* Модальные окна */
+/* Компактные модальные окна */
+.compact-modal .modal-content {
+    max-width: 320px;
+    padding: 20px;
+    margin: 5vh auto;
+}
+
 .modal {
     display: none;
     position: fixed;
@@ -262,7 +268,7 @@ body {
 }
 
 .modal h2 {
-    margin: 0 0 20px 0;
+    margin: 0 0 15px 0;
     text-align: center;
     color: #f1c40f;
     font-size: 22px;
@@ -286,15 +292,13 @@ body {
 
 /* Предложения покупки */
 .offer {
-    padding: 15px;
-    margin: 12px 0;
+    padding: 12px 15px;
+    margin: 10px 0;
     background: rgba(255, 255, 255, 0.08);
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s;
     border-left: 4px solid #f1c40f;
-    position: relative;
-    overflow: hidden;
 }
 
 .offer:hover {
@@ -310,13 +314,13 @@ body {
 
 .offer-amount {
     font-weight: 600;
-    font-size: 17px;
+    font-size: 16px;
 }
 
 .offer-price {
     font-weight: 700;
     color: #f1c40f;
-    font-size: 18px;
+    font-size: 16px;
 }
 
 .offer-bonus {
@@ -329,16 +333,15 @@ body {
 
 /* Варианты вывода */
 .withdraw-option {
-    padding: 16px;
-    margin: 12px 0;
+    padding: 14px;
+    margin: 10px 0;
     background: rgba(255, 255, 255, 0.08);
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s;
     text-align: center;
-    font-size: 18px;
+    font-size: 16px;
     border-left: 4px solid #2ecc71;
-    position: relative;
 }
 
 .withdraw-option:hover {
@@ -359,7 +362,7 @@ body {
 }
 
 .withdraw-info {
-    margin-top: 25px;
+    margin-top: 20px;
     font-size: 14px;
     opacity: 0.9;
     text-align: center;
@@ -373,7 +376,7 @@ body {
     background: rgba(0, 0, 0, 0.3);
     padding: 12px;
     border-radius: 8px;
-    margin-top: 10px;
+    margin: 10px 0;
     font-family: monospace;
     white-space: pre-wrap;
     word-break: break-all;
@@ -387,19 +390,43 @@ body {
     animation: fadeIn 0.5s ease;
 }
 
+.referral-code-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 15px 0;
+}
+
 .referral-code {
+    flex: 1;
     background: linear-gradient(135deg, #f1c40f, #e67e22);
     color: #1a2238;
     padding: 12px 15px;
     border-radius: 8px;
     font-weight: 700;
-    font-size: 18px;
-    margin: 12px 0;
-    display: block;
+    font-size: 14px;
     text-align: center;
-    letter-spacing: 1px;
     box-shadow: 0 3px 10px rgba(241, 196, 15, 0.2);
     border: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.copy-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.copy-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .referral-progress {
@@ -478,11 +505,6 @@ progress::-webkit-progress-value {
     font-weight: 600;
 }
 
-.tab-btn::before {
-    font-size: 22px;
-    margin-bottom: 3px;
-}
-
 /* Анимации */
 @keyframes fadeIn {
     from { opacity: 0; }
@@ -498,11 +520,6 @@ progress::-webkit-progress-value {
         opacity: 1;
         transform: translateY(0);
     }
-}
-
-@keyframes spin {
-    0% { transform: rotateX(0deg); }
-    100% { transform: rotateX(360deg); }
 }
 
 /* Всплывающие уведомления */
@@ -579,13 +596,13 @@ progress::-webkit-progress-value {
         min-width: 120px;
     }
     
-    .modal-content {
+    .modal-content, .compact-modal .modal-content {
         width: 95%;
-        padding: 20px;
+        padding: 15px;
     }
     
     .offer, .withdraw-option {
-        padding: 12px;
+        padding: 10px 12px;
     }
     
     .user-avatar {
@@ -603,5 +620,15 @@ progress::-webkit-progress-value {
     
     .balance-value {
         font-size: 20px;
+    }
+    
+    .referral-code {
+        font-size: 12px;
+        padding: 10px;
+    }
+    
+    .copy-btn {
+        padding: 8px 12px;
+        font-size: 12px;
     }
 }
