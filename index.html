@@ -2,17 +2,17 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MineStars</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <!-- Прелоадер -->
-    <div id="preloader" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f0c29; display: flex; justify-content: center; align-items: center; z-index: 9999;">
-        <div class="star-container" style="width: 150px; height: 150px; position: relative;">
-            <div class="glow" style="position: absolute; width: 200px; height: 200px; background: radial-gradient(circle, rgba(255, 215, 0, 0.4) 0%, rgba(255, 215, 0, 0) 70%); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
-            <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" alt="Loading" style="width: 100%; height: 100%; object-fit: contain; animation: spin 2s linear infinite, pulse 1.5s ease infinite alternate; filter: drop-shadow(0 0 15px gold);">
+    <div id="preloader">
+        <div class="star-container">
+            <div class="glow"></div>
+            <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" alt="Loading">
         </div>
     </div>
 
@@ -23,7 +23,7 @@
             <div class="user-stats">
                 <span>Уровень: <span id="user-level">1</span></span>
                 <span>Рефералов: <span id="referrals-count">0</span></span>
-                <span id="daily-bonus-btn" style="cursor: pointer;">📅</span>
+                <span id="daily-bonus-btn">📅</span>
             </div>
         </div>
     </div>
@@ -34,7 +34,7 @@
             <div class="balance-container">
                 <div class="balance-item">
                     <span class="balance-icon">🎰</span>
-                    <span class="balance-value" id="balance">10</span>
+                    <span class="balance-value" id="balance">0</span>
                 </div>
                 <div class="balance-item">
                     <span class="balance-icon">⭐</span>
@@ -87,11 +87,7 @@
                 </div>
                 
                 <div class="friends-list" id="friends-list">
-                    <div class="empty-state">
-                        <img src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" alt="No friends" class="empty-icon">
-                        <p>Вы пока не пригласили друзей</p>
-                        <p>Используйте ваш реферальный код, чтобы приглашать друзей и получать бонусы</p>
-                    </div>
+                    <!-- Динамически заполняется через JS -->
                 </div>
             </div>
         </div>
@@ -145,7 +141,7 @@
         </div>
     </div>
 
-    <!-- Модальное окно для покупки попыток -->
+    <!-- Модальные окна -->
     <div id="buy-modal" class="modal compact-modal">
         <div class="modal-content">
             <span class="close">&times;</span>
@@ -177,7 +173,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно для вывода звёзд -->
     <div id="withdraw-modal" class="modal compact-modal">
         <div class="modal-content">
             <span class="close">&times;</span>
@@ -205,7 +200,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно ежедневного бонуса -->
     <div id="daily-bonus-modal" class="modal compact-modal">
         <div class="modal-content">
             <span class="close">&times;</span>
@@ -216,7 +210,7 @@
                 <div class="bonus-day" data-day="1">
                     <div class="day-number">День 1</div>
                     <div class="day-reward">1 ⭐</div>
-                    <div class="day-status">✅</div>
+                    <div class="day-status">🔒</div>
                 </div>
                 <div class="bonus-day" data-day="2">
                     <div class="day-number">День 2</div>
