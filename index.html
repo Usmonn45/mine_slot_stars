@@ -19,11 +19,11 @@
     <div class="user-header">
         <img src="default_avatar.png" class="user-avatar" id="user-avatar">
         <div class="user-info">
-            <h3 id="username">Игрок</h3>
+            <h3 id="username">Загрузка...</h3>
             <div class="user-stats">
                 <span>Уровень: <span id="user-level">1</span></span>
                 <span>Рефералов: <span id="referrals-count">0</span></span>
-                <span id="daily-bonus-btn">📅</span>
+                <span id="daily-bonus-btn">🎁</span>
             </div>
         </div>
     </div>
@@ -87,7 +87,10 @@
                 </div>
                 
                 <div class="friends-list" id="friends-list">
-                    <!-- Динамически заполняется через JS -->
+                    <div class="empty-state">
+                        <img src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" alt="No friends">
+                        <p>Вы пока не пригласили друзей</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -95,7 +98,7 @@
         <!-- Вкладка Задания -->
         <div id="tasks" class="tab-content">
             <div class="tasks-section">
-                <h2>Задания</h2>
+                <h2>Ежедневные задания</h2>
                 
                 <div class="task-card">
                     <div class="task-content">
@@ -112,7 +115,7 @@
                     <div class="task-content">
                         <div class="task-icon">🎰</div>
                         <div class="task-info">
-                            <h3>Сыграть 10 раз</h3>
+                            <h3>Сыграть в слоты</h3>
                             <p>Сыграйте 10 раз в слоты и получите 10 звёзд</p>
                             <div class="task-progress">
                                 <progress value="0" max="10"></progress>
@@ -127,7 +130,7 @@
                     <div class="task-content">
                         <div class="task-icon">👥</div>
                         <div class="task-info">
-                            <h3>Пригласить 3 друзей</h3>
+                            <h3>Пригласить друзей</h3>
                             <p>Пригласите 3 друзей и получите 15 звёзд</p>
                             <div class="task-progress">
                                 <progress value="0" max="3"></progress>
@@ -244,7 +247,7 @@
                 </div>
             </div>
             
-            <button id="claim-bonus-btn" class="spin-button" disabled>Забрать бонус</button>
+            <button id="claim-bonus-btn" class="spin-button">Забрать бонус</button>
         </div>
     </div>
 

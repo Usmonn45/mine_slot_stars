@@ -1,40 +1,100 @@
 /* Основные стили */
-body {
+:root {
+    --primary: #f1c40f;
+    --secondary: #2ecc71;
+    --danger: #e74c3c;
+    --dark: #0d131a;
+    --darker: #182430;
+    --light: #ffffff;
+    --gray: #b8b8b8;
+    --card-bg: rgba(0, 0, 0, 0.2);
+    --border: rgba(255, 255, 255, 0.1);
+  }
+  
+  * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: linear-gradient(135deg, #182430, #0d131a);
-    color: #ffffff;
-    height: 100vh;
+  }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, 
+                 Ubuntu, Cantarell, sans-serif;
+    background: linear-gradient(135deg, var(--dark), var(--darker));
+    color: var(--light);
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    overflow-x: hidden;
-}
-
-/* Анимации для прелоадера */
-@keyframes spin {
+    line-height: 1.5;
+  }
+  
+  /* Анимации */
+  @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
-}
-
-@keyframes pulse {
+  }
+  
+  @keyframes pulse {
     0% { transform: scale(1); opacity: 0.8; }
     100% { transform: scale(1.1); opacity: 1; }
-}
-
-/* Шапка пользователя */
-.user-header {
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  
+  /* Прелоадер */
+  #preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--dark);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+  
+  .star-container {
+    position: relative;
+    width: 100px;
+    height: 100px;
+  }
+  
+  .glow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(241,196,15,0.5) 0%, rgba(241,196,15,0) 70%);
+    animation: pulse 1.5s infinite alternate;
+  }
+  
+  .star-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    animation: spin 2s linear infinite;
+  }
+  
+  /* Шапка пользователя */
+  .user-header {
     display: flex;
     align-items: center;
     padding: 15px;
     background: rgba(0, 0, 0, 0.25);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    position: relative;
-    z-index: 100;
+    border-bottom: 1px solid var(--border);
     backdrop-filter: blur(5px);
-}
-
-.user-avatar {
+  }
+  
+  .user-avatar {
     width: 50px;
     height: 50px;
     border-radius: 50%;
@@ -42,85 +102,80 @@ body {
     object-fit: cover;
     border: 2px solid rgba(241, 196, 15, 0.3);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-}
-
-.user-info h3 {
+  }
+  
+  .user-info h3 {
     margin: 0;
     font-size: 18px;
     font-weight: 600;
-    color: #f8f8f8;
-}
-
-.user-stats {
+  }
+  
+  .user-stats {
     font-size: 13px;
-    opacity: 0.8;
+    color: var(--gray);
     display: flex;
     gap: 10px;
     margin-top: 4px;
-    color: #b8b8b8;
-}
-
-.user-stats span {
+  }
+  
+  .user-stats span {
     display: flex;
     align-items: center;
-}
-
-/* Основное содержимое */
-.content {
+  }
+  
+  /* Основное содержимое */
+  .content {
     flex: 1;
-    overflow-y: auto;
     padding: 15px;
     padding-bottom: 70px;
-}
-
-.tab-content {
+  }
+  
+  .tab-content {
     display: none;
     animation: fadeIn 0.3s ease-out;
-}
-
-.tab-content.active {
+  }
+  
+  .tab-content.active {
     display: block;
-}
-
-/* Баланс */
-.balance-container {
+  }
+  
+  /* Баланс */
+  .balance-container {
     display: flex;
     justify-content: space-around;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--card-bg);
     padding: 15px;
     border-radius: 12px;
     margin-bottom: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.balance-item {
+    border: 1px solid var(--border);
+  }
+  
+  .balance-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 5px;
-}
-
-.balance-icon {
+  }
+  
+  .balance-icon {
     font-size: 26px;
-    opacity: 0.9;
-}
-
-.balance-value {
+  }
+  
+  .balance-value {
     font-size: 22px;
     font-weight: 700;
-}
-
-/* Слот-машина */
-.slot-machine {
+  }
+  
+  /* Слот-машина */
+  .slot-machine {
     display: flex;
     justify-content: center;
     gap: 12px;
     margin: 30px 0;
     perspective: 1000px;
-}
-
-.slot {
+  }
+  
+  .slot {
     width: 80px;
     height: 80px;
     background: rgba(255, 255, 255, 0.08);
@@ -131,23 +186,17 @@ body {
     font-size: 42px;
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
     transform-style: preserve-3d;
-    transition: transform 0.3s, box-shadow 0.3s;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.slot.spinning {
+    border: 1px solid var(--border);
+  }
+  
+  .slot.spinning {
     animation: spin 0.1s infinite linear;
     box-shadow: 0 0 20px rgba(241, 196, 15, 0.3);
-}
-
-@keyframes spin {
-    0% { transform: rotateX(0deg); }
-    100% { transform: rotateX(360deg); }
-}
-
-/* Кнопка вращения */
-.spin-button {
-    background: linear-gradient(135deg, #f1c40f, #e67e22);
+  }
+  
+  /* Кнопка вращения */
+  .spin-button {
+    background: linear-gradient(135deg, var(--primary), #e67e22);
     color: #1a2238;
     border: none;
     padding: 16px 30px;
@@ -161,58 +210,50 @@ body {
     max-width: 300px;
     box-shadow: 0 5px 20px rgba(241, 196, 15, 0.3);
     transition: all 0.2s;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.spin-button:hover {
+  }
+  
+  .spin-button:hover {
     transform: translateY(-2px);
     box-shadow: 0 7px 25px rgba(241, 196, 15, 0.4);
-}
-
-.spin-button:active {
-    transform: translateY(0);
-}
-
-.spin-button:disabled {
+  }
+  
+  .spin-button:disabled {
     background: #555;
     color: #999;
     cursor: not-allowed;
     box-shadow: none;
-    transform: none !important;
-}
-
-/* Информация об уровне */
-.level-info {
+  }
+  
+  /* Информация об уровне */
+  .level-info {
     text-align: center;
     margin-top: 20px;
-    font-size: 16px;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--card-bg);
     padding: 15px;
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.level-info p {
+    border: 1px solid var(--border);
+  }
+  
+  .level-info p {
     margin: 8px 0;
     color: #e0e0e0;
-}
-
-.level-info span {
+  }
+  
+  .level-info span {
     font-weight: 600;
-    color: #f1c40f;
-}
-
-/* Кнопки действий */
-.action-buttons {
+    color: var(--primary);
+  }
+  
+  /* Кнопки действий */
+  .action-buttons {
     display: flex;
     justify-content: center;
     gap: 12px;
     margin: 25px 0;
     flex-wrap: wrap;
-}
-
-.action-button {
+  }
+  
+  .action-button {
     background: linear-gradient(135deg, #3498db, #2980b9);
     color: white;
     border: none;
@@ -225,39 +266,18 @@ body {
     min-width: 140px;
     max-width: calc(50% - 6px);
     transition: all 0.2s;
-    box-shadow: 0 3px 12px rgba(41, 128, 185, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.action-button:hover {
+  }
+  
+  .action-button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 18px rgba(41, 128, 185, 0.4);
-}
-
-.action-button:active {
-    transform: translateY(0);
-}
-
-.action-button:nth-child(2) {
-    background: linear-gradient(135deg, #2ecc71, #27ae60);
-    box-shadow: 0 3px 12px rgba(39, 174, 96, 0.3);
-}
-
-.action-button:nth-child(2):hover {
-    box-shadow: 0 5px 18px rgba(39, 174, 96, 0.4);
-}
-
-/* Компактные модальные окна */
-.compact-modal .modal-content {
-    max-width: 320px;
-    padding: 20px;
-    margin: 5vh auto;
-}
-
-.modal {
+  }
+  
+  .action-button:nth-child(2) {
+    background: linear-gradient(135deg, var(--secondary), #27ae60);
+  }
+  
+  /* Модальные окна */
+  .modal {
     display: none;
     position: fixed;
     top: 0;
@@ -268,9 +288,9 @@ body {
     z-index: 1000;
     animation: fadeIn 0.3s ease-out;
     backdrop-filter: blur(5px);
-}
-
-.modal-content {
+  }
+  
+  .modal-content {
     background: #1a2a3a;
     margin: 10vh auto;
     padding: 25px;
@@ -279,76 +299,74 @@ body {
     max-width: 400px;
     box-shadow: 0 10px 35px rgba(0, 0, 0, 0.3);
     position: relative;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border);
     animation: slideUp 0.4s ease-out;
-}
-
-.modal h2 {
+  }
+  
+  .compact-modal .modal-content {
+    max-width: 320px;
+    padding: 20px;
+  }
+  
+  .modal h2 {
     margin: 0 0 15px 0;
     text-align: center;
-    color: #f1c40f;
-    font-size: 22px;
-}
-
-.close {
+    color: var(--primary);
+  }
+  
+  .close {
     position: absolute;
     top: 15px;
     right: 20px;
     font-size: 24px;
     cursor: pointer;
-    opacity: 0.7;
-    transition: opacity 0.2s;
     color: #aaa;
-}
-
-.close:hover {
-    opacity: 1;
-    color: #fff;
-}
-
-/* Предложения покупки */
-.offer {
+    transition: all 0.2s;
+  }
+  
+  .close:hover {
+    color: var(--light);
+  }
+  
+  /* Предложения покупки */
+  .offer {
     padding: 12px 15px;
     margin: 10px 0;
     background: rgba(255, 255, 255, 0.08);
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s;
-    border-left: 4px solid #f1c40f;
-}
-
-.offer:hover {
+    border-left: 4px solid var(--primary);
+  }
+  
+  .offer:hover {
     background: rgba(255, 255, 255, 0.15);
     transform: translateX(5px);
-}
-
-.offer-content {
+  }
+  
+  .offer-content {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-}
-
-.offer-amount {
+  }
+  
+  .offer-amount {
     font-weight: 600;
-    font-size: 16px;
-}
-
-.offer-price {
+  }
+  
+  .offer-price {
     font-weight: 700;
-    color: #f1c40f;
-    font-size: 16px;
-}
-
-.offer-bonus {
+    color: var(--primary);
+  }
+  
+  .offer-bonus {
     font-size: 13px;
-    color: #2ecc71;
+    color: var(--secondary);
     margin-top: 5px;
     text-align: right;
-    font-style: italic;
-}
-
-/* Варианты вывода */
-.withdraw-option {
+  }
+  
+  /* Варианты вывода */
+  .withdraw-option {
     padding: 14px;
     margin: 10px 0;
     background: rgba(255, 255, 255, 0.08);
@@ -356,204 +374,134 @@ body {
     cursor: pointer;
     transition: all 0.3s;
     text-align: center;
-    font-size: 16px;
-    border-left: 4px solid #2ecc71;
-}
-
-.withdraw-option:hover {
+    border-left: 4px solid var(--secondary);
+  }
+  
+  .withdraw-option:hover {
     background: rgba(255, 255, 255, 0.15);
-    transform: translateX(5px);
-}
-
-.withdraw-amount {
+  }
+  
+  .withdraw-amount {
     font-weight: 600;
     display: block;
-}
-
-.withdraw-min {
+  }
+  
+  .withdraw-min {
     font-size: 12px;
-    opacity: 0.7;
+    color: var(--primary);
     margin-top: 3px;
-    color: #f1c40f;
-}
-
-.withdraw-info {
+  }
+  
+  .withdraw-info {
     margin-top: 20px;
     font-size: 14px;
-    opacity: 0.9;
-    text-align: center;
     padding: 15px;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--card-bg);
     border-radius: 8px;
-    border: 1px dashed rgba(255, 255, 255, 0.1);
-}
-
-.withdraw-message {
+    border: 1px dashed var(--border);
+  }
+  
+  .withdraw-message {
     background: rgba(0, 0, 0, 0.3);
     padding: 12px;
     border-radius: 8px;
     margin: 10px 0;
     font-family: monospace;
-    white-space: pre-wrap;
-    word-break: break-all;
     font-size: 13px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Реферальная система */
-.referral-section {
+    border: 1px solid var(--border);
+  }
+  
+  /* Реферальная система */
+  .referral-section {
     padding: 15px;
-    animation: fadeIn 0.5s ease;
-}
-
-.referral-code-container {
+  }
+  
+  .referral-code-container {
     display: flex;
     align-items: center;
     gap: 10px;
     margin: 15px 0;
-}
-
-.referral-code {
+  }
+  
+  .referral-code {
     flex: 1;
-    background: linear-gradient(135deg, #f1c40f, #e67e22);
+    background: linear-gradient(135deg, var(--primary), #e67e22);
     color: #1a2238;
     padding: 12px 15px;
     border-radius: 8px;
     font-weight: 700;
-    font-size: 14px;
     text-align: center;
-    box-shadow: 0 3px 10px rgba(241, 196, 15, 0.2);
-    border: none;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.copy-btn {
+  }
+  
+  .copy-btn {
     background: rgba(255, 255, 255, 0.1);
     border: none;
     color: white;
     padding: 10px 15px;
     border-radius: 8px;
     cursor: pointer;
-    font-size: 14px;
     transition: all 0.2s;
-    white-space: nowrap;
-}
-
-.copy-btn:hover {
+  }
+  
+  .copy-btn:hover {
     background: rgba(255, 255, 255, 0.2);
-}
-
-.referral-progress {
+  }
+  
+  .referral-progress {
     margin-top: 30px;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--card-bg);
     padding: 20px;
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.referral-progress h3 {
+    border: 1px solid var(--border);
+  }
+  
+  .referral-progress h3 {
     margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 17px;
-    color: #f1c40f;
-}
-
-progress {
+    color: var(--primary);
+  }
+  
+  progress {
     width: 100%;
     height: 10px;
     border-radius: 5px;
     margin: 10px 0;
     border: none;
-    background-color: transparent;
-}
-
-progress::-webkit-progress-bar {
+  }
+  
+  progress::-webkit-progress-bar {
     background-color: rgba(255, 255, 255, 0.1);
     border-radius: 5px;
-}
-
-progress::-webkit-progress-value {
-    background: linear-gradient(135deg, #2ecc71, #27ae60);
+  }
+  
+  progress::-webkit-progress-value {
+    background: linear-gradient(135deg, var(--secondary), #27ae60);
     border-radius: 5px;
-}
-
-#level-status {
+  }
+  
+  #level-status {
     text-align: center;
     font-size: 14px;
-    opacity: 0.8;
-    margin-top: 10px;
-    color: #b8b8b8;
-}
-
-/* Стили для раздела друзей */
-.friends-section {
-    padding: 15px;
-    animation: fadeIn 0.5s ease;
-}
-
-.friends-stats {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    margin: 20px 0;
-}
-
-.stat-card {
-    flex: 1;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 12px;
-    padding: 15px 10px;
-    text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    transition: transform 0.3s;
-}
-
-.stat-card:hover {
-    transform: translateY(-3px);
-    background: rgba(0, 0, 0, 0.3);
-}
-
-.stat-icon {
-    font-size: 24px;
-    display: block;
-    margin-bottom: 5px;
-}
-
-.stat-value {
-    font-size: 20px;
-    font-weight: 700;
-    color: #f1c40f;
-    display: block;
-}
-
-.stat-label {
-    font-size: 12px;
-    opacity: 0.8;
-    display: block;
-}
-
-.friends-list-header {
+    color: var(--gray);
+  }
+  
+  /* Стили для друзей */
+  .friends-list-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin: 25px 0 15px 0;
-}
-
-.friends-list-header h3 {
-    margin: 0;
-    font-size: 18px;
-}
-
-.sort-options {
+  }
+  
+  .sort-options {
     display: flex;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--card-bg);
     border-radius: 20px;
     padding: 3px;
-}
-
-.sort-btn {
+  }
+  
+  .sort-btn {
     background: none;
     border: none;
     color: rgba(255, 255, 255, 0.7);
@@ -561,117 +509,232 @@ progress::-webkit-progress-value {
     font-size: 13px;
     cursor: pointer;
     border-radius: 15px;
-    transition: all 0.3s;
-}
-
-.sort-btn.active {
+  }
+  
+  .sort-btn.active {
     background: rgba(241, 196, 15, 0.2);
-    color: #f1c40f;
+    color: var(--primary);
     font-weight: 600;
-}
-
-.friend-card {
+  }
+  
+  .friend-card {
     display: flex;
     align-items: center;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--card-bg);
     border-radius: 12px;
     padding: 12px 15px;
     margin-bottom: 10px;
     transition: all 0.3s;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.friend-card:hover {
+    border: 1px solid var(--border);
+  }
+  
+  .friend-card:hover {
     background: rgba(0, 0, 0, 0.3);
-    transform: translateX(5px);
-}
-
-.friend-avatar {
+  }
+  
+  .friend-avatar {
     width: 45px;
     height: 45px;
     border-radius: 50%;
     margin-right: 15px;
     object-fit: cover;
     border: 2px solid rgba(241, 196, 15, 0.3);
-}
-
-.friend-info {
+  }
+  
+  .friend-info {
     flex: 1;
-}
-
-.friend-name {
+  }
+  
+  .friend-name {
     margin: 0;
     font-size: 16px;
     font-weight: 600;
-}
-
-.friend-date {
+  }
+  
+  .friend-date {
     font-size: 12px;
-    opacity: 0.7;
-    margin-top: 3px;
-}
-
-.friend-stats {
+    color: var(--gray);
+  }
+  
+  .friend-stats {
     text-align: right;
-}
-
-.friend-stars {
-    color: #f1c40f;
+  }
+  
+  .friend-stars {
+    color: var(--primary);
     font-weight: 600;
-    font-size: 16px;
-}
-
-.friend-attempts {
+  }
+  
+  .friend-attempts {
     font-size: 12px;
-    opacity: 0.7;
-    margin-top: 3px;
-}
-
-.friend-level {
+    color: var(--gray);
+  }
+  
+  .friend-level {
     font-size: 10px;
     padding: 2px 6px;
     border-radius: 10px;
     margin-top: 3px;
     display: inline-block;
     background: rgba(255, 255, 255, 0.1);
-}
-
-.friend-level.vip {
+  }
+  
+  .friend-level.vip {
     background: rgba(241, 196, 15, 0.2);
-    color: #f1c40f;
-}
-
-.friend-level.active {
+    color: var(--primary);
+  }
+  
+  .friend-level.active {
     background: rgba(46, 204, 113, 0.2);
-    color: #2ecc71;
-}
-
-.empty-state {
+    color: var(--secondary);
+  }
+  
+  .empty-state {
     text-align: center;
     padding: 30px 0;
-    opacity: 0.7;
-}
-
-.empty-icon {
+  }
+  
+  .empty-state img {
     width: 80px;
     height: 80px;
     opacity: 0.5;
     margin-bottom: 15px;
-}
-
-/* Нижняя панель вкладок */
-.tab-bar {
+  }
+  
+  /* Календарь бонусов */
+  .bonus-calendar {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+  }
+  
+  .bonus-day {
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+  
+  .bonus-day.active {
+    background: rgba(241, 196, 15, 0.1);
+    border-color: rgba(241, 196, 15, 0.3);
+  }
+  
+  .bonus-day.completed {
+    background: rgba(46, 204, 113, 0.1);
+    border-color: rgba(46, 204, 113, 0.3);
+  }
+  
+  .day-number {
+    font-weight: 600;
+    color: var(--primary);
+  }
+  
+  .day-reward {
+    font-size: 14px;
+  }
+  
+  .day-status {
+    font-size: 18px;
+  }
+  
+  /* Задания */
+  .tasks-section {
+    padding: 15px;
+  }
+  
+  .task-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .task-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+  }
+  
+  .task-icon {
+    font-size: 28px;
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .task-info h3 {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+  }
+  
+  .task-info p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--gray);
+  }
+  
+  .task-progress {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .task-progress progress {
+    flex: 1;
+    height: 6px;
+  }
+  
+  .task-progress span {
+    font-size: 12px;
+  }
+  
+  .task-button {
+    background: linear-gradient(135deg, var(--secondary), #27ae60);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  
+  .task-button:disabled {
+    background: #555;
+    color: #999;
+    cursor: not-allowed;
+  }
+  
+  .task-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+  }
+  
+  /* Нижняя панель вкладок */
+  .tab-bar {
     display: flex;
     background: rgba(0, 0, 0, 0.3);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid var(--border);
     position: fixed;
     bottom: 0;
     width: 100%;
     z-index: 100;
     backdrop-filter: blur(5px);
-}
-
-.tab-btn {
+  }
+  
+  .tab-btn {
     flex: 1;
     background: none;
     border: none;
@@ -683,35 +746,15 @@ progress::-webkit-progress-value {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 5px;
-}
-
-.tab-btn.active {
-    color: #f1c40f;
-    opacity: 1;
-    transform: translateY(-2px);
+  }
+  
+  .tab-btn.active {
+    color: var(--primary);
     font-weight: 600;
-}
-
-/* Анимации */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slideUp {
-    from { 
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to { 
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Всплывающие уведомления */
-.win-popup {
+  }
+  
+  /* Всплывающие уведомления */
+  .win-popup {
     position: fixed;
     top: 50%;
     left: 50%;
@@ -722,31 +765,23 @@ progress::-webkit-progress-value {
     text-align: center;
     z-index: 1000;
     animation: fadeIn 0.3s, slideUp 0.4s;
-    border: 2px solid #f1c40f;
+    border: 2px solid var(--primary);
     max-width: 85%;
-    box-shadow: 0 10px 30px rgba(241, 196, 15, 0.2);
     backdrop-filter: blur(5px);
-}
-
-.win-popup h2 {
+  }
+  
+  .win-popup h2 {
     margin: 0 0 10px 0;
-    color: #f1c40f;
-    font-size: 24px;
-}
-
-.win-combination {
+    color: var(--primary);
+  }
+  
+  .win-combination {
     font-size: 42px;
     margin: 15px 0;
-    color: #ffffff;
     letter-spacing: 5px;
-}
-
-.win-popup p {
-    margin: 8px 0;
-    font-size: 16px;
-}
-
-.toast {
+  }
+  
+  .toast {
     position: fixed;
     bottom: 80px;
     left: 50%;
@@ -761,232 +796,49 @@ progress::-webkit-progress-value {
     max-width: 85%;
     text-align: center;
     backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-}
-
-/* Стили для календаря бонусов */
-.bonus-calendar {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin: 20px 0;
-}
-
-.bonus-day {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    padding: 12px;
-    text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.3s;
-}
-
-.bonus-day.active {
-    background: rgba(241, 196, 15, 0.1);
-    border-color: rgba(241, 196, 15, 0.3);
-}
-
-.bonus-day.completed {
-    background: rgba(46, 204, 113, 0.1);
-    border-color: rgba(46, 204, 113, 0.3);
-}
-
-.day-number {
-    font-weight: 600;
-    margin-bottom: 5px;
-    color: #f1c40f;
-}
-
-.day-reward {
-    font-size: 14px;
-    margin-bottom: 5px;
-}
-
-.day-status {
-    font-size: 18px;
-}
-
-/* Стили для заданий */
-.tasks-section {
-    padding: 15px;
-}
-
-.task-card {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.task-content {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex: 1;
-}
-
-.task-icon {
-    font-size: 28px;
-    width: 50px;
-    height: 50px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.task-info h3 {
-    margin: 0 0 5px 0;
-    font-size: 16px;
-}
-
-.task-info p {
-    margin: 0;
-    font-size: 14px;
-    opacity: 0.8;
-}
-
-.task-progress {
-    margin-top: 8px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.task-progress progress {
-    flex: 1;
-    height: 6px;
-}
-
-.task-progress span {
-    font-size: 12px;
-}
-
-.task-button {
-    background: linear-gradient(135deg, #2ecc71, #27ae60);
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 14px;
-    transition: all 0.2s;
-    white-space: nowrap;
-}
-
-.task-button:disabled {
-    background: #555;
-    color: #999;
-    cursor: not-allowed;
-}
-
-.task-button:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
-}
-
-/* Адаптация для маленьких экранов */
-@media (max-width: 400px) {
+  }
+  
+  /* Адаптация для мобильных */
+  @media (max-width: 400px) {
     .slot {
-        width: 70px;
-        height: 70px;
-        font-size: 36px;
+      width: 70px;
+      height: 70px;
+      font-size: 36px;
     }
     
     .spin-button {
-        padding: 14px 20px;
-        font-size: 16px;
+      padding: 14px 20px;
+      font-size: 16px;
     }
     
     .action-button {
-        padding: 12px 15px;
-        font-size: 15px;
-        min-width: 120px;
+      padding: 12px 15px;
+      font-size: 15px;
+      min-width: 120px;
     }
     
-    .modal-content, .compact-modal .modal-content {
-        width: 95%;
-        padding: 15px;
-    }
-    
-    .offer, .withdraw-option {
-        padding: 10px 12px;
+    .modal-content {
+      width: 95%;
+      padding: 15px;
     }
     
     .user-avatar {
-        width: 45px;
-        height: 45px;
-    }
-    
-    .user-info h3 {
-        font-size: 16px;
-    }
-    
-    .balance-icon {
-        font-size: 24px;
-    }
-    
-    .balance-value {
-        font-size: 20px;
-    }
-    
-    .referral-code {
-        font-size: 12px;
-        padding: 10px;
-    }
-    
-    .copy-btn {
-        padding: 8px 12px;
-        font-size: 12px;
-    }
-    
-    /* Адаптация для друзей */
-    .stat-card {
-        padding: 10px 5px;
-    }
-    
-    .stat-icon {
-        font-size: 20px;
-    }
-    
-    .stat-value {
-        font-size: 18px;
-    }
-    
-    .friend-avatar {
-        width: 40px;
-        height: 40px;
-        margin-right: 10px;
-    }
-    
-    .friend-name {
-        font-size: 15px;
-    }
-    
-    .empty-icon {
-        width: 60px;
-        height: 60px;
+      width: 45px;
+      height: 45px;
     }
     
     .bonus-calendar {
-        grid-template-columns: 1fr;
+      grid-template-columns: 1fr;
     }
     
     .task-content {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
     }
     
     .task-button {
-        width: 100%;
-        margin-top: 10px;
+      width: 100%;
+      margin-top: 10px;
     }
-}
+  }

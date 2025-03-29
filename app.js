@@ -7,9 +7,8 @@ const ATTEMPT_PRICES = {
     10: { stars: 7, amount: 10 }
 };
 const WITHDRAW_OPTIONS = [15, 25, 50];
-const INITIAL_BALANCE = 0;
 const CHANNEL_LINK = "https://t.me/mine_not_ru";
-const API_BASE_URL = "https://usmonn45.pythonanywhere.com"; // ЗАМЕНИТЕ НА ВАШ АДРЕС БЭКЕНДА
+const API_BASE_URL = "https://usmonn45.pythonanywhere.com/"; // ЗАМЕНИТЕ НА ВАШ АДРЕС БЭКЕНДА
 
 // Инициализация Telegram WebApp
 const tg = window.Telegram.WebApp;
@@ -23,13 +22,12 @@ const userIdFromUrl = urlParams.get('user_id');
 // Данные пользователя
 let userData = {
     id: userIdFromUrl || tg.initDataUnsafe?.user?.id,
-    balance: INITIAL_BALANCE,
+    balance: 0,
     stars: 0,
     level: 1,
     referrals: 0,
     username: 'Игрок',
-    firstTime: true,
-    bonusGiven: false,
+    photoUrl: '',
     friends: [],
     dailyBonus: {
         lastClaim: null,
@@ -61,11 +59,12 @@ async function initGame() {
     setupEventListeners();
     setupModalHandlers();
     setupReferralLink();
-    setupDailyBonus();
     updateUI();
     
-    if (userData.firstTime && !userData.bonusGiven) {
-        giveInitialBonus();
+    // Загружаем аватар из Telegram, если доступен
+    if (tg.initDataUnsafe?.user?.photo_url) {
+        document.getElementById('user-avatar').src = tg.initDataUnsafe.user.photo_url;
+        userData.photoUrl = tg.initDataUnsafe.user.photo_url;
     }
 }
 
@@ -80,22 +79,17 @@ async function loadUserData() {
         const response = await fetch(`${API_BASE_URL}/api/user?user_id=${userData.id}`);
         if (response.ok) {
             const data = await response.json();
-            
-            // Обновляем данные пользователя
-            userData.balance = data.balance || INITIAL_BALANCE;
-            userData.stars = data.stars || 0;
-            userData.level = data.level || 1;
-            userData.referrals = data.referrals || 0;
-            userData.username = data.username || 'Игрок';
-            userData.friends = data.friends || [];
-            userData.tasks = data.tasks || { subscribe: false, spins: 0, referrals: 0 };
-            userData.dailyBonus = data.dailyBonus || { lastClaim: null, streak: 0 };
+            Object.assign(userData, data);
             
             // Обновляем UI
             document.getElementById('username').textContent = userData.username;
-            if (tg.initDataUnsafe?.user?.photo_url) {
-                document.getElementById('user-avatar').src = tg.initDataUnsafe.user.photo_url;
+            if (userData.photoUrl) {
+                document.getElementById('user-avatar').src = userData.photoUrl;
             }
+            
+            updateDailyBonusUI();
+            updateFriendsUI();
+            updateTasksUI();
         } else {
             console.error('Ошибка загрузки данных:', response.status);
             loadFromLocalStorage();
@@ -107,8 +101,6 @@ async function loadUserData() {
     
     checkReferral();
     updateUI();
-    updateFriendsUI();
-    updateTasksUI();
 }
 
 // Загрузка из локального хранилища
@@ -117,17 +109,9 @@ function loadFromLocalStorage() {
     if (savedData) {
         try {
             const parsed = JSON.parse(savedData);
-            userData.balance = parsed.balance || INITIAL_BALANCE;
-            userData.stars = parsed.stars || 0;
-            userData.level = parsed.level || 1;
-            userData.referrals = parsed.referrals || 0;
-            userData.firstTime = parsed.firstTime !== undefined ? parsed.firstTime : true;
-            userData.bonusGiven = parsed.bonusGiven || false;
-            userData.friends = parsed.friends || [];
-            userData.dailyBonus = parsed.dailyBonus || { lastClaim: null, streak: 0 };
-            userData.tasks = parsed.tasks || { subscribe: false, spins: 0, referrals: 0 };
+            Object.assign(userData, parsed);
         } catch (e) {
-            console.error('Ош��бка загрузки из localStorage:', e);
+            console.error('Ошибка загрузки из localStorage:', e);
         }
     }
 }
@@ -137,21 +121,12 @@ async function syncUserData() {
     if (!userData.id) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/sync`, {
+        const response = await fetch(`${API_BASE_URL}/api/update`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                user_id: userData.id,
-                balance: userData.balance,
-                stars: userData.stars,
-                level: userData.level,
-                referrals: userData.referrals,
-                friends: userData.friends,
-                tasks: userData.tasks,
-                dailyBonus: userData.dailyBonus
-            })
+            body: JSON.stringify(userData)
         });
         
         if (!response.ok) {
@@ -160,17 +135,8 @@ async function syncUserData() {
     } catch (e) {
         console.error('Ошибка синхронизации:', e);
     }
-}
-
-// Выдача начального бонуса
-function giveInitialBonus() {
-    userData.balance += 10;
-    userData.bonusGiven = true;
-    userData.firstTime = false;
+    
     saveGameState();
-    syncUserData();
-    showToast("Вы получили 10 бесплатных попыток!");
-    updateUI();
 }
 
 // Проверка реферальной ссылки
@@ -198,8 +164,8 @@ function addFriend(friendId, friendName, friendAvatar) {
         name: friendName,
         avatar: friendAvatar,
         date: new Date().toISOString(),
-        starsEarned: 0,
-        attemptsEarned: 0,
+        starsEarned: 0.5,
+        attemptsEarned: 1,
         lastActive: new Date().toISOString()
     });
     
@@ -208,33 +174,8 @@ function addFriend(friendId, friendName, friendAvatar) {
     userData.referrals += 1;
     userData.tasks.referrals += 1;
     
-    saveGameState();
     syncUserData();
-    updateUI();
-    updateFriendsUI();
-    updateTasksUI();
-    
     showToast("Вы получили 1 попытку и 0.5 звезды за приглашение друга!");
-}
-
-// Обновление статистики друга
-function updateFriendStats(friendId, stars = 0, attempts = 0) {
-    const friend = userData.friends.find(f => f.id === friendId);
-    if (friend) {
-        friend.starsEarned += stars;
-        friend.attemptsEarned += attempts;
-        friend.lastActive = new Date().toISOString();
-        saveGameState();
-        syncUserData();
-        updateFriendsUI();
-    }
-}
-
-// Получение уровня друга
-function getFriendLevel(starsEarned) {
-    if (starsEarned >= 100) return 'VIP';
-    if (starsEarned >= 30) return 'Активный';
-    return 'Новичок';
 }
 
 // Обновление UI списка друзей
@@ -242,21 +183,21 @@ function updateFriendsUI() {
     const friendsList = document.getElementById('friends-list');
     const totalFriends = document.getElementById('referrals-count');
     
-    totalFriends.textContent = userData.friends.length;
-    friendsList.innerHTML = '';
+    totalFriends.textContent = userData.referrals;
     
     if (userData.friends.length === 0) {
         friendsList.innerHTML = `
             <div class="empty-state">
                 <img src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" alt="No friends">
                 <p>Вы пока не пригласили друзей</p>
-                <p>Используйте ваш реферальный код, чтобы приглашать друзей и получать бонусы</p>
             </div>
         `;
         return;
     }
     
+    friendsList.innerHTML = '';
     let sortedFriends = [...userData.friends];
+    
     if (gameState.currentSort === 'recent') {
         sortedFriends.sort((a, b) => new Date(b.date) - new Date(a.date));
     } else {
@@ -271,10 +212,12 @@ function updateFriendsUI() {
             <div class="friend-info">
                 <h4 class="friend-name">${friend.name}</h4>
                 <span class="friend-date">${formatDate(friend.date)}</span>
-                <span class="friend-level ${getFriendLevel(friend.starsEarned).toLowerCase()}">${getFriendLevel(friend.starsEarned)}</span>
+                <span class="friend-level ${getFriendLevel(friend.starsEarned).toLowerCase()}">
+                    ${getFriendLevel(friend.starsEarned)}
+                </span>
             </div>
             <div class="friend-stats">
-                <span class="friend-stars">${friend.starsEarned} ⭐</span>
+                <span class="friend-stars">${friend.starsEarned.toFixed(1)} ⭐</span>
                 <span class="friend-attempts">${friend.attemptsEarned} попыток</span>
             </div>
         `;
@@ -282,23 +225,36 @@ function updateFriendsUI() {
     });
 }
 
+// Получение уровня друга
+function getFriendLevel(starsEarned) {
+    if (starsEarned >= 100) return 'VIP';
+    if (starsEarned >= 30) return 'Активный';
+    return 'Новичок';
+}
+
 // Настройка ежедневных бонусов
 function setupDailyBonus() {
     const today = new Date().toDateString();
-    const lastClaim = userData.dailyBonus.lastClaim ? new Date(userData.dailyBonus.lastClaim).toDateString() : null;
+    const lastClaim = userData.dailyBonus.lastClaim ? 
+        new Date(userData.dailyBonus.lastClaim).toDateString() : null;
     
     if (lastClaim !== today) {
-        if (!lastClaim || (new Date(today) - new Date(lastClaim)) / (1000 * 60 * 60 * 24) === 1) {
+        if (!lastClaim || isConsecutiveDay(lastClaim, today)) {
             userData.dailyBonus.streak += 1;
         } else {
             userData.dailyBonus.streak = 1;
         }
         
         userData.dailyBonus.lastClaim = new Date().toISOString();
-        saveGameState();
         syncUserData();
-        updateDailyBonusUI();
     }
+    
+    updateDailyBonusUI();
+}
+
+function isConsecutiveDay(lastDate, currentDate) {
+    const dayMs = 24 * 60 * 60 * 1000;
+    return (new Date(currentDate) - new Date(lastDate)) / dayMs === 1;
 }
 
 // Обновление UI ежедневных бонусов
@@ -308,6 +264,8 @@ function updateDailyBonusUI() {
     
     const days = calendar.querySelectorAll('.bonus-day');
     const currentStreak = userData.dailyBonus.streak;
+    const lastClaim = userData.dailyBonus.lastClaim;
+    const today = new Date().toDateString();
     
     days.forEach(day => {
         const dayNum = parseInt(day.dataset.day);
@@ -315,7 +273,8 @@ function updateDailyBonusUI() {
         
         day.classList.remove('active', 'completed');
         
-        if (dayNum === currentStreak) {
+        if (dayNum === currentStreak && lastClaim && 
+            new Date(lastClaim).toDateString() !== today) {
             day.classList.add('active');
             status.textContent = '🔓';
         } else if (dayNum < currentStreak) {
@@ -326,7 +285,11 @@ function updateDailyBonusUI() {
         }
     });
     
-    document.getElementById('claim-bonus-btn').disabled = currentStreak <= 0;
+    const claimBtn = document.getElementById('claim-bonus-btn');
+    if (claimBtn) {
+        claimBtn.disabled = !(currentStreak > 0 && lastClaim && 
+                             new Date(lastClaim).toDateString() !== today);
+    }
 }
 
 // Получение ежедневного бонуса
@@ -347,11 +310,13 @@ function claimDailyBonus() {
     
     if (bonusStars > 0) {
         userData.stars += bonusStars;
-        saveGameState();
+        userData.balance += bonusStars;
+        userData.dailyBonus.lastClaim = new Date().toISOString();
+        
         syncUserData();
-        updateUI();
-        showToast(`Вы получили ${bonusStars} звёзд за ${currentStreak}-й день!`);
+        showToast(`Вы получили ${bonusStars} звёзд и ${bonusStars} попыток за ${currentStreak}-й день!`);
         updateDailyBonusUI();
+        updateUI();
     }
 }
 
@@ -376,6 +341,8 @@ function updateTasksUI() {
         refsProgress.value = userData.tasks.referrals;
         refsText.textContent = `${userData.tasks.referrals}/3`;
     }
+    
+    checkTasksProgress();
 }
 
 // Выполнение задания на подписку
@@ -390,10 +357,7 @@ function completeSubscribeTask() {
     
     userData.balance += 5;
     userData.tasks.subscribe = true;
-    saveGameState();
     syncUserData();
-    updateUI();
-    updateTasksUI();
     showToast("Вы получили 5 попыток за подписку на канал!");
 }
 
@@ -411,10 +375,7 @@ function checkTasksProgress() {
         showToast("Вы выполнили задание и получили 15 звёзд!");
     }
     
-    saveGameState();
     syncUserData();
-    updateUI();
-    updateTasksUI();
 }
 
 // Настройка реферальной ссылки
@@ -432,18 +393,13 @@ function setupReferralLink() {
 function spin() {
     if (gameState.isSpinning || userData.balance <= 0) return;
     
-    gameState.slotAnimations.forEach(clearTimeout);
-    gameState.slotAnimations = [];
-    if (gameState.spinTimeout) clearTimeout(gameState.spinTimeout);
+    clearSpinAnimations();
     
     gameState.isSpinning = true;
     userData.balance--;
     userData.tasks.spins++;
     
-    saveGameState();
-    syncUserData();
     updateUI();
-    updateTasksUI();
     
     const slots = document.querySelectorAll('.slot');
     const results = [];
@@ -462,16 +418,19 @@ function spin() {
                 gameState.spinTimeout = setTimeout(() => {
                     checkWin(results);
                     gameState.isSpinning = false;
-                    saveGameState();
                     syncUserData();
-                    updateUI();
-                    checkTasksProgress();
                 }, 500);
             }
         }, 1000 + (index * 500));
         
         gameState.slotAnimations.push(animTimeout);
     });
+}
+
+function clearSpinAnimations() {
+    gameState.slotAnimations.forEach(clearTimeout);
+    gameState.slotAnimations = [];
+    if (gameState.spinTimeout) clearTimeout(gameState.spinTimeout);
 }
 
 // Проверка выигрыша
@@ -484,12 +443,20 @@ function checkWin(results) {
     } else {
         gameState.lastWin = 0;
     }
+    
+    updateUI();
+    checkTasksProgress();
 }
 
 // Покупка попыток через Telegram Stars
 function buyAttempts(amount, starsPrice) {
     if (!tg.openInvoice) {
         showToast("Функция покупки доступна только в Telegram");
+        return;
+    }
+    
+    if (userData.stars < starsPrice) {
+        showToast("Недостаточно звёзд для покупки");
         return;
     }
     
@@ -508,8 +475,7 @@ function buyAttempts(amount, starsPrice) {
     tg.openInvoice(invoice, (status) => {
         if (status === 'paid') {
             userData.balance += amount;
-            updateUI();
-            saveGameState();
+            userData.stars -= starsPrice;
             syncUserData();
             showToast(`Успешно! Получено ${amount} попыток`);
         } else {
@@ -535,16 +501,20 @@ async function requestWithdraw(amount) {
                 user_id: userData.id,
                 username: userData.username,
                 amount: amount,
+                balance: userData.stars,
+                referrals: userData.referrals,
                 timestamp: new Date().toISOString()
             })
         });
 
         if (response.ok) {
             userData.stars -= amount;
-            saveGameState();
             syncUserData();
-            updateUI();
-            showToast(`Запрос на вывод ${amount}⭐ отправлен!`);
+            showToast(`Запрос на вывод ${amount}⭐ отправлен! Ожидайте.`);
+            
+            // Формируем сообщение для админа
+            const message = `Запрос на вывод ${amount}⭐\nID: ${userData.id}\nUser: ${userData.username}`;
+            document.getElementById('withdraw-message').textContent = message;
         } else {
             showToast("Ошибка при отправке запроса");
         }
@@ -644,12 +614,15 @@ function setupEventListeners() {
 }
 
 function setupModalHandlers() {
+    // Обработчики модальных окон
     document.getElementById('buy-button').addEventListener('click', () => {
         document.getElementById('buy-modal').style.display = 'block';
     });
     
     document.getElementById('withdraw-button').addEventListener('click', () => {
         document.getElementById('withdraw-modal').style.display = 'block';
+        document.getElementById('withdraw-message').textContent = 
+            `Запрос на вывод\nID: ${userData.id}\nUser: ${userData.username}`;
     });
     
     document.querySelectorAll('.close').forEach(btn => {
@@ -678,17 +651,7 @@ function setupModalHandlers() {
 
 // Сохранение данных
 function saveGameState() {
-    localStorage.setItem('slotGameState', JSON.stringify({
-        balance: userData.balance,
-        stars: userData.stars,
-        level: userData.level,
-        referrals: userData.referrals,
-        firstTime: userData.firstTime,
-        bonusGiven: userData.bonusGiven,
-        friends: userData.friends,
-        dailyBonus: userData.dailyBonus,
-        tasks: userData.tasks
-    }));
+    localStorage.setItem('slotGameState', JSON.stringify(userData));
 }
 
 // Вспомогательные функции
