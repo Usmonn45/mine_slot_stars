@@ -11,6 +11,17 @@ body {
     overflow-x: hidden;
 }
 
+/* Анимации для прелоадера */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(1.1); opacity: 1; }
+}
+
 /* Шапка пользователя */
 .user-header {
     display: flex;
@@ -47,6 +58,11 @@ body {
     gap: 10px;
     margin-top: 4px;
     color: #b8b8b8;
+}
+
+.user-stats span {
+    display: flex;
+    align-items: center;
 }
 
 /* Основное содержимое */
@@ -471,6 +487,178 @@ progress::-webkit-progress-value {
     color: #b8b8b8;
 }
 
+/* Стили для раздела друзей */
+.friends-section {
+    padding: 15px;
+    animation: fadeIn 0.5s ease;
+}
+
+.friends-stats {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.stat-card {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 15px 10px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: transform 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.stat-icon {
+    font-size: 24px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #f1c40f;
+    display: block;
+}
+
+.stat-label {
+    font-size: 12px;
+    opacity: 0.8;
+    display: block;
+}
+
+.friends-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 25px 0 15px 0;
+}
+
+.friends-list-header h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.sort-options {
+    display: flex;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    padding: 3px;
+}
+
+.sort-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 15px;
+    transition: all 0.3s;
+}
+
+.sort-btn.active {
+    background: rgba(241, 196, 15, 0.2);
+    color: #f1c40f;
+    font-weight: 600;
+}
+
+.friend-card {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    transition: all 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.friend-card:hover {
+    background: rgba(0, 0, 0, 0.3);
+    transform: translateX(5px);
+}
+
+.friend-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    margin-right: 15px;
+    object-fit: cover;
+    border: 2px solid rgba(241, 196, 15, 0.3);
+}
+
+.friend-info {
+    flex: 1;
+}
+
+.friend-name {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.friend-date {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-top: 3px;
+}
+
+.friend-stats {
+    text-align: right;
+}
+
+.friend-stars {
+    color: #f1c40f;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.friend-attempts {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-top: 3px;
+}
+
+.friend-level {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-top: 3px;
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.friend-level.vip {
+    background: rgba(241, 196, 15, 0.2);
+    color: #f1c40f;
+}
+
+.friend-level.active {
+    background: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 30px 0;
+    opacity: 0.7;
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    opacity: 0.5;
+    margin-bottom: 15px;
+}
+
 /* Нижняя панель вкладок */
 .tab-bar {
     display: flex;
@@ -577,6 +765,133 @@ progress::-webkit-progress-value {
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
 }
 
+/* Стили для календаря бонусов */
+.bonus-calendar {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.bonus-day {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s;
+}
+
+.bonus-day.active {
+    background: rgba(241, 196, 15, 0.1);
+    border-color: rgba(241, 196, 15, 0.3);
+}
+
+.bonus-day.completed {
+    background: rgba(46, 204, 113, 0.1);
+    border-color: rgba(46, 204, 113, 0.3);
+}
+
+.day-number {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #f1c40f;
+}
+
+.day-reward {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.day-status {
+    font-size: 18px;
+}
+
+/* Стили для заданий */
+.tasks-section {
+    padding: 15px;
+}
+
+.task-card {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.task-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+}
+
+.task-icon {
+    font-size: 28px;
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.task-info h3 {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+}
+
+.task-info p {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.task-progress {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.task-progress progress {
+    flex: 1;
+    height: 6px;
+}
+
+.task-progress span {
+    font-size: 12px;
+}
+
+.task-button {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.task-button:disabled {
+    background: #555;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.task-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+}
+
 /* Адаптация для маленьких экранов */
 @media (max-width: 400px) {
     .slot {
@@ -630,5 +945,48 @@ progress::-webkit-progress-value {
     .copy-btn {
         padding: 8px 12px;
         font-size: 12px;
+    }
+    
+    /* Адаптация для друзей */
+    .stat-card {
+        padding: 10px 5px;
+    }
+    
+    .stat-icon {
+        font-size: 20px;
+    }
+    
+    .stat-value {
+        font-size: 18px;
+    }
+    
+    .friend-avatar {
+        width: 40px;
+        height: 40px;
+        margin-right: 10px;
+    }
+    
+    .friend-name {
+        font-size: 15px;
+    }
+    
+    .empty-icon {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .bonus-calendar {
+        grid-template-columns: 1fr;
+    }
+    
+    .task-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .task-button {
+        width: 100%;
+        margin-top: 10px;
     }
 }

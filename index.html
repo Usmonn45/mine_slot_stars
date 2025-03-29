@@ -8,6 +8,14 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
+    <!-- Прелоадер -->
+    <div id="preloader" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f0c29; display: flex; justify-content: center; align-items: center; z-index: 9999;">
+        <div class="star-container" style="width: 150px; height: 150px; position: relative;">
+            <div class="glow" style="position: absolute; width: 200px; height: 200px; background: radial-gradient(circle, rgba(255, 215, 0, 0.4) 0%, rgba(255, 215, 0, 0) 70%); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
+            <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" alt="Loading" style="width: 100%; height: 100%; object-fit: contain; animation: spin 2s linear infinite, pulse 1.5s ease infinite alternate; filter: drop-shadow(0 0 15px gold);">
+        </div>
+    </div>
+
     <div class="user-header">
         <img src="default_avatar.png" class="user-avatar" id="user-avatar">
         <div class="user-info">
@@ -15,6 +23,7 @@
             <div class="user-stats">
                 <span>Уровень: <span id="user-level">1</span></span>
                 <span>Рефералов: <span id="referrals-count">0</span></span>
+                <span id="daily-bonus-btn" style="cursor: pointer;">📅</span>
             </div>
         </div>
     </div>
@@ -55,18 +64,82 @@
         <!-- Вкладка Рефералы -->
         <div id="referrals" class="tab-content">
             <div class="referral-section">
-                <h2>Приглашай друзей</h2>
+                <h2>Реферальная система</h2>
                 <p>Твой реферальный код:</p>
                 <div class="referral-code-container">
                     <div class="referral-code" id="referral-code">loading...</div>
                     <button id="copy-ref-btn" class="copy-btn">Копировать</button>
                 </div>
-                <p>За каждого друга получишь +1 попытку и +5 звёзд!</p>
+                <p>За каждого друга получишь +1 попытку и +0.5 звёзд!</p>
                 
                 <div class="referral-progress">
                     <h3>Прогресс до следующего уровня:</h3>
                     <progress id="level-progress" value="0" max="50"></progress>
                     <p id="level-status">Нужно ещё 50 друзей для 2 уровня</p>
+                </div>
+
+                <div class="friends-list-header">
+                    <h3>Ваши друзья</h3>
+                    <div class="sort-options">
+                        <button class="sort-btn active" data-sort="recent">Новые</button>
+                        <button class="sort-btn" data-sort="top">Топ</button>
+                    </div>
+                </div>
+                
+                <div class="friends-list" id="friends-list">
+                    <div class="empty-state">
+                        <img src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" alt="No friends" class="empty-icon">
+                        <p>Вы пока не пригласили друзей</p>
+                        <p>Используйте ваш реферальный код, чтобы приглашать друзей и получать бонусы</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка Задания -->
+        <div id="tasks" class="tab-content">
+            <div class="tasks-section">
+                <h2>Задания</h2>
+                
+                <div class="task-card">
+                    <div class="task-content">
+                        <div class="task-icon">📢</div>
+                        <div class="task-info">
+                            <h3>Подписаться на канал</h3>
+                            <p>Подпишитесь на наш канал и получите 5 попыток</p>
+                        </div>
+                    </div>
+                    <button id="subscribe-task-btn" class="task-button">Выполнить</button>
+                </div>
+                
+                <div class="task-card">
+                    <div class="task-content">
+                        <div class="task-icon">🎰</div>
+                        <div class="task-info">
+                            <h3>Сыграть 10 раз</h3>
+                            <p>Сыграйте 10 раз в слоты и получите 10 звёзд</p>
+                            <div class="task-progress">
+                                <progress value="0" max="10"></progress>
+                                <span>0/10</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="task-button" disabled>В процессе</button>
+                </div>
+                
+                <div class="task-card">
+                    <div class="task-content">
+                        <div class="task-icon">👥</div>
+                        <div class="task-info">
+                            <h3>Пригласить 3 друзей</h3>
+                            <p>Пригласите 3 друзей и получите 15 звёзд</p>
+                            <div class="task-progress">
+                                <progress value="0" max="3"></progress>
+                                <span>0/3</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="task-button" disabled>В процессе</button>
                 </div>
             </div>
         </div>
@@ -132,9 +205,59 @@
         </div>
     </div>
 
+    <!-- Модальное окно ежедневного бонуса -->
+    <div id="daily-bonus-modal" class="modal compact-modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Ежедневный бонус</h2>
+            <p>Заходите каждый день, чтобы получить бонус!</p>
+            
+            <div class="bonus-calendar">
+                <div class="bonus-day" data-day="1">
+                    <div class="day-number">День 1</div>
+                    <div class="day-reward">1 ⭐</div>
+                    <div class="day-status">✅</div>
+                </div>
+                <div class="bonus-day" data-day="2">
+                    <div class="day-number">День 2</div>
+                    <div class="day-reward">2 ⭐</div>
+                    <div class="day-status">🔒</div>
+                </div>
+                <div class="bonus-day" data-day="3">
+                    <div class="day-number">День 3</div>
+                    <div class="day-reward">3 ⭐</div>
+                    <div class="day-status">🔒</div>
+                </div>
+                <div class="bonus-day" data-day="4">
+                    <div class="day-number">День 4</div>
+                    <div class="day-reward">5 ⭐</div>
+                    <div class="day-status">🔒</div>
+                </div>
+                <div class="bonus-day" data-day="5">
+                    <div class="day-number">День 5</div>
+                    <div class="day-reward">7 ⭐</div>
+                    <div class="day-status">🔒</div>
+                </div>
+                <div class="bonus-day" data-day="6">
+                    <div class="day-number">День 6</div>
+                    <div class="day-reward">10 ⭐</div>
+                    <div class="day-status">🔒</div>
+                </div>
+                <div class="bonus-day" data-day="7">
+                    <div class="day-number">День 7</div>
+                    <div class="day-reward">15 ⭐</div>
+                    <div class="day-status">🔒</div>
+                </div>
+            </div>
+            
+            <button id="claim-bonus-btn" class="spin-button" disabled>Забрать бонус</button>
+        </div>
+    </div>
+
     <div class="tab-bar">
         <button class="tab-btn active" data-tab="game">🎰 Игра</button>
         <button class="tab-btn" data-tab="referrals">👥 Рефералы</button>
+        <button class="tab-btn" data-tab="tasks">📝 Задания</button>
     </div>
 
     <script src="app.js"></script>
