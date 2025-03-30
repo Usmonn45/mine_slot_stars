@@ -8,7 +8,7 @@ const ATTEMPT_PRICES = {
 };
 const WITHDRAW_OPTIONS = [15, 25, 50];
 const CHANNEL_LINK = "https://t.me/mine_not_ru";
-const API_BASE_URL = "https://ваш-сервер.ру/api";
+const ADMIN_CONTACT = "@usmon110"; // Ваш юзернейм для контакта
 
 // Инициализация Telegram WebApp
 const tg = window.Telegram.WebApp;
@@ -76,7 +76,7 @@ async function loadUserData() {
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/user?user_id=${userData.id}`);
+        const response = await fetch(`/api/user?user_id=${userData.id}`);
         if (response.ok) {
             const data = await response.json();
             Object.assign(userData, data);
@@ -121,7 +121,7 @@ async function syncUserData() {
     if (!userData.id) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/update`, {
+        const response = await fetch('/api/update', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -147,8 +147,19 @@ function checkReferral() {
         const referrerId = refParam.split('_')[1];
         if (referrerId && referrerId !== userData.id?.toString()) {
             if (!userData.friends.some(f => f.id === referrerId)) {
-                const referrerName = `Пользователь ${referrerId}`;
-                addFriend(referrerId, referrerName, null);
+                // Получаем данные о реферере из Telegram
+                let referrerName = `Пользователь ${referrerId}`;
+                let referrerAvatar = null;
+                
+                if (tg.initDataUnsafe?.user?.id === referrerId) {
+                    referrerName = tg.initDataUnsafe.user.first_name;
+                    if (tg.initDataUnsafe.user.last_name) {
+                        referrerName += ' ' + tg.initDataUnsafe.user.last_name;
+                    }
+                    referrerAvatar = tg.initDataUnsafe.user.photo_url;
+                }
+                
+                addFriend(referrerId, referrerName, referrerAvatar);
                 showToast(`Вы зашли по реферальной ссылке от ${referrerName}`);
             }
         }
@@ -456,88 +467,48 @@ function checkWin(results) {
     checkTasksProgress();
 }
 
-// Покупка попыток через Telegram Stars
-async function buyAttempts(amount, starsPrice) {
-    if (!tg.openInvoice) {
-        showToast("Функция покупки доступна только в Telegram");
-        return;
-    }
-    
+// Покупка попыток за внутренние звезды
+function buyAttempts(amount, starsPrice) {
     if (userData.stars < starsPrice) {
         showToast("Недостаточно звёзд для покупки");
         return;
     }
 
-    try {
-        const response = await fetch(`${API_BASE_URL}/create_invoice`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                user_id: userData.id,
-                amount: amount,
-                stars: starsPrice
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error('Ошибка создания счета');
-        }
-
-        const invoice = await response.json();
-
-        tg.openInvoice(invoice, (status) => {
-            if (status === 'paid') {
-                userData.balance += amount;
-                userData.stars -= starsPrice;
-                syncUserData();
-                updateUI();
-                showToast(`Успешно! Получено ${amount} попыток`);
-                createConfetti();
-            } else {
-                showToast("Покупка отменена");
-            }
-        });
-    } catch (e) {
-        console.error('Ошибка покупки:', e);
-        showToast("Ошибка при создании платежа");
-    }
+    userData.balance += amount;
+    userData.stars -= starsPrice;
+    syncUserData();
+    updateUI();
+    showToast(`Успешно! Получено ${amount} попыток`);
+    createConfetti();
 }
 
 // Запрос на вывод звёзд
-async function requestWithdraw(amount) {
+function requestWithdraw(amount) {
     if (userData.stars < amount) {
         showToast("Недостаточно звёзд для вывода");
         return;
     }
 
-    try {
-        const response = await fetch(`${API_BASE_URL}/withdraw`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                user_id: userData.id,
-                username: userData.username,
-                amount: amount,
-                balance: userData.stars
-            })
-        });
+    // Списываем звезды сразу
+    userData.stars -= amount;
+    syncUserData();
+    updateUI();
 
-        if (response.ok) {
-            userData.stars -= amount;
-            syncUserData();
-            updateUI();
-            showToast(`Запрос на вывод ${amount}⭐ отправлен! Ожидайте выплаты.`);
-        } else {
-            showToast("Ошибка при отправке запроса");
-        }
-    } catch (e) {
-        console.error('Ошибка вывода:', e);
-        showToast("Ошибка соединения с сервером");
-    }
+    // Формируем сообщение для админа
+    const message = `Запрос на вывод ${amount}⭐\nID: ${userData.id}\nUser: ${userData.username}\nБаланс: ${userData.stars}⭐`;
+    
+    // Показываем модальное окно с инструкцией
+    const modal = document.getElementById('withdraw-modal');
+    const messageElement = document.getElementById('withdraw-message');
+    messageElement.textContent = message;
+    
+    // Кнопка копирования
+    document.getElementById('copy-withdraw-btn').onclick = () => {
+        copyToClipboard(message);
+        showToast("Текст скопирован, отправьте его админу");
+    };
+    
+    modal.style.display = 'block';
 }
 
 // Копирование текста
@@ -654,6 +625,8 @@ function setupModalHandlers() {
     
     document.getElementById('withdraw-button').addEventListener('click', () => {
         document.getElementById('withdraw-modal').style.display = 'block';
+        document.getElementById('withdraw-message').textContent = 
+            `Запрос на вывод\nID: ${userData.id}\nUser: ${userData.username}`;
     });
     
     document.querySelectorAll('.close').forEach(btn => {
@@ -675,7 +648,6 @@ function setupModalHandlers() {
         option.addEventListener('click', () => {
             const amount = parseInt(option.dataset.amount);
             requestWithdraw(amount);
-            document.getElementById('withdraw-modal').style.display = 'none';
         });
     });
 }
