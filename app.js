@@ -8,7 +8,7 @@ const ATTEMPT_PRICES = {
 };
 const WITHDRAW_OPTIONS = [15, 25, 50];
 const CHANNEL_LINK = "https://t.me/mine_not_ru";
-const API_BASE_URL = "https://usmonn45.pythonanywhere.com/"; // ЗАМЕНИТЕ НА ВАШ АДРЕС БЭКЕНДА
+const API_BASE_URL = "https://ваш-сервер.ру/api";
 
 // Инициализация Telegram WebApp
 const tg = window.Telegram.WebApp;
@@ -76,7 +76,7 @@ async function loadUserData() {
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/user?user_id=${userData.id}`);
+        const response = await fetch(`${API_BASE_URL}/user?user_id=${userData.id}`);
         if (response.ok) {
             const data = await response.json();
             Object.assign(userData, data);
@@ -121,7 +121,7 @@ async function syncUserData() {
     if (!userData.id) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/update`, {
+        const response = await fetch(`${API_BASE_URL}/update`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -141,7 +141,7 @@ async function syncUserData() {
 
 // Проверка реферальной ссылки
 function checkReferral() {
-    const refParam = urlParams.get('start');
+    const refParam = urlParams.get('ref') || urlParams.get('start');
     
     if (refParam && refParam.startsWith('ref_')) {
         const referrerId = refParam.split('_')[1];
@@ -176,6 +176,8 @@ function addFriend(friendId, friendName, friendAvatar) {
     
     syncUserData();
     showToast("Вы получили 1 попытку и 0.5 звезды за приглашение друга!");
+    updateFriendsUI();
+    updateUI();
 }
 
 // Обновление UI списка друзей
@@ -317,6 +319,7 @@ function claimDailyBonus() {
         showToast(`Вы получили ${bonusStars} звёзд и ${bonusStars} попыток за ${currentStreak}-й день!`);
         updateDailyBonusUI();
         updateUI();
+        createConfetti();
     }
 }
 
@@ -358,7 +361,9 @@ function completeSubscribeTask() {
     userData.balance += 5;
     userData.tasks.subscribe = true;
     syncUserData();
+    updateTasksUI();
     showToast("Вы получили 5 попыток за подписку на канал!");
+    createConfetti();
 }
 
 // Проверка прогресса заданий
@@ -366,16 +371,18 @@ function checkTasksProgress() {
     if (userData.tasks.spins >= 10) {
         userData.stars += 10;
         userData.tasks.spins = 0;
-        showToast("Вы выполнили задание и получили 10 звёзд!");
+        syncUserData();
+        showWinAnimation("🎉", 10);
+        updateTasksUI();
     }
     
     if (userData.tasks.referrals >= 3) {
         userData.stars += 15;
         userData.tasks.referrals = 0;
-        showToast("Вы выполнили задание и получили 15 звёзд!");
+        syncUserData();
+        showWinAnimation("👥", 15);
+        updateTasksUI();
     }
-    
-    syncUserData();
 }
 
 // Настройка реферальной ссылки
@@ -419,6 +426,7 @@ function spin() {
                     checkWin(results);
                     gameState.isSpinning = false;
                     syncUserData();
+                    updateUI();
                 }, 500);
             }
         }, 1000 + (index * 500));
@@ -440,16 +448,16 @@ function checkWin(results) {
         userData.stars += starsWon;
         gameState.lastWin = starsWon;
         showWinAnimation(results.join(''), starsWon);
+        createConfetti();
     } else {
         gameState.lastWin = 0;
     }
     
-    updateUI();
     checkTasksProgress();
 }
 
 // Покупка попыток через Telegram Stars
-function buyAttempts(amount, starsPrice) {
+async function buyAttempts(amount, starsPrice) {
     if (!tg.openInvoice) {
         showToast("Функция покупки доступна только в Telegram");
         return;
@@ -459,29 +467,42 @@ function buyAttempts(amount, starsPrice) {
         showToast("Недостаточно звёзд для покупки");
         return;
     }
-    
-    const invoice = {
-        title: `Покупка ${amount} попыток`,
-        description: `Вы получите ${amount} попыток в игре`,
-        currency: "USD",
-        prices: [{ label: "Stars", amount: starsPrice * 100 }],
-        payload: JSON.stringify({
-            type: "buy_attempts",
-            amount: amount,
-            user_id: userData.id
-        })
-    };
-    
-    tg.openInvoice(invoice, (status) => {
-        if (status === 'paid') {
-            userData.balance += amount;
-            userData.stars -= starsPrice;
-            syncUserData();
-            showToast(`Успешно! Получено ${amount} попыток`);
-        } else {
-            showToast("Покупка отменена");
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/create_invoice`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user_id: userData.id,
+                amount: amount,
+                stars: starsPrice
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Ошибка создания счета');
         }
-    });
+
+        const invoice = await response.json();
+
+        tg.openInvoice(invoice, (status) => {
+            if (status === 'paid') {
+                userData.balance += amount;
+                userData.stars -= starsPrice;
+                syncUserData();
+                updateUI();
+                showToast(`Успешно! Получено ${amount} попыток`);
+                createConfetti();
+            } else {
+                showToast("Покупка отменена");
+            }
+        });
+    } catch (e) {
+        console.error('Ошибка покупки:', e);
+        showToast("Ошибка при создании платежа");
+    }
 }
 
 // Запрос на вывод звёзд
@@ -492,7 +513,7 @@ async function requestWithdraw(amount) {
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/withdraw`, {
+        const response = await fetch(`${API_BASE_URL}/withdraw`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -501,20 +522,15 @@ async function requestWithdraw(amount) {
                 user_id: userData.id,
                 username: userData.username,
                 amount: amount,
-                balance: userData.stars,
-                referrals: userData.referrals,
-                timestamp: new Date().toISOString()
+                balance: userData.stars
             })
         });
 
         if (response.ok) {
             userData.stars -= amount;
             syncUserData();
-            showToast(`Запрос на вывод ${amount}⭐ отправлен! Ожидайте.`);
-            
-            // Формируем сообщение для админа
-            const message = `Запрос на вывод ${amount}⭐\nID: ${userData.id}\nUser: ${userData.username}`;
-            document.getElementById('withdraw-message').textContent = message;
+            updateUI();
+            showToast(`Запрос на вывод ${amount}⭐ отправлен! Ожидайте выплаты.`);
         } else {
             showToast("Ошибка при отправке запроса");
         }
@@ -556,25 +572,42 @@ function updateUI() {
 
 function updateLevelProgress() {
     const progress = document.getElementById('level-progress');
-    let required = 0, current = 0;
+    const levelStatus = document.getElementById('level-status');
     
-    if (userData.level === 1) {
-        required = 50;
-        current = userData.referrals;
-    } else if (userData.level === 2) {
-        required = 100;
-        current = userData.referrals;
-    } else {
-        progress.value = 1;
-        progress.max = 1;
-        document.getElementById('level-status').textContent = "Максимальный уровень";
-        return;
+    const levels = [
+        { required: 0, reward: 0 },
+        { required: 5, reward: 5 },
+        { required: 15, reward: 10 },
+        { required: 30, reward: 15 },
+        { required: 50, reward: 20 }
+    ];
+    
+    let currentLevel = 1;
+    for (let i = levels.length - 1; i >= 0; i--) {
+        if (userData.referrals >= levels[i].required) {
+            currentLevel = i + 1;
+            break;
+        }
     }
     
-    progress.value = current;
-    progress.max = required;
-    document.getElementById('level-status').textContent = 
-        `Нужно ещё ${required - current} друзей для ${userData.level + 1} уровня`;
+    if (currentLevel > userData.level) {
+        userData.level = currentLevel;
+        userData.stars += levels[currentLevel].reward;
+        syncUserData();
+        showWinAnimation("⭐", levels[currentLevel].reward);
+    }
+    
+    const nextLevel = currentLevel < levels.length ? currentLevel + 1 : currentLevel;
+    const needed = levels[nextLevel-1]?.required - userData.referrals || 0;
+    
+    progress.value = userData.referrals - levels[currentLevel-1]?.required || 0;
+    progress.max = levels[nextLevel-1]?.required - levels[currentLevel-1]?.required || 1;
+    
+    if (currentLevel >= levels.length) {
+        levelStatus.textContent = "Максимальный уровень достигнут!";
+    } else {
+        levelStatus.textContent = `До ${nextLevel} уровня: ${needed} рефералов`;
+    }
 }
 
 // Настройка обработчиков событий
@@ -621,8 +654,6 @@ function setupModalHandlers() {
     
     document.getElementById('withdraw-button').addEventListener('click', () => {
         document.getElementById('withdraw-modal').style.display = 'block';
-        document.getElementById('withdraw-message').textContent = 
-            `Запрос на вывод\nID: ${userData.id}\nUser: ${userData.username}`;
     });
     
     document.querySelectorAll('.close').forEach(btn => {
@@ -683,6 +714,25 @@ function formatDate(dateString) {
         month: 'short',
         year: 'numeric'
     });
+}
+
+function createConfetti() {
+    const colors = ['#f1c40f', '#e67e22', '#2ecc71', '#3498db', '#9b59b6'];
+    
+    for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = `${Math.random() * 100}vw`;
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.width = `${Math.random() * 10 + 5}px`;
+        confetti.style.height = `${Math.random() * 10 + 5}px`;
+        confetti.style.animationDuration = `${Math.random() * 2 + 2}s`;
+        document.body.appendChild(confetti);
+        
+        setTimeout(() => {
+            confetti.remove();
+        }, 3000);
+    }
 }
 
 // Запуск игры
