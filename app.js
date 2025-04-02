@@ -6,9 +6,11 @@ const ATTEMPT_PRICES = {
     5: { stars: 4, amount: 5 },
     10: { stars: 7, amount: 10 }
 };
-const WITHDRAW_OPTIONS = [15, 25, 50];
+const WITHDRAW_OPTIONS = [25, 50, 100]; // Обновленные суммы для вывода
+const WITHDRAW_MIN_REFERRALS = 25; // Минимальное количество рефералов для вывода
 const CHANNEL_LINK = "https://t.me/mine_not_ru";
-const ADMIN_CONTACT = "@usmon110"; // Ваш юзернейм для контакта
+const CHANNEL_LINK_2 = "https://t.me/LOHUTI_TJ"; // Замените на реальную ссылку
+const ADMIN_CONTACT = "@usmon110";
 
 // Инициализация Telegram WebApp
 const tg = window.Telegram.WebApp;
@@ -35,6 +37,7 @@ let userData = {
     },
     tasks: {
         subscribe: false,
+        subscribe2: false, // Новое задание на подписку
         spins: 0,
         referrals: 0
     }
@@ -61,7 +64,7 @@ async function initGame() {
     setupReferralLink();
     updateUI();
     
-    // Загружаем аватар из Telegram, если доступен
+    // Загружаем аватар из Telegram
     if (tg.initDataUnsafe?.user?.photo_url) {
         document.getElementById('user-avatar').src = tg.initDataUnsafe.user.photo_url;
         userData.photoUrl = tg.initDataUnsafe.user.photo_url;
@@ -81,7 +84,6 @@ async function loadUserData() {
             const data = await response.json();
             Object.assign(userData, data);
             
-            // Обновляем UI
             document.getElementById('username').textContent = userData.username;
             if (userData.photoUrl) {
                 document.getElementById('user-avatar').src = userData.photoUrl;
@@ -147,7 +149,6 @@ function checkReferral() {
         const referrerId = refParam.split('_')[1];
         if (referrerId && referrerId !== userData.id?.toString()) {
             if (!userData.friends.some(f => f.id === referrerId)) {
-                // Получаем данные о реферере из Telegram
                 let referrerName = `Пользователь ${referrerId}`;
                 let referrerAvatar = null;
                 
@@ -160,7 +161,6 @@ function checkReferral() {
                 }
                 
                 addFriend(referrerId, referrerName, referrerAvatar);
-                showToast(`Вы зашли по реферальной ссылке от ${referrerName}`);
             }
         }
     }
@@ -337,43 +337,70 @@ function claimDailyBonus() {
 // Настройка заданий
 function updateTasksUI() {
     const subscribeBtn = document.getElementById('subscribe-task-btn');
+    const subscribeBtn2 = document.getElementById('subscribe-task-btn-2');
+    const spinsBtn = document.getElementById('spins-task-btn');
+    const referralsBtn = document.getElementById('referrals-task-btn');
+    
     if (subscribeBtn) {
         subscribeBtn.disabled = userData.tasks.subscribe;
         subscribeBtn.textContent = userData.tasks.subscribe ? '✅ Выполнено' : 'Выполнить';
     }
     
-    const spinsProgress = document.querySelector('.task-card:nth-child(2) .task-progress progress');
-    const spinsText = document.querySelector('.task-card:nth-child(2) .task-progress span');
+    if (subscribeBtn2) {
+        subscribeBtn2.disabled = userData.tasks.subscribe2;
+        subscribeBtn2.textContent = userData.tasks.subscribe2 ? '✅ Выполнено' : 'Выполнить';
+    }
+    
+    const spinsProgress = document.querySelector('.task-card:nth-child(3) .task-progress progress');
+    const spinsText = document.querySelector('.task-card:nth-child(3) .task-progress span');
     if (spinsProgress && spinsText) {
         spinsProgress.value = userData.tasks.spins;
         spinsText.textContent = `${userData.tasks.spins}/10`;
     }
     
-    const refsProgress = document.querySelector('.task-card:nth-child(3) .task-progress progress');
-    const refsText = document.querySelector('.task-card:nth-child(3) .task-progress span');
+    const refsProgress = document.querySelector('.task-card:nth-child(4) .task-progress progress');
+    const refsText = document.querySelector('.task-card:nth-child(4) .task-progress span');
     if (refsProgress && refsText) {
         refsProgress.value = userData.tasks.referrals;
-        refsText.textContent = `${userData.tasks.referrals}/3`;
+        refsText.textContent = `${userData.tasks.referrals}/25`;
+    }
+    
+    if (spinsBtn) {
+        spinsBtn.disabled = userData.tasks.spins < 10;
+        spinsBtn.textContent = userData.tasks.spins < 10 ? 'В процессе' : 'Забрать награду';
+    }
+    
+    if (referralsBtn) {
+        referralsBtn.disabled = userData.tasks.referrals < 25;
+        referralsBtn.textContent = userData.tasks.referrals < 25 ? 'В процессе' : 'Забрать награду';
     }
     
     checkTasksProgress();
 }
 
 // Выполнение задания на подписку
-function completeSubscribeTask() {
-    if (userData.tasks.subscribe) return;
+function completeSubscribeTask(channel = 1) {
+    if ((channel === 1 && userData.tasks.subscribe) || 
+        (channel === 2 && userData.tasks.subscribe2)) return;
+    
+    const link = channel === 1 ? CHANNEL_LINK : CHANNEL_LINK_2;
     
     if (tg.openLink) {
-        tg.openLink(CHANNEL_LINK);
+        tg.openLink(link);
     } else {
-        window.open(CHANNEL_LINK, '_blank');
+        window.open(link, '_blank');
     }
     
-    userData.balance += 5;
-    userData.tasks.subscribe = true;
+    userData.balance += 3;
+    if (channel === 1) {
+        userData.tasks.subscribe = true;
+    } else {
+        userData.tasks.subscribe2 = true;
+    }
+    
     syncUserData();
     updateTasksUI();
-    showToast("Вы получили 5 попыток за подписку на канал!");
+    showToast(`Вы получили 3 попытки за подписку на канал!`);
     createConfetti();
 }
 
@@ -383,15 +410,15 @@ function checkTasksProgress() {
         userData.stars += 10;
         userData.tasks.spins = 0;
         syncUserData();
-        showWinAnimation("🎉", 10);
+        showWinAnimation("🎰", 10);
         updateTasksUI();
     }
     
-    if (userData.tasks.referrals >= 3) {
-        userData.stars += 15;
+    if (userData.tasks.referrals >= 25) {
+        userData.stars += 50;
         userData.tasks.referrals = 0;
         syncUserData();
-        showWinAnimation("👥", 15);
+        showWinAnimation("👥", 50);
         updateTasksUI();
     }
 }
@@ -408,14 +435,16 @@ function setupReferralLink() {
 }
 
 // Логика вращения
-function spin() {
+function spin(allAttempts = false) {
     if (gameState.isSpinning || userData.balance <= 0) return;
     
     clearSpinAnimations();
     
     gameState.isSpinning = true;
-    userData.balance--;
-    userData.tasks.spins++;
+    const attemptsToUse = allAttempts ? userData.balance : 1;
+    
+    userData.balance -= attemptsToUse;
+    userData.tasks.spins += attemptsToUse;
     
     updateUI();
     
@@ -434,7 +463,7 @@ function spin() {
             
             if (index === slots.length - 1) {
                 gameState.spinTimeout = setTimeout(() => {
-                    checkWin(results);
+                    checkWin(results, attemptsToUse);
                     gameState.isSpinning = false;
                     syncUserData();
                     updateUI();
@@ -453,9 +482,9 @@ function clearSpinAnimations() {
 }
 
 // Проверка выигрыша
-function checkWin(results) {
+function checkWin(results, attemptsUsed = 1) {
     if (results[0] === results[1] && results[1] === results[2]) {
-        const starsWon = BASE_WIN_STARS * userData.level;
+        const starsWon = BASE_WIN_STARS * userData.level * attemptsUsed;
         userData.stars += starsWon;
         gameState.lastWin = starsWon;
         showWinAnimation(results.join(''), starsWon);
@@ -489,20 +518,21 @@ function requestWithdraw(amount) {
         return;
     }
 
-    // Списываем звезды сразу
+    if (userData.referrals < WITHDRAW_MIN_REFERRALS) {
+        showToast(`Для вывода нужно пригласить ${WITHDRAW_MIN_REFERRALS} друзей`);
+        return;
+    }
+
     userData.stars -= amount;
     syncUserData();
     updateUI();
 
-    // Формируем сообщение для админа
     const message = `Запрос на вывод ${amount}⭐\nID: ${userData.id}\nUser: ${userData.username}\nБаланс: ${userData.stars}⭐`;
     
-    // Показываем модальное окно с инструкцией
     const modal = document.getElementById('withdraw-modal');
     const messageElement = document.getElementById('withdraw-message');
     messageElement.textContent = message;
     
-    // Кнопка копирования
     document.getElementById('copy-withdraw-btn').onclick = () => {
         copyToClipboard(message);
         showToast("Текст скопирован, отправьте его админу");
@@ -538,6 +568,10 @@ function updateUI() {
     spinBtn.textContent = userData.balance > 0 ? `Крутить (1 попытка)` : "Нет попыток";
     spinBtn.disabled = userData.balance <= 0 || gameState.isSpinning;
     
+    const spinAllBtn = document.getElementById('spin-all-button');
+    spinAllBtn.textContent = userData.balance > 0 ? `Крутить все (${userData.balance} попыток)` : "Нет попыток";
+    spinAllBtn.disabled = userData.balance <= 0 || gameState.isSpinning;
+    
     updateLevelProgress();
 }
 
@@ -547,10 +581,10 @@ function updateLevelProgress() {
     
     const levels = [
         { required: 0, reward: 0 },
-        { required: 5, reward: 5 },
-        { required: 15, reward: 10 },
-        { required: 30, reward: 15 },
-        { required: 50, reward: 20 }
+        { required: 50, reward: 5 },    // Уровень 2: 50 рефералов
+        { required: 150, reward: 15 },  // Уровень 3: 150 рефералов
+        { required: 300, reward: 30 },  // Уровень 4: 300 рефералов
+        { required: 500, reward: 50 }   // Уровень 5: 500 рефералов
     ];
     
     let currentLevel = 1;
@@ -583,7 +617,8 @@ function updateLevelProgress() {
 
 // Настройка обработчиков событий
 function setupEventListeners() {
-    document.getElementById('spin-button').addEventListener('click', spin);
+    document.getElementById('spin-button').addEventListener('click', () => spin());
+    document.getElementById('spin-all-button').addEventListener('click', () => spin(true));
     
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -613,12 +648,14 @@ function setupEventListeners() {
         updateDailyBonusUI();
     });
     
-    document.getElementById('subscribe-task-btn')?.addEventListener('click', completeSubscribeTask);
+    document.getElementById('subscribe-task-btn')?.addEventListener('click', () => completeSubscribeTask(1));
+    document.getElementById('subscribe-task-btn-2')?.addEventListener('click', () => completeSubscribeTask(2));
     document.getElementById('claim-bonus-btn')?.addEventListener('click', claimDailyBonus);
+    document.getElementById('spins-task-btn')?.addEventListener('click', checkTasksProgress);
+    document.getElementById('referrals-task-btn')?.addEventListener('click', checkTasksProgress);
 }
 
 function setupModalHandlers() {
-    // Обработчики модальных окон
     document.getElementById('buy-button').addEventListener('click', () => {
         document.getElementById('buy-modal').style.display = 'block';
     });

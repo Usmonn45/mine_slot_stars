@@ -49,10 +49,12 @@
             </div>
 
             <button id="spin-button" class="spin-button">Крутить (1 попытка)</button>
+            <button id="spin-all-button" class="spin-button" style="background: linear-gradient(135deg, #e74c3c, #c0392b); margin-top: 10px;">Крутить все попытки</button>
 
             <div class="level-info">
                 <p>Текущий множитель: <span id="level">1</span>x</p>
                 <p>Выигрыш: <span id="prize-info">15⭐</span></p>
+                <p id="bonus-info" style="color: var(--primary); font-weight: bold; animation: glow 1.5s infinite alternate;"></p>
             </div>
 
             <div class="action-buttons">
@@ -65,12 +67,13 @@
         <div id="referrals" class="tab-content">
             <div class="referral-section">
                 <h2>Реферальная система</h2>
-                <p>Твой реферальный код:</p>
+                <p>Приглашайте друзей и получайте бонусы!</p>
+                <p>За каждого друга: <span style="color: var(--primary);">+1 попытка</span> и <span style="color: var(--primary);">+0.5 ⭐</span></p>
+                
                 <div class="referral-code-container">
                     <div class="referral-code" id="referral-code">loading...</div>
                     <button id="copy-ref-btn" class="copy-btn">Копировать</button>
                 </div>
-                <p>За каждого друга получишь +1 попытку и +0.5 звёзд!</p>
                 
                 <div class="referral-progress">
                     <h3>Прогресс до следующего уровня:</h3>
@@ -105,10 +108,21 @@
                         <div class="task-icon">📢</div>
                         <div class="task-info">
                             <h3>Подписаться на канал</h3>
-                            <p>Подпишитесь на наш канал и получите 5 попыток</p>
+                            <p>Подпишитесь на наш канал и получите 3 попытки</p>
                         </div>
                     </div>
                     <button id="subscribe-task-btn" class="task-button">Выполнить</button>
+                </div>
+                
+                <div class="task-card">
+                    <div class="task-content">
+                        <div class="task-icon">📢</div>
+                        <div class="task-info">
+                            <h3>Подписаться на второй канал</h3>
+                            <p>Подпишитесь на наш дополнительный канал и получите 3 попытки</p>
+                        </div>
+                    </div>
+                    <button id="subscribe-task-btn-2" class="task-button">Выполнить</button>
                 </div>
                 
                 <div class="task-card">
@@ -123,7 +137,7 @@
                             </div>
                         </div>
                     </div>
-                    <button class="task-button" disabled>В процессе</button>
+                    <button id="spins-task-btn" class="task-button" disabled>В процессе</button>
                 </div>
                 
                 <div class="task-card">
@@ -131,14 +145,14 @@
                         <div class="task-icon">👥</div>
                         <div class="task-info">
                             <h3>Пригласить друзей</h3>
-                            <p>Пригласите 3 друзей и получите 15 звёзд</p>
+                            <p>Пригласите 25 друзей и получите 50 звёзд</p>
                             <div class="task-progress">
-                                <progress value="0" max="3"></progress>
-                                <span>0/3</span>
+                                <progress value="0" max="25"></progress>
+                                <span>0/25</span>
                             </div>
                         </div>
                     </div>
-                    <button class="task-button" disabled>В процессе</button>
+                    <button id="referrals-task-btn" class="task-button" disabled>В процессе</button>
                 </div>
             </div>
         </div>
@@ -180,19 +194,20 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>Вывести звёзды</h2>
-            <p>Выберите сумму для вывода:</p>
-            
-            <div class="withdraw-option" data-amount="15">
-                <span class="withdraw-amount">15 ⭐</span>
-                <span class="withdraw-min">Мин. сумма</span>
-            </div>
+            <p>Минимальное количество для вывода: <strong>25 ⭐</strong></p>
+            <p>Для вывода необходимо пригласить <strong>25 друзей</strong></p>
             
             <div class="withdraw-option" data-amount="25">
                 <span class="withdraw-amount">25 ⭐</span>
+                <span class="withdraw-min">Мин. сумма</span>
             </div>
             
             <div class="withdraw-option" data-amount="50">
                 <span class="withdraw-amount">50 ⭐</span>
+            </div>
+            
+            <div class="withdraw-option" data-amount="100">
+                <span class="withdraw-amount">100 ⭐</span>
             </div>
             
             <div class="withdraw-info">
