@@ -92,14 +92,24 @@ async function buyAttempts(amount) {
     tg.openInvoice(invoiceLink, async (status) => {
       if (status === 'paid') {
         try {
-          // После оплаты просто перезагружаем данные пользователя с сервера
+          // После оплаты отправляем данные на сервер-бот для синхронизации
+          await fetch('https://ВАШ_АДРЕС_БОТА/api/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: userData.id,
+              balance: userData.balance + amount,
+              stars: userData.stars
+            })
+          });
+          // После синхронизации перезагружаем данные пользователя
           await loadUserData();
           showToast(`Получено ${amount} попыток!`);
           createConfetti();
           window.history.replaceState({}, '', window.location.pathname);
         } catch (e) {
-          console.error("Ошибка загрузки данных:", e);
-          showToast("Ошибка обновления баланса");
+          console.error("Ошибка синхронизации с ботом:", e);
+          showToast("Ошибка синхронизации с Telegram");
         }
       } else {
         showToast("Оплата не завершена");
