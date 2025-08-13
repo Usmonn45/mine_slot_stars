@@ -92,29 +92,13 @@ async function buyAttempts(amount) {
     tg.openInvoice(invoiceLink, async (status) => {
       if (status === 'paid') {
         try {
-          // Обновляем баланс локально
-          userData.balance += amount;
-          
-          // Синхронизируем с сервером
-          const response = await fetch('/api/update', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              id: userData.id,
-              balance: userData.balance
-            })
-          });
-
-          if (response.ok) {
-            updateUI();
-            showToast(`Получено ${amount} попыток!`);
-            createConfetti();
-            
-            // Обновляем историю браузера
-            window.history.replaceState({}, '', window.location.pathname);
-          }
+          // После оплаты просто перезагружаем данные пользователя с сервера
+          await loadUserData();
+          showToast(`Получено ${amount} попыток!`);
+          createConfetti();
+          window.history.replaceState({}, '', window.location.pathname);
         } catch (e) {
-          console.error("Ошибка синхронизации:", e);
+          console.error("Ошибка загрузки данных:", e);
           showToast("Ошибка обновления баланса");
         }
       } else {
@@ -234,12 +218,23 @@ function updateUI() {
   document.getElementById('stars-count').textContent = userData.stars;
   document.getElementById('user-level').textContent = userData.level;
   document.getElementById('referrals-count').textContent = userData.referrals;
-  
+
+  // Имя пользователя
+  document.getElementById('username').textContent = userData.name || userData.username || 'Игрок';
+
+  // Аватарка пользователя
+  const avatarEl = document.getElementById('user-avatar');
+  if (userData.avatar) {
+    avatarEl.src = `https://api.telegram.org/file/bot${BOT_TOKEN}/${userData.avatar}`;
+  } else {
+    avatarEl.src = 'default_avatar.png';
+  }
+
   // Кнопки вращения
   const spinBtn = document.getElementById('spin-button');
   spinBtn.textContent = userData.balance > 0 ? "Крутить (1 попытка)" : "Нет попыток";
   spinBtn.disabled = userData.balance <= 0 || gameState.isSpinning;
-  
+
   const spinAllBtn = document.getElementById('spin-all-button');
   spinAllBtn.textContent = userData.balance > 0 ? `Крутить все (${userData.balance})` : "Нет попыток";
   spinAllBtn.disabled = userData.balance <= 0 || gameState.isSpinning;
