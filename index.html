@@ -1,3 +1,11 @@
+    <!-- Модальное окно заявок на вывод (только для админа) -->
+    <div id="admin-withdraw-modal" class="modal compact-modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Заявки на вывод</h2>
+            <div id="admin-withdraw-list"></div>
+        </div>
+    </div>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -60,7 +68,39 @@
             <div class="action-buttons">
                 <button id="buy-button" class="action-button">Купить попытки</button>
                 <button id="withdraw-button" class="action-button">Вывести звёзды</button>
+                <button id="promo-btn" class="action-button">Промокод</button>
+                <button id="admin-panel-btn" class="action-button" style="display:none;">Панель админа</button>
+                <button id="admin-withdraw-btn" class="action-button" style="display:none;">Заявки на вывод</button>
             </div>
+    <!-- Модальное окно промокода -->
+    <div id="promo-modal" class="modal compact-modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Ввести промокод</h2>
+            <input type="text" id="promo-input" placeholder="Введите промокод" style="width:100%;margin-bottom:10px;">
+            <button id="apply-promo-btn" class="spin-button">Активировать</button>
+            <div id="promo-result" style="margin-top:10px;"></div>
+        </div>
+    </div>
+
+    <!-- Модальное окно админ-панели -->
+    <div id="admin-modal" class="modal compact-modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Панель админа</h2>
+            <h3>Добавить промокод</h3>
+            <input type="text" id="admin-promo-code" placeholder="Промокод" style="width:100%;margin-bottom:5px;">
+            <input type="number" id="admin-promo-reward" placeholder="Бонус (попытки)" style="width:100%;margin-bottom:10px;">
+            <button id="add-promo-btn" class="spin-button">Добавить промокод</button>
+            <div id="admin-promo-result" style="margin-bottom:15px;"></div>
+            <h3>Добавить задание</h3>
+            <input type="text" id="admin-task-title" placeholder="Название задания" style="width:100%;margin-bottom:5px;">
+            <input type="text" id="admin-task-desc" placeholder="Описание" style="width:100%;margin-bottom:5px;">
+            <input type="number" id="admin-task-reward" placeholder="Бонус (попытки)" style="width:100%;margin-bottom:10px;">
+            <button id="add-task-btn" class="spin-button">Добавить задание</button>
+            <div id="admin-task-result"></div>
+        </div>
+    </div>
         </div>
 
         <!-- Вкладка Рефералы -->
