@@ -100,19 +100,16 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 tg.enableClosingConfirmation();
 
-// Получение user_id из URL
-const urlParams = new URLSearchParams(window.location.search);
-const userIdFromUrl = urlParams.get('user_id');
-
-// Данные пользователя
+// Получение user_id только из Telegram WebApp API
+// (user_id из URL не используем, только tg.initDataUnsafe)
 let userData = {
-    id: userIdFromUrl || tg.initDataUnsafe?.user?.id,
+    id: tg.initDataUnsafe?.user?.id,
     balance: 0,
     stars: 0,
     level: 1,
     referrals: 0,
-    username: 'Игрок',
-    photoUrl: '',
+    username: tg.initDataUnsafe?.user?.username || 'Игрок',
+    photoUrl: tg.initDataUnsafe?.user?.photo_url || '',
     friends: [],
     dailyBonus: {
         lastClaim: null,
