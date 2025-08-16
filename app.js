@@ -1,11 +1,6 @@
-// --- Чтение user_id из startapp ---
+// --- Чтение user_id из URL ---
 const urlParams = new URLSearchParams(window.location.search);
-const startAppParam = urlParams.get('startapp');
-let userIdFromUrl = null;
-
-if (startAppParam?.startsWith('user_id_')) {
-  userIdFromUrl = Number(startAppParam.replace('user_id_', ''));
-}
+const userIdFromUrl = Number(urlParams.get('user_id'));
 
 // --- Telegram WebApp ---
 let tg = null;
@@ -46,11 +41,11 @@ let promoCodes = JSON.parse(localStorage.getItem('promoCodes') || '{}');
 let customTasks = JSON.parse(localStorage.getItem('customTasks') || '[]');
 
 // --- API ---
-const API_BASE = "https://minestars-api.onrender.com";
+const API_BASE = "https://minestars-theta.vercel.app";
 
 async function loadUserData() {
   if (!userData.id) {
-    showToast("Необходимо авторизоваться через бота");
+    showToast("Ошибка: не удалось получить ID пользователя");
     return;
   }
 
@@ -75,6 +70,7 @@ async function loadUserData() {
 
 async function syncUserData() {
   if (!userData.id) return;
+
   try {
     await fetch(`${API_BASE}/api/update`, {
       method: 'POST',
@@ -84,6 +80,7 @@ async function syncUserData() {
   } catch (e) {
     console.error('Ошибка синхронизации:', e);
   }
+
   saveGameState();
 }
 
@@ -190,6 +187,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+// --- Остальные функции (без изменений) ---
 function setupEventListeners() {
   document.getElementById('spin-button')?.addEventListener('click', () => spin(false));
   document.getElementById('spin-all-button')?.addEventListener('click', () => spin(true));
