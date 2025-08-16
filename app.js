@@ -22,7 +22,7 @@ try {
 // --- Конфигурация ---
 const SYMBOLS = ['🍒', '🍋', '🍊', '🍇', '🔔', '⭐', '7️⃣'];
 const BASE_WIN_STARS = 15;
-const WITHDRAW_MIN_REFERRALS = 25;
+const WITHDRAW_MIN_REFERRALS = 5;
 const CHANNEL_LINK = "https://t.me/rullet_777";
 const CHANNEL_LINK_2 = "https://t.me/LOHUTI_TJ";
 const ADMIN_CONTACT = "@usmonkhan";
@@ -104,7 +104,6 @@ function saveGameState() {
   }
 }
 
-// --- Остальные функции ---
 function showToast(msg) {
   const toast = document.createElement('div');
   toast.className = 'toast';
@@ -174,7 +173,6 @@ function spin(all = false) {
   });
 }
 
-// --- Запуск ---
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     console.log('🔧 Инициализация...');
@@ -192,7 +190,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// --- Остальные функции (без изменений) ---
 function setupEventListeners() {
   document.getElementById('spin-button')?.addEventListener('click', () => spin(false));
   document.getElementById('spin-all-button')?.addEventListener('click', () => spin(true));
@@ -218,7 +215,9 @@ function setupEventListeners() {
 
   document.querySelectorAll('.offer').forEach(el => {
     el.addEventListener('click', () => {
-      buyAttempts(parseInt(el.dataset.offer), parseInt(el.dataset.stars));
+      const attempts = parseInt(el.dataset.offer);
+      const stars = parseInt(el.dataset.stars);
+      buyAttempts(attempts, stars);
       document.getElementById('buy-modal').style.display = 'none';
     });
   });
@@ -263,27 +262,36 @@ function setupPromoAndAdmin() {
   document.getElementById('apply-promo-btn')?.addEventListener('click', () => {
     const code = document.getElementById('promo-input')?.value.trim();
     const result = document.getElementById('promo-result');
-    if (!code) return result && (result.textContent = 'Введите промокод!');
-    if (promoCodes[code] && !promoCodes[code].usedBy?.includes(userData.id)) {
-      userData.balance += Number(promoCodes[code].reward || 1);
-      promoCodes[code].usedBy = (promoCodes[code].usedBy || []).concat(userData.id);
-      localStorage.setItem('promoCodes', JSON.stringify(promoCodes));
-      syncUserData();
-      updateUI();
-      result.textContent = `Промокод активирован! +${promoCodes[code].reward}`;
-    } else {
-      result.textContent = 'Не найден или уже использован.';
+    if (!code) return result.textContent = 'Введите промокод!';
+
+    const promo = promoCodes[code];
+    if (!promo) return result.textContent = 'Промокод не найден.';
+
+    if ((promo.usedBy || []).includes(userData.id)) {
+      return result.textContent = 'Вы уже использовали этот промокод.';
     }
+
+    if ((promo.usedBy || []).length >= (promo.limit || Infinity)) {
+      return result.textContent = 'Промокод исчерпан.';
+    }
+
+    userData.balance += Number(promo.reward || 1);
+    promo.usedBy = (promo.usedBy || []).concat(userData.id);
+    localStorage.setItem('promoCodes', JSON.stringify(promoCodes));
+    syncUserData();
+    updateUI();
+    result.textContent = `Промокод активирован! +${promo.reward}`;
   });
 
   document.getElementById('add-promo-btn')?.addEventListener('click', () => {
     const code = document.getElementById('admin-promo-code')?.value.trim();
     const reward = Number(document.getElementById('admin-promo-reward')?.value);
+    const limit = Number(prompt('Лимит использований:')) || 1;
     const result = document.getElementById('admin-promo-result');
-    if (!code || !reward) return result && (result.textContent = 'Заполните поля!');
-    promoCodes[code] = { reward, usedBy: [] };
+    if (!code || !reward) return result.textContent = 'Заполните поля!';
+    promoCodes[code] = { reward, usedBy: [], limit };
     localStorage.setItem('promoCodes', JSON.stringify(promoCodes));
-    result.textContent = `Промокод ${code} добавлен!`;
+    result.textContent = `Промокод ${code} добавлен с лимитом ${limit}!`;
   });
 
   document.getElementById('add-task-btn')?.addEventListener('click', () => {
@@ -291,7 +299,7 @@ function setupPromoAndAdmin() {
     const desc = document.getElementById('admin-task-desc')?.value.trim();
     const reward = Number(document.getElementById('admin-task-reward')?.value);
     const result = document.getElementById('admin-task-result');
-    if (!title || !desc || !reward) return result && (result.textContent = 'Заполните поля!');
+    if (!title || !desc || !reward) return result.textContent = 'Заполните поля!';
     customTasks.push({ title, desc, reward });
     localStorage.setItem('customTasks', JSON.stringify(customTasks));
     result.textContent = 'Задание добавлено!';
@@ -350,7 +358,7 @@ function checkReferral() {
   const ref = urlParams.get('ref') || urlParams.get('start');
   if (ref?.startsWith('ref_')) {
     const refId = ref.split('_')[1];
-    if (refId && refId !== userData.id.toString()) {
+    if (refId && refId !== userData.id?.toString()) {
       if (!userData.friends.some(f => f.id === refId)) {
         userData.friends.push({
           id: refId,
@@ -374,15 +382,9 @@ function checkReferral() {
 }
 
 function buyAttempts(attempts, stars) {
-  if (userData.stars >= stars) {
-    userData.stars -= stars;
-    userData.balance += attempts;
-    syncUserData();
-    updateUI();
-    showToast(`Куплено ${attempts} попыток`);
-  } else {
-    showToast('Недостаточно звёзд');
-  }
+  if (!tg) return showToast('Telegram WebApp не доступен.');
+  const invoiceUrl = `https://t.me/free_stars01Bot?start=invoice_${attempts}_${stars}`;
+  tg.openLink(invoiceUrl);
 }
 
 function claimDailyBonus() {
@@ -401,11 +403,14 @@ function claimDailyBonus() {
 }
 
 function completeSubscribeTask(channelNum) {
-  if (channelNum === 1) userData.tasks.subscribe = true;
-  else if (channelNum === 2) userData.tasks.subscribe2 = true;
+  const key = channelNum === 1 ? 'subscribe' : 'subscribe2';
+  if (userData.tasks[key]) {
+    showToast('Уже выполнено!');
+    return;
+  }
+  userData.tasks[key] = true;
   userData.balance += 2;
   syncUserData();
-  updateUI();
   updateTasksUI();
   showToast('Задание выполнено! +2 попытки');
 }
