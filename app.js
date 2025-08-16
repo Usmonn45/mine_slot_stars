@@ -47,7 +47,7 @@ let gameState = {
 };
 
 // --- API ---
-const API_BASE = 'http://localhost:5000';
+const API_BASE = 'https://minestars-api.onrender.com';
 
 async function loadUserData() {
     if (!userData.id) {
