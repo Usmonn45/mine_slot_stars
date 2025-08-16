@@ -8,9 +8,18 @@ if (startAppParam && startAppParam.startsWith('user_id_')) {
 }
 
 // --- Telegram WebApp ---
-const tg = window.Telegram.WebApp;
-tg.expand();
-tg.enableClosingConfirmation();
+let tg = null;
+try {
+    tg = window.Telegram?.WebApp;
+    if (tg) {
+        tg.expand();
+        tg.enableClosingConfirmation();
+    } else {
+        console.warn('Telegram WebApp не доступен');
+    }
+} catch (e) {
+    console.error('Ошибка инициализации Telegram WebApp:', e);
+}
 
 // --- Конфигурация ---
 const SYMBOLS = ['🍒', '🍋', '🍊', '🍇', '🔔', '⭐', '7️⃣'];
@@ -22,13 +31,13 @@ const ADMIN_CONTACT = "@usmonkhan";
 
 // --- Данные пользователя ---
 let userData = {
-    id: userIdFromUrl || tg.initDataUnsafe?.user?.id,
+    id: userIdFromUrl || tg?.initDataUnsafe?.user?.id,
     balance: 0,
     stars: 0,
     level: 1,
     referrals: 0,
-    username: tg.initDataUnsafe?.user?.username || 'Игрок',
-    photoUrl: tg.initDataUnsafe?.user?.photo_url || '',
+    username: tg?.initDataUnsafe?.user?.username || 'Игрок',
+    photoUrl: tg?.initDataUnsafe?.user?.photo_url || '',
     friends: [],
     dailyBonus: { lastClaim: null, streak: 0 },
     tasks: { subscribe: false, subscribe2: false, spins: 0, referrals: 0 }
@@ -47,7 +56,7 @@ let gameState = {
 };
 
 // --- API ---
-const API_BASE = 'https://minestars-api.onrender.com';
+const API_BASE = "https://minestars-api.onrender.com";
 
 async function loadUserData() {
     if (!userData.id) {
@@ -92,18 +101,22 @@ async function syncUserData() {
 
 // --- localStorage fallback ---
 function loadFromLocalStorage() {
-    const saved = localStorage.getItem('slotGameState');
-    if (saved) {
-        try {
+    try {
+        const saved = localStorage.getItem('slotGameState');
+        if (saved) {
             Object.assign(userData, JSON.parse(saved));
-        } catch (e) {
-            console.error('Ошибка localStorage:', e);
         }
+    } catch (e) {
+        console.error('Ошибка localStorage:', e);
     }
 }
 
 function saveGameState() {
-    localStorage.setItem('slotGameState', JSON.stringify(userData));
+    try {
+        localStorage.setItem('slotGameState', JSON.stringify(userData));
+    } catch (e) {
+        console.error('Ошибка сохранения localStorage:', e);
+    }
 }
 
 // --- Реферал ---
@@ -144,20 +157,29 @@ function addFriend(id, name, avatar) {
 
 // --- UI обновление ---
 function updateUI() {
-    document.getElementById('balance').textContent = userData.balance;
-    document.getElementById('stars-count').textContent = userData.stars;
-    document.getElementById('user-level').textContent = userData.level;
-    document.getElementById('level').textContent = userData.level;
-    document.getElementById('prize-info').textContent = `${BASE_WIN_STARS * userData.level}⭐`;
-    document.getElementById('referrals-count').textContent = userData.referrals;
-
+    const balanceEl = document.getElementById('balance');
+    const starsEl = document.getElementById('stars-count');
+    const levelEl = document.getElementById('user-level');
+    const prizeInfoEl = document.getElementById('prize-info');
+    const referralsEl = document.getElementById('referrals-count');
     const spinBtn = document.getElementById('spin-button');
-    spinBtn.textContent = userData.balance > 0 ? `Крутить (1 попытка)` : "Нет попыток";
-    spinBtn.disabled = userData.balance <= 0 || gameState.isSpinning;
-
     const spinAllBtn = document.getElementById('spin-all-button');
-    spinAllBtn.textContent = userData.balance > 0 ? `Крутить все (${userData.balance})` : "Нет попыток";
-    spinAllBtn.disabled = userData.balance <= 0 || gameState.isSpinning;
+
+    if (balanceEl) balanceEl.textContent = userData.balance;
+    if (starsEl) starsEl.textContent = userData.stars;
+    if (levelEl) levelEl.textContent = userData.level;
+    if (prizeInfoEl) prizeInfoEl.textContent = `${BASE_WIN_STARS * userData.level}⭐`;
+    if (referralsEl) referralsEl.textContent = userData.referrals;
+
+    if (spinBtn) {
+        spinBtn.textContent = userData.balance > 0 ? `Крутить (1 попытка)` : "Нет попыток";
+        spinBtn.disabled = userData.balance <= 0 || gameState.isSpinning;
+    }
+
+    if (spinAllBtn) {
+        spinAllBtn.textContent = userData.balance > 0 ? `Крутить все (${userData.balance})` : "Нет попыток";
+        spinAllBtn.disabled = userData.balance <= 0 || gameState.isSpinning;
+    }
 }
 
 // --- Слоты ---
@@ -213,59 +235,64 @@ let customTasks = JSON.parse(localStorage.getItem('customTasks') || '[]');
 function setupPromoAndAdmin() {
     const isAdmin = userData.id === 6079178039 || userData.username === 'usmonkhan';
 
+    const adminPanelBtn = document.getElementById('admin-panel-btn');
+    const adminWithdrawBtn = document.getElementById('admin-withdraw-btn');
+    
     if (isAdmin) {
-        document.getElementById('admin-panel-btn').style.display = 'inline-block';
-        document.getElementById('admin-withdraw-btn').style.display = 'inline-block';
+        if (adminPanelBtn) adminPanelBtn.style.display = 'inline-block';
+        if (adminWithdrawBtn) adminWithdrawBtn.style.display = 'inline-block';
     }
 
-    document.getElementById('promo-btn').onclick = () => {
-        document.getElementById('promo-modal').style.display = 'block';
-    };
+    const promoBtn = document.getElementById('promo-btn');
+    if (promoBtn) promoBtn.onclick = () => document.getElementById('promo-modal').style.display = 'block';
 
-    document.getElementById('admin-panel-btn').onclick = () => {
-        document.getElementById('admin-modal').style.display = 'block';
-    };
+    const adminPanelBtnEvent = document.getElementById('admin-panel-btn');
+    if (adminPanelBtnEvent) adminPanelBtnEvent.onclick = () => document.getElementById('admin-modal').style.display = 'block';
 
-    document.getElementById('admin-withdraw-btn').onclick = () => {
+    const adminWithdrawBtnEvent = document.getElementById('admin-withdraw-btn');
+    if (adminWithdrawBtnEvent) adminWithdrawBtnEvent.onclick = () => {
         renderWithdrawRequests();
         document.getElementById('admin-withdraw-modal').style.display = 'block';
     };
 
-    document.getElementById('apply-promo-btn').onclick = () => {
-        const code = document.getElementById('promo-input').value.trim();
+    const applyPromoBtn = document.getElementById('apply-promo-btn');
+    if (applyPromoBtn) applyPromoBtn.onclick = () => {
+        const code = document.getElementById('promo-input')?.value.trim();
         const resultDiv = document.getElementById('promo-result');
-        if (!code) return resultDiv.textContent = 'Введите промокод!';
+        if (!code) return resultDiv && (resultDiv.textContent = 'Введите промокод!');
         if (promoCodes[code] && !promoCodes[code].usedBy?.includes(userData.id)) {
             userData.balance += Number(promoCodes[code].reward || 1);
             promoCodes[code].usedBy = (promoCodes[code].usedBy || []).concat(userData.id);
             localStorage.setItem('promoCodes', JSON.stringify(promoCodes));
             syncUserData();
             updateUI();
-            resultDiv.textContent = `Промокод активирован! +${promoCodes[code].reward}`;
+            if (resultDiv) resultDiv.textContent = `Промокод активирован! +${promoCodes[code].reward}`;
         } else {
-            resultDiv.textContent = 'Не найден или уже использован.';
+            if (resultDiv) resultDiv.textContent = 'Не найден или уже использован.';
         }
     };
 
-    document.getElementById('add-promo-btn').onclick = () => {
-        const code = document.getElementById('admin-promo-code').value.trim();
-        const reward = Number(document.getElementById('admin-promo-reward').value);
+    const addPromoBtn = document.getElementById('add-promo-btn');
+    if (addPromoBtn) addPromoBtn.onclick = () => {
+        const code = document.getElementById('admin-promo-code')?.value.trim();
+        const reward = Number(document.getElementById('admin-promo-reward')?.value);
         const resultDiv = document.getElementById('admin-promo-result');
-        if (!code || !reward) return resultDiv.textContent = 'Заполните поля!';
+        if (!code || !reward) return resultDiv && (resultDiv.textContent = 'Заполните поля!');
         promoCodes[code] = { reward, usedBy: [] };
         localStorage.setItem('promoCodes', JSON.stringify(promoCodes));
-        resultDiv.textContent = `Промокод ${code} добавлен!`;
+        if (resultDiv) resultDiv.textContent = `Промокод ${code} добавлен!`;
     };
 
-    document.getElementById('add-task-btn').onclick = () => {
-        const title = document.getElementById('admin-task-title').value.trim();
-        const desc = document.getElementById('admin-task-desc').value.trim();
-        const reward = Number(document.getElementById('admin-task-reward').value);
+    const addTaskBtn = document.getElementById('add-task-btn');
+    if (addTaskBtn) addTaskBtn.onclick = () => {
+        const title = document.getElementById('admin-task-title')?.value.trim();
+        const desc = document.getElementById('admin-task-desc')?.value.trim();
+        const reward = Number(document.getElementById('admin-task-reward')?.value);
         const resultDiv = document.getElementById('admin-task-result');
-        if (!title || !desc || !reward) return resultDiv.textContent = 'Заполните поля!';
+        if (!title || !desc || !reward) return resultDiv && (resultDiv.textContent = 'Заполните поля!');
         customTasks.push({ title, desc, reward });
         localStorage.setItem('customTasks', JSON.stringify(customTasks));
-        resultDiv.textContent = 'Задание добавлено!';
+        if (resultDiv) resultDiv.textContent = 'Задание добавлено!';
     };
 }
 
@@ -293,6 +320,7 @@ function requestWithdraw(amount) {
 
 function renderWithdrawRequests() {
     const list = document.getElementById('admin-withdraw-list');
+    if (!list) return;
     list.innerHTML = '';
     if (!withdrawRequests.length) {
         list.innerHTML = '<p>Нет заявок</p>';
@@ -334,6 +362,8 @@ function updateWithdrawStatus(id, status) {
 // --- UI: друзья, задания, модалки ---
 function updateFriendsUI() {
     const list = document.getElementById('friends-list');
+    if (!list) return;
+    
     if (userData.friends.length === 0) {
         list.innerHTML = `
             <div class="empty-state">
@@ -370,65 +400,102 @@ function updateFriendsUI() {
 }
 
 function updateTasksUI() {
-    document.getElementById('subscribe-task-btn').textContent = userData.tasks.subscribe ? '✅ Выполнено' : 'Выполнить';
-    document.getElementById('subscribe-task-btn-2').textContent = userData.tasks.subscribe2 ? '✅ Выполнено' : 'Выполнить';
-    document.getElementById('spins-task-btn').textContent = userData.tasks.spins < 10 ? 'В процессе' : 'Забрать награду';
-    document.getElementById('referrals-task-btn').textContent = userData.tasks.referrals < 25 ? 'В процессе' : 'Забрать награду';
+    const btn1 = document.getElementById('subscribe-task-btn');
+    const btn2 = document.getElementById('subscribe-task-btn-2');
+    const btn3 = document.getElementById('spins-task-btn');
+    const btn4 = document.getElementById('referrals-task-btn');
 
-    document.querySelector('.task-card:nth-child(3) progress').value = userData.tasks.spins;
-    document.querySelector('.task-card:nth-child(3) span').textContent = `${userData.tasks.spins}/10`;
-    document.querySelector('.task-card:nth-child(4) progress').value = userData.tasks.referrals;
-    document.querySelector('.task-card:nth-child(4) span').textContent = `${userData.tasks.referrals}/25`;
+    if (btn1) btn1.textContent = userData.tasks.subscribe ? '✅ Выполнено' : 'Выполнить';
+    if (btn2) btn2.textContent = userData.tasks.subscribe2 ? '✅ Выполнено' : 'Выполнить';
+    if (btn3) btn3.textContent = userData.tasks.spins < 10 ? 'В процессе' : 'Забрать награду';
+    if (btn4) btn4.textContent = userData.tasks.referrals < 25 ? 'В процессе' : 'Забрать награду';
+
+    const progress3 = document.querySelector('.task-card:nth-child(3) progress');
+    const span3 = document.querySelector('.task-card:nth-child(3) span');
+    if (progress3) progress3.value = userData.tasks.spins;
+    if (span3) span3.textContent = `${userData.tasks.spins}/10`;
+
+    const progress4 = document.querySelector('.task-card:nth-child(4) progress');
+    const span4 = document.querySelector('.task-card:nth-child(4) span');
+    if (progress4) progress4.value = userData.tasks.referrals;
+    if (span4) span4.textContent = `${userData.tasks.referrals}/25`;
 }
 
 function setupReferralLink() {
-    const ref = userData.id ? `https://t.me/free_stars01Bot/MineStars2?startapp=user_id_${userData.id}` : 'Недоступно';
-    document.getElementById('referral-code').textContent = ref;
-    document.getElementById('copy-ref-btn').onclick = () => {
-        navigator.clipboard.writeText(ref);
-        showToast("Ссылка скопирована");
+    const ref = userData.id ? 
+        `https://t.me/free_stars01Bot/MineStars2?startapp=user_id_${userData.id}` : 
+        'Недоступно';
+    
+    const refCodeEl = document.getElementById('referral-code');
+    if (refCodeEl) refCodeEl.textContent = ref;
+    
+    const copyBtn = document.getElementById('copy-ref-btn');
+    if (copyBtn) copyBtn.onclick = () => {
+        navigator.clipboard.writeText(ref).then(() => showToast("Ссылка скопирована"));
     };
 }
 
 // --- События ---
 function setupEventListeners() {
-    document.getElementById('spin-button').onclick = () => spin(false);
-    document.getElementById('spin-all-button').onclick = () => spin(true);
-    document.getElementById('subscribe-task-btn').onclick = () => completeSubscribeTask(1);
-    document.getElementById('subscribe-task-btn-2').onclick = () => completeSubscribeTask(2);
-    document.getElementById('claim-bonus-btn')?.addEventListener('click', claimDailyBonus);
+    const spinBtn = document.getElementById('spin-button');
+    const spinAllBtn = document.getElementById('spin-all-button');
+    const subscribeBtn1 = document.getElementById('subscribe-task-btn');
+    const subscribeBtn2 = document.getElementById('subscribe-task-btn-2');
+    const claimBonusBtn = document.getElementById('claim-bonus-btn');
+
+    if (spinBtn) spinBtn.onclick = () => spin(false);
+    if (spinAllBtn) spinAllBtn.onclick = () => spin(true);
+    if (subscribeBtn1) subscribeBtn1.onclick = () => completeSubscribeTask(1);
+    if (subscribeBtn2) subscribeBtn2.onclick = () => completeSubscribeTask(2);
+    if (claimBonusBtn) claimBonusBtn.addEventListener('click', claimDailyBonus);
 
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById(btn.dataset.tab).classList.add('active');
+            const tabContent = document.getElementById(btn.dataset.tab);
+            if (tabContent) tabContent.classList.add('active');
         });
     });
 
     document.querySelectorAll('.close').forEach(btn => {
-        btn.onclick = () => btn.closest('.modal').style.display = 'none';
+        btn.onclick = () => {
+            const modal = btn.closest('.modal');
+            if (modal) modal.style.display = 'none';
+        };
     });
 
     document.querySelectorAll('.offer').forEach(offer => {
         offer.onclick = () => {
             buyAttempts(parseInt(offer.dataset.offer), parseInt(offer.dataset.stars));
-            document.getElementById('buy-modal').style.display = 'none';
+            const buyModal = document.getElementById('buy-modal');
+            if (buyModal) buyModal.style.display = 'none';
         };
     });
 
     document.querySelectorAll('.withdraw-option').forEach(opt => {
         opt.onclick = () => {
             requestWithdraw(parseInt(opt.dataset.amount));
-            document.getElementById('withdraw-modal').style.display = 'none';
+            const withdrawModal = document.getElementById('withdraw-modal');
+            if (withdrawModal) withdrawModal.style.display = 'none';
         };
     });
 }
 
 function setupModalHandlers() {
-    document.getElementById('buy-button').onclick = () => document.getElementById('buy-modal').style.display = 'block';
-    document.getElementById('withdraw-button').onclick = () => document.getElementById('withdraw-modal').style.display = 'block';
+    const buyBtn = document.getElementById('buy-button');
+    const withdrawBtn = document.getElementById('withdraw-button');
+
+    if (buyBtn) buyBtn.onclick = () => {
+        const modal = document.getElementById('buy-modal');
+        if (modal) modal.style.display = 'block';
+    };
+    
+    if (withdrawBtn) withdrawBtn.onclick = () => {
+        const modal = document.getElementById('withdraw-modal');
+        if (modal) modal.style.display = 'block';
+    };
 }
 
 // --- Утилиты ---
@@ -466,10 +533,104 @@ function createConfetti() {
 }
 
 // --- Запуск ---
-document.addEventListener('DOMContentLoaded', () => {
-    loadUserData();
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        console.log('DOM загружен, начинаем инициализацию...');
+        
+        // Показываем загрузку
+        document.body.classList.remove('loaded');
+        
+        // Проверка ключевых элементов
+        const requiredElements = ['balance', 'stars-count', 'spin-button'];
+        const missing = requiredElements.filter(id => !document.getElementById(id));
+        if (missing.length > 0) {
+            console.warn('Отсутствуют элементы:', missing);
+        }
+        
+        await loadUserData();
+        setupEventListeners();
+        setupModalHandlers();
+        setupPromoAndAdmin();
+        setupReferralLink();
+        
+        console.log('Инициализация завершена успешно');
+        
+        // Скрываем загрузку
+        setTimeout(() => {
+            document.body.classList.add('loaded');
+        }, 500);
+        
+    } catch (error) {
+        console.error('Критическая ошибка инициализации:', error);
+        showToast('Ошибка загрузки приложения');
+        document.body.classList.add('loaded');
+    }
+});
+
+// Функции для задач (если не определены)
+function completeSubscribeTask(channelNum) {
+    if (channelNum === 1) {
+        userData.tasks.subscribe = true;
+    } else if (channelNum === 2) {
+        userData.tasks.subscribe2 = true;
+    }
+    userData.balance += 2;
+    syncUserData();
+    updateUI();
+    updateTasksUI();
+    showToast('Задание выполнено! +2 попытки');
+}
+
+function buyAttempts(attempts, stars) {
+    if (userData.stars >= stars) {
+        userData.stars -= stars;
+        userData.balance += attempts;
+        syncUserData();
+        updateUI();
+        showToast(`Куплено ${attempts} попыток`);
+    } else {
+        showToast('Недостаточно звёзд');
+    }
+}
+
+function claimDailyBonus() {
+    const now = new Date();
+    const lastClaim = userData.dailyBonus.lastClaim ? new Date(userData.dailyBonus.lastClaim) : null;
+    
+    if (!lastClaim || (now - lastClaim) > 24 * 60 * 60 * 1000) {
+        userData.balance += 5;
+        userData.dailyBonus.lastClaim = now.toISOString();
+        userData.dailyBonus.streak += 1;
+        syncUserData();
+        updateUI();
+        showToast('Ежедневный бонус получен! +5 попыток');
+    } else {
+        showToast('Бонус уже получен сегодня');
+    }
+}
+// --- Остальные функции уже выше ---
+// Ниже — финальные обработчики и запуск
+
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    console.log('🔧 Инициализация приложения...');
+
+    const required = ['balance', 'stars-count', 'spin-button', 'user-level'];
+    const missing = required.filter(id => !document.getElementById(id));
+    if (missing.length) {
+      console.warn('⚠️ Отсутствуют элементы DOM:', missing);
+    }
+
+    await loadUserData();
     setupEventListeners();
     setupModalHandlers();
     setupPromoAndAdmin();
     setupReferralLink();
+
+    console.log('✅ Инициализация завершена');
+    document.body.classList.add('loaded');
+  } catch (err) {
+    console.error('❌ Ошибка инициализации:', err);
+    document.body.classList.add('loaded');
+  }
 });
