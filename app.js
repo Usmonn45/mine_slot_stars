@@ -608,29 +608,3 @@ function claimDailyBonus() {
         showToast('Бонус уже получен сегодня');
     }
 }
-// --- Остальные функции уже выше ---
-// Ниже — финальные обработчики и запуск
-
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    console.log('🔧 Инициализация приложения...');
-
-    const required = ['balance', 'stars-count', 'spin-button', 'user-level'];
-    const missing = required.filter(id => !document.getElementById(id));
-    if (missing.length) {
-      console.warn('⚠️ Отсутствуют элементы DOM:', missing);
-    }
-
-    await loadUserData();
-    setupEventListeners();
-    setupModalHandlers();
-    setupPromoAndAdmin();
-    setupReferralLink();
-
-    console.log('✅ Инициализация завершена');
-    document.body.classList.add('loaded');
-  } catch (err) {
-    console.error('❌ Ошибка инициализации:', err);
-    document.body.classList.add('loaded');
-  }
-});
