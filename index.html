@@ -402,6 +402,50 @@
             color: var(--primary);
             margin-top: 5px;
         }
+
+        /* Friends List */
+        .friends-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .friend-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .friend-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+        
+        .friend-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .friend-details {
+            flex: 1;
+        }
+        
+        .friend-name {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        
+        .friend-date {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
         
         /* Wallet */
         .wallet-section {
@@ -796,6 +840,7 @@
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -918,6 +963,9 @@
                     <div class="ref-link-container">
                         <p>Приглашайте друзей и получайте +1 крутку за каждого!</p>
                         <span class="ref-link" id="ref-link">https://t.me/777slots_bot?start=ref_123</span>
+                        <button class="form-submit" id="copy-ref-btn" style="margin-top: 10px;">
+                            <i class="fas fa-copy"></i> Копировать ссылку
+                        </button>
                     </div>
                     
                     <div class="friends-stats">
@@ -929,6 +977,11 @@
                             <div>Круток</div>
                             <div class="stat-value" id="friend-spins">0</div>
                         </div>
+                    </div>
+
+                    <h4 class="section-title" style="margin-top: 20px;"><i class="fas fa-user-friends"></i> Ваши друзья</h4>
+                    <div class="friends-list" id="friends-list">
+                        <!-- Friends will be added here dynamically -->
                     </div>
                 </div>
             </div>
@@ -1086,28 +1139,22 @@
             userId: null,
             username: "Username",
             avatar: "https://i.imgur.com/JYj3Q3D.png",
-            starsBalance: 25,
-            bonusBalance: 150,
-            freeSpins: 3,
-            friendSpins: 2,
+            starsBalance: 0,
+            bonusBalance: 0,
+            freeSpins: 5, // Начальные 5 бесплатных круток
+            friendSpins: 0,
             paidSpins: 0,
-            invitedCount: 5,
+            invitedCount: 0,
+            invitedFriends: [],
             isSpinning: false,
             isAdmin: false,
             tasks: [
                 { id: 1, title: "Подписаться на канал", url: "https://t.me/777slots_channel", completed: false },
-                { id: 2, title: "Пригласить друга", url: "https://t.me/share/url?url=https://t.me/777slots_bot", completed: true },
+                { id: 2, title: "Пригласить друга", url: "https://t.me/share/url?url=https://t.me/777slots_bot", completed: false },
                 { id: 3, title: "Сыграть в слоты", url: "#", completed: false }
             ],
-            withdrawals: [
-                { id: 1, userId: 123456, username: "User1", avatar: "https://i.imgur.com/JYj3Q3D.png", amount: 15, status: "pending" },
-                { id: 2, userId: 789012, username: "User2", avatar: "https://i.imgur.com/JYj3Q3D.png", amount: 25, status: "pending" }
-            ],
-            users: [
-                { id: 123456, username: "User1", avatar: "https://i.imgur.com/JYj3Q3D.png", starsBalance: 50, bonusBalance: 200, lastActive: "2023-05-15" },
-                { id: 789012, username: "User2", avatar: "https://i.imgur.com/JYj3Q3D.png", starsBalance: 120, bonusBalance: 80, lastActive: "2023-05-14" },
-                { id: 345678, username: "User3", avatar: "https://i.imgur.com/JYj3Q3D.png", starsBalance: 15, bonusBalance: 300, lastActive: "2023-05-13" }
-            ],
+            withdrawals: [],
+            users: [],
             symbols: ["🍒", "🍋", "🍊", "🍇", "🍉", "🍎", "🍓", "🍍", "🍌", "7️⃣"],
             winSymbols: ["7️⃣", "🍌", "🍍", "🍓"]
         };
@@ -1130,7 +1177,9 @@
             taskManagementList: document.getElementById('task-management-list'),
             withdrawalList: document.getElementById('withdrawal-list'),
             usersList: document.getElementById('users-list'),
+            friendsList: document.getElementById('friends-list'),
             refLink: document.getElementById('ref-link'),
+            copyRefBtn: document.getElementById('copy-ref-btn'),
             invitedCount: document.getElementById('invited-count'),
             friendSpins: document.getElementById('friend-spins'),
             convertAmount: document.getElementById('convert-amount'),
@@ -1167,6 +1216,8 @@
             renderTaskManagement();
             renderWithdrawals();
             renderUsers();
+            renderFriends();
+            checkReferral();
         }
 
         // Initialize Telegram WebApp
@@ -1199,6 +1250,58 @@
             tg.BackButton.onClick(() => {
                 closeAllModals();
             });
+
+            // Handle referral from bot
+            tg.onEvent('viewportChanged', () => {
+                checkReferral();
+            });
+        }
+
+        // Check if user came from referral link
+        function checkReferral() {
+            if (!window.Telegram || !Telegram.WebApp) return;
+
+            const tg = Telegram.WebApp;
+            const initData = tg.initData || '';
+            const params = new URLSearchParams(initData);
+            const startParam = params.get('start') || '';
+
+            if (startParam.startsWith('ref_')) {
+                const referrerId = startParam.split('_')[1];
+                if (referrerId && referrerId !== state.userId) {
+                    // In real app, here you would send this to your backend
+                    // For demo, we'll simulate it
+                    setTimeout(() => {
+                        showToast(`🎉 Вы зашли по ссылке друга!`);
+                        
+                        // Simulate notification to referrer
+                        if (window.Telegram && Telegram.WebApp) {
+                            Telegram.WebApp.sendData(JSON.stringify({
+                                action: "referral_joined",
+                                referrerId: referrerId,
+                                newUserId: state.userId,
+                                username: state.username
+                            }));
+                        }
+                    }, 2000);
+                }
+            }
+        }
+
+        // Handle referral notification from bot
+        function handleReferralNotification(friendData) {
+            state.invitedCount++;
+            state.friendSpins++;
+            state.invitedFriends.push({
+                id: friendData.id,
+                username: friendData.username,
+                avatar: friendData.avatar,
+                date: new Date().toLocaleDateString()
+            });
+            
+            showToast(`🎉 Ваш друг @${friendData.username} присоединился! +1 крутка`);
+            updateUI();
+            renderFriends();
         }
 
         // Update UI based on state
@@ -1217,10 +1320,39 @@
             elements.friendSpins.textContent = state.friendSpins;
             
             // Update ref link
-            elements.refLink.textContent = `https://t.me/777slots_bot?start=ref_${state.userId}`;
+            if (state.userId) {
+                elements.refLink.textContent = `https://t.me/777slots_bot?start=ref_${state.userId}`;
+            }
             
             // Show/hide admin panel
             elements.adminNavItem.style.display = state.isAdmin ? 'flex' : 'none';
+        }
+
+        // Render friends list
+        function renderFriends() {
+            elements.friendsList.innerHTML = '';
+            
+            if (state.invitedFriends.length === 0) {
+                elements.friendsList.innerHTML = '<p style="text-align: center; opacity: 0.7;">Вы еще никого не пригласили</p>';
+                return;
+            }
+            
+            state.invitedFriends.forEach(friend => {
+                const friendElement = document.createElement('div');
+                friendElement.className = 'friend-item';
+                
+                friendElement.innerHTML = `
+                    <div class="friend-avatar">
+                        <img src="${friend.avatar}" alt="${friend.username}">
+                    </div>
+                    <div class="friend-details">
+                        <div class="friend-name">@${friend.username}</div>
+                        <div class="friend-date">Присоединился: ${friend.date}</div>
+                    </div>
+                `;
+                
+                elements.friendsList.appendChild(friendElement);
+            });
         }
 
         // Render tasks
@@ -1470,6 +1602,16 @@
                 status: "pending"
             });
             
+            // In real app, send this to backend
+            if (window.Telegram && Telegram.WebApp) {
+                Telegram.WebApp.sendData(JSON.stringify({
+                    action: "withdraw_request",
+                    userId: state.userId,
+                    amount: amount,
+                    username: state.username
+                }));
+            }
+            
             showToast(`Запрос на вывод ${amount} ⭐ отправлен администратору`);
             renderWithdrawals();
         }
@@ -1579,6 +1721,14 @@
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
             });
+        }
+
+        // Copy referral link
+        function copyReferralLink() {
+            const link = elements.refLink.textContent;
+            navigator.clipboard.writeText(link)
+                .then(() => showToast('Ссылка скопирована в буфер обмена'))
+                .catch(() => showToast('Не удалось скопировать ссылку', 'error'));
         }
 
         // Setup event listeners
@@ -1698,226 +1848,20 @@
             });
             
             elements.saveTaskBtn.addEventListener('click', addNewTask);
+            
+            // Copy referral link
+            elements.copyRefBtn.addEventListener('click', copyReferralLink);
+            
+            // Handle messages from bot
+            window.addEventListener('message', (event) => {
+                if (event.data && event.data.action === "referral_notification") {
+                    handleReferralNotification(event.data.friend);
+                }
+            });
         }
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
-  </html>    </div>
-  </div>
-
-  <!-- Контент -->
-  <div class="content">
-    <div id="game" class="tab-content active">
-      <div class="balance-container">
-        <div class="balance-item">
-          <span class="balance-icon">🎰</span>
-          <span class="balance-value" id="balance">0</span>
-        </div>
-        <div class="balance-item">
-          <span class="balance-icon">⭐</span>
-          <span class="balance-value" id="stars-count">0</span>
-        </div>
-      </div>
-
-      <div class="slot-machine">
-        <div class="slot" id="slot1">⭐</div>
-        <div class="slot" id="slot2">⭐</div>
-        <div class="slot" id="slot3">⭐</div>
-      </div>
-
-      <button id="spin-button" class="spin-button">Крутить (1 попытка)</button>
-      <button id="spin-all-button" class="spin-button">Крутить все попытки</button>
-
-      <div class="level-info">
-        <p>Текущий множитель: <span id="level">1</span>x</p>
-        <p>Выигрыш: <span id="prize-info">15⭐</span></p>
-        <p id="bonus-info"></p>
-      </div>
-
-      <div class="action-buttons">
-        <button id="buy-button" class="action-button">Купить попытки</button>
-        <button id="withdraw-button" class="action-button">Вывести звёзды</button>
-        <button id="promo-btn" class="action-button">Промокод</button>
-        <button id="admin-panel-btn" style="display:none;">Панель админа</button>
-        <button id="admin-withdraw-btn" style="display:none;">Заявки на вывод</button>
-      </div>
-    </div>
-
-    <div id="referrals" class="tab-content">
-      <div class="referral-section">
-        <h2>Реферальная система</h2>
-        <p>Приглашайте друзей и получайте бонусы!</p>
-        <p>За друга: <span style="color:#f1c40f">+1 попытка</span> и <span style="color:#f1c40f">+0.5 ⭐</span></p>
-
-        <div class="referral-code-container">
-          <div class="referral-code" id="referral-code">loading...</div>
-          <button id="copy-ref-btn" class="copy-btn">Копировать</button>
-        </div>
-
-        <div class="referral-progress">
-          <h3>Прогресс до следующего уровня:</h3>
-          <progress id="level-progress" value="0" max="50"></progress>
-          <p id="level-status">Нужно ещё 50 друзей</p>
-        </div>
-
-        <div class="friends-list-header">
-          <h3>Ваши друзья</h3>
-          <div class="sort-options">
-            <button class="sort-btn active" data-sort="recent">Новые</button>
-            <button class="sort-btn" data-sort="top">Топ</button>
-          </div>
-        </div>
-
-        <div class="friends-list" id="friends-list">
-          <div class="empty-state">
-            <img src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" alt="No friends" />
-            <p>Вы пока не пригласили друзей</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="tasks" class="tab-content">
-      <div class="tasks-section">
-        <h2>Ежедневные задания</h2>
-
-        <div class="task-card">
-          <div class="task-content">
-            <div class="task-icon">📢</div>
-            <div class="task-info">
-              <h3>Подписаться на канал</h3>
-              <p>Подпишитесь и получите 3 попытки</p>
-            </div>
-          </div>
-          <button id="subscribe-task-btn" class="task-button">Выполнить</button>
-        </div>
-
-        <div class="task-card">
-          <div class="task-content">
-            <div class="task-icon">📢</div>
-            <div class="task-info">
-              <h3>Подписаться на второй канал</h3>
-              <p>Подпишитесь и получите 3 попытки</p>
-            </div>
-          </div>
-          <button id="subscribe-task-btn-2" class="task-button">Выполнить</button>
-        </div>
-
-        <div class="task-card">
-          <div class="task-content">
-            <div class="task-icon">🎰</div>
-            <div class="task-info">
-              <h3>Сыграть в слоты</h3>
-              <p>Сыграйте 10 раз и получите 10 звёзд</p>
-              <div class="task-progress">
-                <progress value="0" max="10"></progress>
-                <span>0/10</span>
-              </div>
-            </div>
-          </div>
-          <button id="spins-task-btn" class="task-button" disabled>В процессе</button>
-        </div>
-
-        <div class="task-card">
-          <div class="task-content">
-            <div class="task-icon">👥</div>
-            <div class="task-info">
-              <h3>Пригласить друзей</h3>
-              <p>Пригласите 25 друзей и получите 50 звёзд</p>
-              <div class="task-progress">
-                <progress value="0" max="25"></progress>
-                <span>0/25</span>
-              </div>
-            </div>
-          </div>
-          <button id="referrals-task-btn" class="task-button" disabled>В процессе</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Модальные окна -->
-  <div id="buy-modal" class="modal compact-modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2>Купить попытки</h2>
-      <div class="offer" data-offer="1" data-stars="1">
-        <span>1 попытка — 1 Star</span>
-      </div>
-      <div class="offer" data-offer="5" data-stars="4">
-        <span>5 попыток — 4 Stars</span>
-        <small>Экономия 1</small>
-      </div>
-      <div class="offer" data-offer="10" data-stars="7">
-        <span>10 попыток — 7 Stars</span>
-        <small>Экономия 3</small>
-      </div>
-    </div>
-  </div>
-
-  <div id="withdraw-modal" class="modal compact-modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2>Вывести звёзды</h2>
-      <div class="withdraw-option" data-amount="25">25 ⭐</div>
-      <div class="withdraw-option" data-amount="50">50 ⭐</div>
-      <div class="withdraw-option" data-amount="100">100 ⭐</div>
-    </div>
-  </div>
-
-  <div id="daily-bonus-modal" class="modal compact-modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2>Ежедневный бонус</h2>
-      <button id="claim-bonus-btn" class="spin-button">Забрать бонус</button>
-    </div>
-  </div>
-
-  <div id="admin-modal" class="modal compact-modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2>Панель админа</h2>
-      <input type="text" id="admin-promo-code" placeholder="Промокод" />
-      <input type="number" id="admin-promo-reward" placeholder="Бонус" />
-      <button id="add-promo-btn" class="spin-button">Добавить</button>
-      <div id="admin-promo-result"></div>
-
-      <h3>Добавить задание</h3>
-      <input type="text" id="admin-task-title" placeholder="Название" />
-      <input type="text" id="admin-task-desc" placeholder="Описание" />
-      <input type="number" id="admin-task-reward" placeholder="Бонус" />
-      <button id="add-task-btn" class="spin-button">Добавить</button>
-      <div id="admin-task-result"></div>
-    </div>
-  </div>
-
-  <div id="admin-withdraw-modal" class="modal compact-modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2>Заявки на вывод</h2>
-      <div id="admin-withdraw-list"></div>
-    </div>
-  </div>
-
-  <div id="promo-modal" class="modal compact-modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2>Ввести промокод</h2>
-      <input type="text" id="promo-input" placeholder="Введите промокод" />
-      <button id="apply-promo-btn" class="spin-button">Активировать</button>
-      <div id="promo-result"></div>
-    </div>
-  </div>
-
-  <!-- Нижняя панель -->
-  <div class="tab-bar">
-    <button class="tab-btn active" data-tab="game">🎰 Игра</button>
-    <button class="tab-btn" data-tab="referrals">👥 Рефералы</button>
-    <button class="tab-btn" data-tab="tasks">📝 Задания</button>
-  </div>
-
-  <script src="app.js"></script>
-</body>
-</html>
+    </html>
