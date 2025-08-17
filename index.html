@@ -1,40 +1,1710 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>MineStars</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>777 Slots</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ffc107;
+            --secondary: #ff9800;
+            --dark: #1a1a2e;
+            --darker: #16213e;
+            --light: #f8f9fa;
+            --danger: #dc3545;
+            --success: #28a745;
+            --info: #17a2b8;
+            --telegram: #0088cc;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark);
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        
+        /* Header */
+        .header {
+            background-color: var(--darker);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--dark);
+            overflow: hidden;
+        }
+        
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .username {
+            font-weight: 600;
+            max-width: 120px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .balance-container {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .balance {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+        
+        .balance-icon {
+            color: var(--primary);
+        }
+        
+        .balance-amount {
+            font-weight: 600;
+        }
+        
+        /* Main Content - Slots */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .slots-container {
+            width: 100%;
+            max-width: 320px;
+            background-color: var(--darker);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            margin-bottom: 25px;
+        }
+        
+        .slots-machine {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .slots-reel {
+            height: 80px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .slots-symbol {
+            font-size: 40px;
+            height: 80px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+        }
+        
+        .slots-payline {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background-color: var(--primary);
+            transform: translateY(-50%);
+            z-index: 5;
+            box-shadow: 0 0 10px var(--primary);
+        }
+        
+        .slots-result {
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            min-height: 27px;
+        }
+        
+        .slots-win {
+            color: var(--primary);
+            animation: pulse 0.5s infinite alternate;
+        }
+        
+        .spin-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--dark);
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+            transition: all 0.3s;
+            text-transform: uppercase;
+            width: 100%;
+            max-width: 320px;
+        }
+        
+        .spin-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.6);
+        }
+        
+        .spin-btn:disabled {
+            background: #6c757d;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .spins-count {
+            margin-top: 15px;
+            font-size: 16px;
+            color: var(--primary);
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            background-color: var(--darker);
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--light);
+            text-decoration: none;
+            font-size: 12px;
+            gap: 5px;
+            opacity: 0.7;
+            transition: all 0.3s;
+        }
+        
+        .nav-item.active {
+            opacity: 1;
+            color: var(--primary);
+        }
+        
+        .nav-item i {
+            font-size: 20px;
+        }
+        
+        /* Modals */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .modal-content {
+            background-color: var(--darker);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 20px;
+            position: relative;
+            animation: modalFadeIn 0.3s;
+        }
+        
+        @keyframes modalFadeIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        /* Tasks */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .task-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .task-title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .task-link {
+            color: var(--info);
+            text-decoration: none;
+            word-break: break-all;
+        }
+        
+        .task-complete {
+            background-color: var(--primary);
+            color: var(--dark);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .task-complete:hover {
+            background-color: var(--secondary);
+        }
+        
+        .task-completed {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        /* Friends */
+        .ref-link-container {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .ref-link {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            word-break: break-all;
+            margin-top: 10px;
+            display: block;
+        }
+        
+        .friends-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .stat-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            flex: 1;
+            margin: 0 5px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-top: 5px;
+        }
+        
+        /* Wallet */
+        .wallet-section {
+            margin-bottom: 25px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .convert-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .form-label {
+            font-size: 14px;
+        }
+        
+        .form-input {
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            padding: 10px 15px;
+            color: white;
+        }
+        
+        .form-submit {
+            background-color: var(--primary);
+            color: var(--dark);
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .form-submit:hover {
+            background-color: var(--secondary);
+        }
+        
+        .withdraw-btn {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .withdraw-btn:hover {
+            background-color: #218838;
+        }
+        
+        .buy-spins-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .buy-spins-option {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .buy-spins-option:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .buy-spins-count {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .buy-spins-price {
+            font-size: 14px;
+            color: var(--light);
+            margin-top: 5px;
+        }
+        
+        /* Promo */
+        .promo-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .promo-input {
+            flex: 1;
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            padding: 10px 15px;
+            color: white;
+        }
+        
+        .promo-submit {
+            background-color: var(--primary);
+            color: var(--dark);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .promo-submit:hover {
+            background-color: var(--secondary);
+        }
+        
+        /* Admin */
+        .admin-section {
+            margin-bottom: 25px;
+        }
+        
+        .admin-btn {
+            background-color: var(--danger);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .admin-btn:hover {
+            background-color: #c82333;
+        }
+        
+        /* Withdrawal Requests */
+        .withdrawal-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .withdrawal-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .withdrawal-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            flex: 1;
+        }
+        
+        .withdrawal-user {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .withdrawal-user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+        
+        .withdrawal-user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .withdrawal-amount {
+            color: var(--primary);
+        }
+        
+        .withdrawal-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .withdrawal-approve {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .withdrawal-decline {
+            background-color: var(--danger);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        /* Task Management */
+        .task-management-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .task-management-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .task-management-title {
+            font-weight: 600;
+            flex: 1;
+        }
+        
+        .task-management-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .task-management-edit {
+            background-color: var(--info);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .task-management-delete {
+            background-color: var(--danger);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        /* Users List */
+        .users-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .user-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+        
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .user-details {
+            flex: 1;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        
+        .user-id {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .user-balance {
+            text-align: right;
+        }
+        
+        .user-stars {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes reelSpin {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-1000px); }
+        }
+        
+        .reel-spinning {
+            animation: reelSpin 2s cubic-bezier(0.5, 0, 0.5, 1) forwards;
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--success);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 5px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1100;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .toast.show {
+            opacity: 1;
+        }
+        
+        .toast.error {
+            background-color: var(--danger);
+        }
+        
+        /* Responsive */
+        @media (max-width: 480px) {
+            .balance-container {
+                gap: 8px;
+            }
+            
+            .balance {
+                padding: 5px 8px;
+                font-size: 14px;
+            }
+            
+            .spin-btn {
+                padding: 12px 30px;
+                font-size: 16px;
+            }
+            
+            .buy-spins-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-  <!-- Прелоадер -->
-  <div id="preloader">
-    <div class="star-container">
-      <div class="glow"></div>
-      <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" alt="Loading" />
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="user-info">
+                <div class="avatar" id="user-avatar">
+                    <img id="user-avatar-img" src="https://i.imgur.com/JYj3Q3D.png" alt="User Avatar">
+                </div>
+                <div class="username" id="username">Username</div>
+            </div>
+            <div class="balance-container">
+                <div class="balance">
+                    <i class="fas fa-star balance-icon"></i>
+                    <span class="balance-amount" id="stars-balance">0</span>
+                </div>
+                <div class="balance">
+                    <i class="fas fa-coins balance-icon"></i>
+                    <span class="balance-amount" id="bonus-balance">0</span>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content - Slots -->
+        <main class="main-content">
+            <div class="slots-container">
+                <div class="slots-machine">
+                    <div class="slots-reel" id="reel1">
+                        <div class="slots-symbol">🍒</div>
+                        <div class="slots-symbol">🍋</div>
+                        <div class="slots-symbol">🍊</div>
+                        <div class="slots-symbol">🍇</div>
+                        <div class="slots-symbol">🍉</div>
+                        <div class="slots-symbol">🍎</div>
+                        <div class="slots-symbol">🍓</div>
+                        <div class="slots-symbol">🍍</div>
+                        <div class="slots-symbol">🍌</div>
+                        <div class="slots-symbol">7️⃣</div>
+                    </div>
+                    <div class="slots-reel" id="reel2">
+                        <div class="slots-symbol">🍒</div>
+                        <div class="slots-symbol">🍋</div>
+                        <div class="slots-symbol">🍊</div>
+                        <div class="slots-symbol">🍇</div>
+                        <div class="slots-symbol">🍉</div>
+                        <div class="slots-symbol">🍎</div>
+                        <div class="slots-symbol">🍓</div>
+                        <div class="slots-symbol">🍍</div>
+                        <div class="slots-symbol">🍌</div>
+                        <div class="slots-symbol">7️⃣</div>
+                    </div>
+                    <div class="slots-reel" id="reel3">
+                        <div class="slots-symbol">🍒</div>
+                        <div class="slots-symbol">🍋</div>
+                        <div class="slots-symbol">🍊</div>
+                        <div class="slots-symbol">🍇</div>
+                        <div class="slots-symbol">🍉</div>
+                        <div class="slots-symbol">🍎</div>
+                        <div class="slots-symbol">🍓</div>
+                        <div class="slots-symbol">🍍</div>
+                        <div class="slots-symbol">🍌</div>
+                        <div class="slots-symbol">7️⃣</div>
+                    </div>
+                    <div class="slots-payline"></div>
+                </div>
+                <div class="slots-result" id="slots-result"></div>
+            </div>
+            
+            <button class="spin-btn" id="spin-btn">Крутить</button>
+            <div class="spins-count" id="spins-count">Доступно круток: 0</div>
+        </main>
+        
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item" data-modal="tasks">
+                <i class="fas fa-tasks"></i>
+                <span>Задания</span>
+            </a>
+            <a href="#" class="nav-item" data-modal="friends">
+                <i class="fas fa-users"></i>
+                <span>Друзья</span>
+            </a>
+            <a href="#" class="nav-item" data-modal="wallet">
+                <i class="fas fa-wallet"></i>
+                <span>Кошелёк</span>
+            </a>
+            <a href="#" class="nav-item" data-modal="admin" id="admin-nav-item" style="display: none;">
+                <i class="fas fa-user-shield"></i>
+                <span>Админ</span>
+            </a>
+        </nav>
+        
+        <!-- Toast -->
+        <div class="toast" id="toast"></div>
+        
+        <!-- Tasks Modal -->
+        <div class="modal" id="tasks-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title"><i class="fas fa-tasks"></i> Задания</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Выполняйте задания и получайте бесплатные крутки!</p>
+                    <div class="task-list" id="task-list">
+                        <!-- Tasks will be added here dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Friends Modal -->
+        <div class="modal" id="friends-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title"><i class="fas fa-users"></i> Друзья</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="ref-link-container">
+                        <p>Приглашайте друзей и получайте +1 крутку за каждого!</p>
+                        <span class="ref-link" id="ref-link">https://t.me/777slots_bot?start=ref_123</span>
+                    </div>
+                    
+                    <div class="friends-stats">
+                        <div class="stat-card">
+                            <div>Приглашено</div>
+                            <div class="stat-value" id="invited-count">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div>Круток</div>
+                            <div class="stat-value" id="friend-spins">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Wallet Modal -->
+        <div class="modal" id="wallet-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title"><i class="fas fa-wallet"></i> Кошелёк</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="wallet-section">
+                        <h4 class="section-title"><i class="fas fa-exchange-alt"></i> Обмен</h4>
+                        <div class="convert-form">
+                            <div class="form-group">
+                                <label class="form-label">Обменять бонусные монеты на крутки</label>
+                                <input type="number" class="form-input" id="convert-amount" placeholder="Количество монет" min="10">
+                                <small>1 крутка = 10 бонусных монет</small>
+                            </div>
+                            <button class="form-submit" id="convert-btn">Обменять</button>
+                        </div>
+                    </div>
+                    
+                    <div class="wallet-section">
+                        <h4 class="section-title"><i class="fas fa-shopping-cart"></i> Купить крутки</h4>
+                        <div class="buy-spins-container">
+                            <div class="buy-spins-option" data-spins="1" data-price="5">
+                                <div class="buy-spins-count">1 крутка</div>
+                                <div class="buy-spins-price">5 ⭐</div>
+                            </div>
+                            <div class="buy-spins-option" data-spins="5" data-price="20">
+                                <div class="buy-spins-count">5 круток</div>
+                                <div class="buy-spins-price">20 ⭐</div>
+                            </div>
+                            <div class="buy-spins-option" data-spins="10" data-price="35">
+                                <div class="buy-spins-count">10 круток</div>
+                                <div class="buy-spins-price">35 ⭐</div>
+                            </div>
+                            <div class="buy-spins-option" data-spins="20" data-price="60">
+                                <div class="buy-spins-count">20 круток</div>
+                                <div class="buy-spins-price">60 ⭐</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="wallet-section">
+                        <h4 class="section-title"><i class="fas fa-money-bill-wave"></i> Вывод</h4>
+                        <div class="convert-form">
+                            <div class="form-group">
+                                <label class="form-label">Сумма вывода (⭐)</label>
+                                <select class="form-input" id="withdraw-amount">
+                                    <option value="15">15 ⭐</option>
+                                    <option value="25">25 ⭐</option>
+                                    <option value="50">50 ⭐</option>
+                                    <option value="100">100 ⭐</option>
+                                </select>
+                            </div>
+                            <button class="withdraw-btn" id="withdraw-btn">Запросить вывод</button>
+                        </div>
+                    </div>
+                    
+                    <div class="wallet-section">
+                        <h4 class="section-title"><i class="fas fa-gift"></i> Промокод</h4>
+                        <p>Введите промокод, чтобы получить бонусные крутки:</p>
+                        <div class="promo-form">
+                            <input type="text" class="promo-input" id="promo-code" placeholder="Введите промокод">
+                            <button class="promo-submit" id="promo-submit">Активировать</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Admin Modal -->
+        <div class="modal" id="admin-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title"><i class="fas fa-user-shield"></i> Админ панель</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="admin-section">
+                        <h4 class="section-title"><i class="fas fa-plus-circle"></i> Создать промокод</h4>
+                        <div class="convert-form">
+                            <div class="form-group">
+                                <label class="form-label">Код</label>
+                                <input type="text" class="form-input" id="promo-code-input" placeholder="PROMO123">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Крутки</label>
+                                <input type="number" class="form-input" id="promo-spins" placeholder="5" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Лимит использований</label>
+                                <input type="number" class="form-input" id="promo-uses" placeholder="100" min="1">
+                            </div>
+                            <button class="form-submit" id="create-promo-btn">Создать</button>
+                        </div>
+                    </div>
+                    
+                    <div class="admin-section">
+                        <h4 class="section-title"><i class="fas fa-tasks"></i> Управление заданиями</h4>
+                        <div class="task-management-list" id="task-management-list">
+                            <!-- Tasks will be added here dynamically -->
+                        </div>
+                        <button class="admin-btn" id="add-task-btn">Добавить новое задание</button>
+                    </div>
+                    
+                    <div class="admin-section">
+                        <h4 class="section-title"><i class="fas fa-money-bill-wave"></i> Запросы на вывод</h4>
+                        <div class="withdrawal-list" id="withdrawal-list">
+                            <!-- Withdrawals will be added here dynamically -->
+                        </div>
+                    </div>
+                    
+                    <div class="admin-section">
+                        <h4 class="section-title"><i class="fas fa-users"></i> Пользователи</h4>
+                        <div class="users-list" id="users-list">
+                            <!-- Users will be added here dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Add Task Modal -->
+        <div class="modal" id="add-task-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title"><i class="fas fa-plus-circle"></i> Добавить задание</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="convert-form">
+                        <div class="form-group">
+                            <label class="form-label">Название задания</label>
+                            <input type="text" class="form-input" id="new-task-title" placeholder="Подписаться на канал">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Ссылка</label>
+                            <input type="text" class="form-input" id="new-task-url" placeholder="https://t.me/777slots_channel">
+                        </div>
+                        <button class="form-submit" id="save-task-btn">Сохранить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- Загрузочный экран -->
-  <div id="loading-screen">
-    <div>
-      <div class="spinner"></div>
-      <p>Загрузка...</p>
-    </div>
-  </div>
+    <script>
+        // Game State
+        const state = {
+            userId: null,
+            username: "Username",
+            avatar: "https://i.imgur.com/JYj3Q3D.png",
+            starsBalance: 25,
+            bonusBalance: 150,
+            freeSpins: 3,
+            friendSpins: 2,
+            paidSpins: 0,
+            invitedCount: 5,
+            isSpinning: false,
+            isAdmin: false,
+            tasks: [
+                { id: 1, title: "Подписаться на канал", url: "https://t.me/777slots_channel", completed: false },
+                { id: 2, title: "Пригласить друга", url: "https://t.me/share/url?url=https://t.me/777slots_bot", completed: true },
+                { id: 3, title: "Сыграть в слоты", url: "#", completed: false }
+            ],
+            withdrawals: [
+                { id: 1, userId: 123456, username: "User1", avatar: "https://i.imgur.com/JYj3Q3D.png", amount: 15, status: "pending" },
+                { id: 2, userId: 789012, username: "User2", avatar: "https://i.imgur.com/JYj3Q3D.png", amount: 25, status: "pending" }
+            ],
+            users: [
+                { id: 123456, username: "User1", avatar: "https://i.imgur.com/JYj3Q3D.png", starsBalance: 50, bonusBalance: 200, lastActive: "2023-05-15" },
+                { id: 789012, username: "User2", avatar: "https://i.imgur.com/JYj3Q3D.png", starsBalance: 120, bonusBalance: 80, lastActive: "2023-05-14" },
+                { id: 345678, username: "User3", avatar: "https://i.imgur.com/JYj3Q3D.png", starsBalance: 15, bonusBalance: 300, lastActive: "2023-05-13" }
+            ],
+            symbols: ["🍒", "🍋", "🍊", "🍇", "🍉", "🍎", "🍓", "🍍", "🍌", "7️⃣"],
+            winSymbols: ["7️⃣", "🍌", "🍍", "🍓"]
+        };
 
-  <!-- Хедер -->
-  <div class="user-header">
-    <img src="default_avatar.png" class="user-avatar" id="user-avatar" />
-    <div class="user-info">
-      <h3 id="username">Загрузка...</h3>
-      <div class="user-stats">
-        <span>Уровень: <span id="user-level">1</span></span>
-        <span>Рефералов: <span id="referrals-count">0</span></span>
-        <span id="daily-bonus-btn">🎁</span>
-      </div>
-    </div>
+        // DOM Elements
+        const elements = {
+            username: document.getElementById('username'),
+            userAvatar: document.getElementById('user-avatar-img'),
+            starsBalance: document.getElementById('stars-balance'),
+            bonusBalance: document.getElementById('bonus-balance'),
+            spinsCount: document.getElementById('spins-count'),
+            spinBtn: document.getElementById('spin-btn'),
+            slotsResult: document.getElementById('slots-result'),
+            reels: [
+                document.getElementById('reel1'),
+                document.getElementById('reel2'),
+                document.getElementById('reel3')
+            ],
+            taskList: document.getElementById('task-list'),
+            taskManagementList: document.getElementById('task-management-list'),
+            withdrawalList: document.getElementById('withdrawal-list'),
+            usersList: document.getElementById('users-list'),
+            refLink: document.getElementById('ref-link'),
+            invitedCount: document.getElementById('invited-count'),
+            friendSpins: document.getElementById('friend-spins'),
+            convertAmount: document.getElementById('convert-amount'),
+            convertBtn: document.getElementById('convert-btn'),
+            withdrawAmount: document.getElementById('withdraw-amount'),
+            withdrawBtn: document.getElementById('withdraw-btn'),
+            promoCode: document.getElementById('promo-code'),
+            promoSumbit: document.getElementById('promo-submit'),
+            toast: document.getElementById('toast'),
+            navItems: document.querySelectorAll('.nav-item'),
+            modals: document.querySelectorAll('.modal'),
+            closeModalBtns: document.querySelectorAll('.close-modal'),
+            createPromoBtn: document.getElementById('create-promo-btn'),
+            addTaskBtn: document.getElementById('add-task-btn'),
+            saveTaskBtn: document.getElementById('save-task-btn'),
+            adminNavItem: document.getElementById('admin-nav-item'),
+            buySpinsOptions: document.querySelectorAll('.buy-spins-option')
+        };
+
+        // Initialize the app
+        function init() {
+            // Check if running in Telegram WebApp
+            if (window.Telegram && Telegram.WebApp) {
+                initTelegramWebApp();
+            } else {
+                // For testing outside Telegram
+                state.userId = Math.floor(Math.random() * 1000000);
+                state.isAdmin = true; // For demo purposes
+                updateUI();
+            }
+            
+            setupEventListeners();
+            renderTasks();
+            renderTaskManagement();
+            renderWithdrawals();
+            renderUsers();
+        }
+
+        // Initialize Telegram WebApp
+        function initTelegramWebApp() {
+            const tg = window.Telegram.WebApp;
+            
+            // Expand the app
+            tg.expand();
+            
+            // Get user data
+            const user = tg.initDataUnsafe.user;
+            if (user) {
+                state.userId = user.id;
+                state.username = user.username || `${user.first_name}${user.last_name ? ' ' + user.last_name : ''}`;
+                state.avatar = user.photo_url || "https://i.imgur.com/JYj3Q3D.png";
+                
+                // Check if user is admin (in real app, this should come from your backend)
+                state.isAdmin = user.id === 6079178039; // Replace with your admin ID
+            }
+            
+            // Set theme colors
+            document.documentElement.style.setProperty('--primary', tg.themeParams.button_color || '#ffc107');
+            document.documentElement.style.setProperty('--darker', tg.themeParams.bg_color || '#16213e');
+            document.documentElement.style.setProperty('--dark', tg.themeParams.secondary_bg_color || '#1a1a2e');
+            document.documentElement.style.setProperty('--light', tg.themeParams.text_color || '#f8f9fa');
+            
+            updateUI();
+            
+            // Handle back button
+            tg.BackButton.onClick(() => {
+                closeAllModals();
+            });
+        }
+
+        // Update UI based on state
+        function updateUI() {
+            elements.username.textContent = state.username;
+            elements.userAvatar.src = state.avatar;
+            elements.starsBalance.textContent = state.starsBalance;
+            elements.bonusBalance.textContent = state.bonusBalance;
+            
+            const totalSpins = state.freeSpins + state.friendSpins + state.paidSpins;
+            elements.spinsCount.textContent = `Доступно круток: ${totalSpins}`;
+            
+            elements.spinBtn.disabled = totalSpins <= 0 || state.isSpinning;
+            
+            elements.invitedCount.textContent = state.invitedCount;
+            elements.friendSpins.textContent = state.friendSpins;
+            
+            // Update ref link
+            elements.refLink.textContent = `https://t.me/777slots_bot?start=ref_${state.userId}`;
+            
+            // Show/hide admin panel
+            elements.adminNavItem.style.display = state.isAdmin ? 'flex' : 'none';
+        }
+
+        // Render tasks
+        function renderTasks() {
+            elements.taskList.innerHTML = '';
+            
+            state.tasks.forEach(task => {
+                const taskElement = document.createElement('div');
+                taskElement.className = 'task-item';
+                
+                taskElement.innerHTML = `
+                    <div class="task-title">
+                        <i class="fas fa-${task.completed ? 'check-circle' : 'circle'}"></i>
+                        ${task.title}
+                    </div>
+                    <a href="${task.url}" class="task-link" target="_blank">${task.url}</a>
+                    <button class="task-complete ${task.completed ? 'task-completed' : ''}" 
+                            data-task-id="${task.id}" 
+                            ${task.completed ? 'disabled' : ''}>
+                        ${task.completed ? 'Выполнено' : '✅ Готово'}
+                    </button>
+                `;
+                
+                elements.taskList.appendChild(taskElement);
+            });
+        }
+
+        // Render task management
+        function renderTaskManagement() {
+            elements.taskManagementList.innerHTML = '';
+            
+            state.tasks.forEach(task => {
+                const taskElement = document.createElement('div');
+                taskElement.className = 'task-management-item';
+                
+                taskElement.innerHTML = `
+                    <div class="task-management-title">${task.title}</div>
+                    <div class="task-management-actions">
+                        <button class="task-management-edit" data-task-id="${task.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="task-management-delete" data-task-id="${task.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                elements.taskManagementList.appendChild(taskElement);
+            });
+        }
+
+        // Render withdrawal requests
+        function renderWithdrawals() {
+            elements.withdrawalList.innerHTML = '';
+            
+            state.withdrawals.forEach(withdrawal => {
+                if (withdrawal.status !== 'pending') return;
+                
+                const withdrawalElement = document.createElement('div');
+                withdrawalElement.className = 'withdrawal-item';
+                
+                withdrawalElement.innerHTML = `
+                    <div class="withdrawal-info">
+                        <div class="withdrawal-user">
+                            <div class="withdrawal-user-avatar">
+                                <img src="${withdrawal.avatar}" alt="${withdrawal.username}">
+                            </div>
+                            @${withdrawal.username}
+                        </div>
+                        <div class="withdrawal-amount">${withdrawal.amount} ⭐</div>
+                    </div>
+                    <div class="withdrawal-actions">
+                        <button class="withdrawal-approve" data-withdrawal-id="${withdrawal.id}">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="withdrawal-decline" data-withdrawal-id="${withdrawal.id}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                
+                elements.withdrawalList.appendChild(withdrawalElement);
+            });
+        }
+
+        // Render users list
+        function renderUsers() {
+            elements.usersList.innerHTML = '';
+            
+            state.users.forEach(user => {
+                const userElement = document.createElement('div');
+                userElement.className = 'user-item';
+                
+                userElement.innerHTML = `
+                    <div class="user-avatar">
+                        <img src="${user.avatar}" alt="${user.username}">
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name">@${user.username}</div>
+                        <div class="user-id">ID: ${user.id}</div>
+                    </div>
+                    <div class="user-balance">
+                        <div class="user-stars">${user.starsBalance} ⭐</div>
+                    </div>
+                `;
+                
+                elements.usersList.appendChild(userElement);
+            });
+        }
+
+        // Spin the slots
+        function spinSlots() {
+            if (state.isSpinning) return;
+            
+            const totalSpins = state.freeSpins + state.friendSpins + state.paidSpins;
+            if (totalSpins <= 0) {
+                showToast('У вас нет круток!', 'error');
+                return;
+            }
+            
+            state.isSpinning = true;
+            updateUI();
+            
+            // Clear previous result
+            elements.slotsResult.textContent = '';
+            elements.slotsResult.className = 'slots-result';
+            
+            // Spin each reel with different durations for more natural effect
+            const spinDurations = [2000, 2200, 2400];
+            const results = [];
+            
+            elements.reels.forEach((reel, index) => {
+                // Clear animation class if it exists
+                reel.style.animation = 'none';
+                void reel.offsetHeight; // Trigger reflow
+                
+                // Generate random result (with 1% chance for each symbol to be the same)
+                const isWin = Math.random() < 0.01; // 1% chance to win
+                let symbol;
+                
+                if (isWin && index === 0) {
+                    // First reel - choose a winning symbol
+                    const winSymbolIndex = Math.floor(Math.random() * state.winSymbols.length);
+                    symbol = state.winSymbols[winSymbolIndex];
+                } else if (isWin && index > 0) {
+                    // Other reels - match the first symbol
+                    symbol = results[0];
+                } else {
+                    // Random symbol
+                    const symbolIndex = Math.floor(Math.random() * state.symbols.length);
+                    symbol = state.symbols[symbolIndex];
+                }
+                
+                results.push(symbol);
+                
+                // Calculate target position (align the selected symbol in the middle)
+                const symbolIndex = state.symbols.indexOf(symbol);
+                const targetPosition = -symbolIndex * 80; // Each symbol is 80px tall
+                
+                // Apply animation
+                reel.style.transform = `translateY(${targetPosition}px)`;
+                reel.style.transition = `transform ${spinDurations[index]}ms cubic-bezier(0.5, 0, 0.5, 1)`;
+            });
+            
+            // Check results after all reels stop
+            setTimeout(() => {
+                state.isSpinning = false;
+                
+                // Check for win (all symbols match)
+                if (results[0] === results[1] && results[1] === results[2]) {
+                    const winAmount = 15; // WIN_REWARD
+                    state.starsBalance += winAmount;
+                    elements.slotsResult.textContent = `🎉 Джекпот! +${winAmount} ⭐`;
+                    elements.slotsResult.classList.add('slots-win');
+                } else {
+                    const coinsAmount = 10; // LOSS_REWARD
+                    state.bonusBalance += coinsAmount;
+                    elements.slotsResult.textContent = `😢 Вы проиграли, но +${coinsAmount} бонусных монет`;
+                }
+                
+                // Deduct spin
+                if (state.paidSpins > 0) {
+                    state.paidSpins--;
+                } else if (state.friendSpins > 0) {
+                    state.friendSpins--;
+                } else {
+                    state.freeSpins = Math.max(0, state.freeSpins - 1);
+                }
+                
+                updateUI();
+            }, Math.max(...spinDurations) + 100);
+        }
+
+        // Convert coins to spins
+        function convertCoins() {
+            const amount = parseInt(elements.convertAmount.value);
+            if (isNaN(amount) || amount < 10) {
+                showToast('Минимальная сумма обмена - 10 монет', 'error');
+                return;
+            }
+            
+            if (state.bonusBalance < amount) {
+                showToast('Недостаточно бонусных монет', 'error');
+                return;
+            }
+            
+            const spins = Math.floor(amount / 10);
+            state.bonusBalance -= spins * 10;
+            state.freeSpins += spins;
+            
+            showToast(`Успешно! Обменяно ${amount} монет на ${spins} круток`);
+            elements.convertAmount.value = '';
+            updateUI();
+        }
+
+        // Buy spins with stars
+        function buySpins(spins, price) {
+            if (state.starsBalance < price) {
+                showToast('Недостаточно звезд', 'error');
+                return;
+            }
+            
+            state.starsBalance -= price;
+            state.paidSpins += spins;
+            
+            showToast(`Успешно! Куплено ${spins} круток за ${price} ⭐`);
+            updateUI();
+        }
+
+        // Request withdrawal
+        function requestWithdrawal() {
+            const amount = parseInt(elements.withdrawAmount.value);
+            
+            if (state.starsBalance < amount) {
+                showToast('Недостаточно звезд для вывода', 'error');
+                return;
+            }
+            
+            // Add to withdrawal requests
+            const newId = state.withdrawals.length + 1;
+            state.withdrawals.push({
+                id: newId,
+                userId: state.userId,
+                username: state.username,
+                avatar: state.avatar,
+                amount: amount,
+                status: "pending"
+            });
+            
+            showToast(`Запрос на вывод ${amount} ⭐ отправлен администратору`);
+            renderWithdrawals();
+        }
+
+        // Approve withdrawal
+        function approveWithdrawal(id) {
+            const withdrawal = state.withdrawals.find(w => w.id === id);
+            if (!withdrawal) return;
+            
+            withdrawal.status = "approved";
+            
+            // In real app, here you would send stars to user via Telegram payment
+            showToast(`Вывод #${id} одобрен. Средства отправлены пользователю.`);
+            renderWithdrawals();
+        }
+
+        // Decline withdrawal
+        function declineWithdrawal(id) {
+            const withdrawal = state.withdrawals.find(w => w.id === id);
+            if (!withdrawal) return;
+            
+            withdrawal.status = "declined";
+            
+            // In real app, here you would notify user about declined withdrawal
+            showToast(`Вывод #${id} отклонен`);
+            renderWithdrawals();
+        }
+
+        // Redeem promo code
+        function redeemPromo() {
+            const code = elements.promoCode.value.trim();
+            
+            if (!code) {
+                showToast('Введите промокод', 'error');
+                return;
+            }
+            
+            // Simulate promo check
+            if (code.toUpperCase() === 'BONUS10') {
+                state.freeSpins += 3;
+                showToast('Промокод активирован! +3 крутки');
+                elements.promoCode.value = '';
+                updateUI();
+            } else {
+                showToast('Неверный промокод', 'error');
+            }
+        }
+
+        // Complete task
+        function completeTask(taskId) {
+            const task = state.tasks.find(t => t.id === taskId);
+            if (!task || task.completed) return;
+            
+            task.completed = true;
+            state.freeSpins += 1;
+            
+            showToast('Задание выполнено! +1 крутка');
+            renderTasks();
+            updateUI();
+        }
+
+        // Add new task
+        function addNewTask() {
+            const title = document.getElementById('new-task-title').value.trim();
+            const url = document.getElementById('new-task-url').value.trim();
+            
+            if (!title || !url) {
+                showToast('Заполните все поля', 'error');
+                return;
+            }
+            
+            const newId = state.tasks.length + 1;
+            state.tasks.push({
+                id: newId,
+                title: title,
+                url: url,
+                completed: false
+            });
+            
+            document.getElementById('new-task-title').value = '';
+            document.getElementById('new-task-url').value = '';
+            document.getElementById('add-task-modal').classList.remove('active');
+            
+            showToast('Новое задание добавлено');
+            renderTasks();
+            renderTaskManagement();
+        }
+
+        // Show toast message
+        function showToast(message, type = 'success') {
+            elements.toast.textContent = message;
+            elements.toast.className = `toast ${type}`;
+            elements.toast.classList.add('show');
+            
+            setTimeout(() => {
+                elements.toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Close all modals
+        function closeAllModals() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.remove('active');
+            });
+            
+            // Reset active nav item
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Spin button
+            elements.spinBtn.addEventListener('click', spinSlots);
+            
+            // Convert coins
+            elements.convertBtn.addEventListener('click', convertCoins);
+            
+            // Buy spins options
+            elements.buySpinsOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    const spins = parseInt(option.dataset.spins);
+                    const price = parseInt(option.dataset.price);
+                    buySpins(spins, price);
+                });
+            });
+            
+            // Withdraw
+            elements.withdrawBtn.addEventListener('click', requestWithdrawal);
+            
+            // Promo code
+            elements.promoSumbit.addEventListener('click', redeemPromo);
+            
+            // Complete task (delegated event)
+            elements.taskList.addEventListener('click', (e) => {
+                if (e.target.classList.contains('task-complete') && !e.target.disabled) {
+                    const taskId = parseInt(e.target.dataset.taskId);
+                    completeTask(taskId);
+                }
+            });
+            
+            // Withdrawal actions (delegated events)
+            elements.withdrawalList.addEventListener('click', (e) => {
+                if (e.target.closest('.withdrawal-approve')) {
+                    const withdrawalId = parseInt(e.target.closest('.withdrawal-approve').dataset.withdrawalId);
+                    approveWithdrawal(withdrawalId);
+                } else if (e.target.closest('.withdrawal-decline')) {
+                    const withdrawalId = parseInt(e.target.closest('.withdrawal-decline').dataset.withdrawalId);
+                    declineWithdrawal(withdrawalId);
+                }
+            });
+            
+            // Task management actions (delegated events)
+            elements.taskManagementList.addEventListener('click', (e) => {
+                if (e.target.closest('.task-management-edit')) {
+                    const taskId = parseInt(e.target.closest('.task-management-edit').dataset.taskId);
+                    showToast(`Редактирование задания #${taskId} (симуляция)`);
+                } else if (e.target.closest('.task-management-delete')) {
+                    const taskId = parseInt(e.target.closest('.task-management-delete').dataset.taskId);
+                    state.tasks = state.tasks.filter(t => t.id !== taskId);
+                    showToast(`Задание #${taskId} удалено`);
+                    renderTasks();
+                    renderTaskManagement();
+                }
+            });
+            
+            // Navigation
+            elements.navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    // Update active nav item
+                    elements.navItems.forEach(nav => nav.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    // Show corresponding modal
+                    const modalId = item.dataset.modal + '-modal';
+                    document.getElementById(modalId).classList.add('active');
+                    
+                    // Show back button in Telegram WebApp
+                    if (window.Telegram && Telegram.WebApp) {
+                        Telegram.WebApp.BackButton.show();
+                    }
+                });
+            });
+            
+            // Close modals
+            elements.closeModalBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    closeAllModals();
+                    
+                    // Hide back button in Telegram WebApp
+                    if (window.Telegram && Telegram.WebApp) {
+                        Telegram.WebApp.BackButton.hide();
+                    }
+                });
+            });
+            
+            // Close modal when clicking outside
+            elements.modals.forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        closeAllModals();
+                        
+                        // Hide back button in Telegram WebApp
+                        if (window.Telegram && Telegram.WebApp) {
+                            Telegram.WebApp.BackButton.hide();
+                        }
+                    }
+                });
+            });
+            
+            // Admin buttons
+            elements.createPromoBtn.addEventListener('click', () => {
+                showToast('Промокод создан (симуляция)');
+            });
+            
+            elements.addTaskBtn.addEventListener('click', () => {
+                document.getElementById('add-task-modal').classList.add('active');
+                
+                // Show back button in Telegram WebApp
+                if (window.Telegram && Telegram.WebApp) {
+                    Telegram.WebApp.BackButton.show();
+                }
+            });
+            
+            elements.saveTaskBtn.addEventListener('click', addNewTask);
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+  </html>    </div>
   </div>
 
   <!-- Контент -->
