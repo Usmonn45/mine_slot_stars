@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>777 Slots</title>
+    <title>777 Slots XTR</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -16,6 +16,7 @@
             --success: #28a745;
             --info: #17a2b8;
             --telegram: #0088cc;
+            --xtr: #ffd700;
         }
         
         * {
@@ -99,6 +100,12 @@
             border-radius: 20px;
         }
         
+        .xtr-balance {
+            background: linear-gradient(135deg, var(--xtr), #ff9900);
+            color: var(--dark);
+            font-weight: bold;
+        }
+        
         .balance-icon {
             color: var(--primary);
         }
@@ -156,6 +163,7 @@
             align-items: center;
             justify-content: center;
             position: absolute;
+            will-change: transform;
         }
         
         .slots-payline {
@@ -785,13 +793,32 @@
             animation: pulse 2s infinite;
         }
         
-        @keyframes reelSpin {
+        /* Новые анимации для исправленных барабанов */
+        @keyframes reelSpinFast {
             0% { transform: translateY(0); }
             100% { transform: translateY(-1000px); }
         }
         
-        .reel-spinning {
-            animation: reelSpin 2s cubic-bezier(0.5, 0, 0.5, 1) forwards;
+        @keyframes reelSpinMedium {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-1000px); }
+        }
+        
+        @keyframes reelSpinSlow {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-1000px); }
+        }
+        
+        .reel-spinning-fast {
+            animation: reelSpinFast 2s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
+        }
+        
+        .reel-spinning-medium {
+            animation: reelSpinMedium 2.2s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
+        }
+        
+        .reel-spinning-slow {
+            animation: reelSpinSlow 2.4s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
         }
         
         /* Toast */
@@ -853,9 +880,9 @@
                 <div class="username" id="username">Username</div>
             </div>
             <div class="balance-container">
-                <div class="balance">
+                <div class="balance xtr-balance">
                     <i class="fas fa-star balance-icon"></i>
-                    <span class="balance-amount" id="stars-balance">0</span>
+                    <span class="balance-amount" id="xtr-balance">0</span>
                 </div>
                 <div class="balance">
                     <i class="fas fa-coins balance-icon"></i>
@@ -1010,21 +1037,21 @@
                     <div class="wallet-section">
                         <h4 class="section-title"><i class="fas fa-shopping-cart"></i> Купить крутки</h4>
                         <div class="buy-spins-container">
-                            <div class="buy-spins-option" data-spins="1" data-price="5">
+                            <div class="buy-spins-option" data-spins="1" data-price="50">
                                 <div class="buy-spins-count">1 крутка</div>
-                                <div class="buy-spins-price">5 ⭐</div>
+                                <div class="buy-spins-price">50 XTR</div>
                             </div>
-                            <div class="buy-spins-option" data-spins="5" data-price="20">
+                            <div class="buy-spins-option" data-spins="5" data-price="200">
                                 <div class="buy-spins-count">5 круток</div>
-                                <div class="buy-spins-price">20 ⭐</div>
+                                <div class="buy-spins-price">200 XTR</div>
                             </div>
-                            <div class="buy-spins-option" data-spins="10" data-price="35">
+                            <div class="buy-spins-option" data-spins="10" data-price="350">
                                 <div class="buy-spins-count">10 круток</div>
-                                <div class="buy-spins-price">35 ⭐</div>
+                                <div class="buy-spins-price">350 XTR</div>
                             </div>
-                            <div class="buy-spins-option" data-spins="20" data-price="60">
+                            <div class="buy-spins-option" data-spins="20" data-price="600">
                                 <div class="buy-spins-count">20 круток</div>
-                                <div class="buy-spins-price">60 ⭐</div>
+                                <div class="buy-spins-price">600 XTR</div>
                             </div>
                         </div>
                     </div>
@@ -1033,12 +1060,12 @@
                         <h4 class="section-title"><i class="fas fa-money-bill-wave"></i> Вывод</h4>
                         <div class="convert-form">
                             <div class="form-group">
-                                <label class="form-label">Сумма вывода (⭐)</label>
+                                <label class="form-label">Сумма вывода (XTR)</label>
                                 <select class="form-input" id="withdraw-amount">
-                                    <option value="15">15 ⭐</option>
-                                    <option value="25">25 ⭐</option>
-                                    <option value="50">50 ⭐</option>
-                                    <option value="100">100 ⭐</option>
+                                    <option value="150">150 XTR</option>
+                                    <option value="250">250 XTR</option>
+                                    <option value="500">500 XTR</option>
+                                    <option value="1000">1000 XTR</option>
                                 </select>
                             </div>
                             <button class="withdraw-btn" id="withdraw-btn">Запросить вывод</button>
@@ -1139,9 +1166,9 @@
             userId: null,
             username: "Username",
             avatar: "https://i.imgur.com/JYj3Q3D.png",
-            starsBalance: 0,
+            xtrBalance: 0, // Telegram Stars (XTR)
             bonusBalance: 0,
-            freeSpins: 5, // Начальные 5 бесплатных круток
+            freeSpins: 5,
             friendSpins: 0,
             paidSpins: 0,
             invitedCount: 0,
@@ -1163,7 +1190,7 @@
         const elements = {
             username: document.getElementById('username'),
             userAvatar: document.getElementById('user-avatar-img'),
-            starsBalance: document.getElementById('stars-balance'),
+            xtrBalance: document.getElementById('xtr-balance'),
             bonusBalance: document.getElementById('bonus-balance'),
             spinsCount: document.getElementById('spins-count'),
             spinBtn: document.getElementById('spin-btn'),
@@ -1308,7 +1335,7 @@
         function updateUI() {
             elements.username.textContent = state.username;
             elements.userAvatar.src = state.avatar;
-            elements.starsBalance.textContent = state.starsBalance;
+            elements.xtrBalance.textContent = state.xtrBalance;
             elements.bonusBalance.textContent = state.bonusBalance;
             
             const totalSpins = state.freeSpins + state.friendSpins + state.paidSpins;
@@ -1422,7 +1449,7 @@
                             </div>
                             @${withdrawal.username}
                         </div>
-                        <div class="withdrawal-amount">${withdrawal.amount} ⭐</div>
+                        <div class="withdrawal-amount">${withdrawal.amount} XTR</div>
                     </div>
                     <div class="withdrawal-actions">
                         <button class="withdrawal-approve" data-withdrawal-id="${withdrawal.id}">
@@ -1455,7 +1482,7 @@
                         <div class="user-id">ID: ${user.id}</div>
                     </div>
                     <div class="user-balance">
-                        <div class="user-stars">${user.starsBalance} ⭐</div>
+                        <div class="user-stars">${user.xtrBalance} XTR</div>
                     </div>
                 `;
                 
@@ -1480,16 +1507,17 @@
             elements.slotsResult.textContent = '';
             elements.slotsResult.className = 'slots-result';
             
-            // Spin each reel with different durations for more natural effect
-            const spinDurations = [2000, 2200, 2400];
+            // Different spin durations for each reel
+            const spinDurations = [1800, 2000, 2200];
             const results = [];
             
             elements.reels.forEach((reel, index) => {
-                // Clear animation class if it exists
-                reel.style.animation = 'none';
+                // Clear previous animation
+                reel.style.transform = 'translateY(0)';
+                reel.style.transition = 'none';
                 void reel.offsetHeight; // Trigger reflow
                 
-                // Generate random result (with 1% chance for each symbol to be the same)
+                // Generate random result
                 const isWin = Math.random() < 0.01; // 1% chance to win
                 let symbol;
                 
@@ -1508,13 +1536,17 @@
                 
                 results.push(symbol);
                 
-                // Calculate target position (align the selected symbol in the middle)
+                // Calculate target position
                 const symbolIndex = state.symbols.indexOf(symbol);
                 const targetPosition = -symbolIndex * 80; // Each symbol is 80px tall
                 
-                // Apply animation
+                // Apply different animations to each reel
+                const animationClass = index === 0 ? 'reel-spinning-fast' : 
+                                      index === 1 ? 'reel-spinning-medium' : 
+                                      'reel-spinning-slow';
+                
                 reel.style.transform = `translateY(${targetPosition}px)`;
-                reel.style.transition = `transform ${spinDurations[index]}ms cubic-bezier(0.5, 0, 0.5, 1)`;
+                reel.style.transition = `transform ${spinDurations[index]}ms cubic-bezier(0.2, 0.8, 0.3, 1)`;
             });
             
             // Check results after all reels stop
@@ -1523,12 +1555,12 @@
                 
                 // Check for win (all symbols match)
                 if (results[0] === results[1] && results[1] === results[2]) {
-                    const winAmount = 15; // WIN_REWARD
-                    state.starsBalance += winAmount;
-                    elements.slotsResult.textContent = `🎉 Джекпот! +${winAmount} ⭐`;
+                    const winAmount = 150; // WIN_REWARD in XTR
+                    state.xtrBalance += winAmount;
+                    elements.slotsResult.textContent = `🎉 Джекпот! +${winAmount} XTR`;
                     elements.slotsResult.classList.add('slots-win');
                 } else {
-                    const coinsAmount = 10; // LOSS_REWARD
+                    const coinsAmount = 10; // LOSS_REWARD in bonus coins
                     state.bonusBalance += coinsAmount;
                     elements.slotsResult.textContent = `😢 Вы проиграли, но +${coinsAmount} бонусных монет`;
                 }
@@ -1568,17 +1600,18 @@
             updateUI();
         }
 
-        // Buy spins with stars
+        // Buy spins with XTR
         function buySpins(spins, price) {
-            if (state.starsBalance < price) {
-                showToast('Недостаточно звезд', 'error');
+            if (state.xtrBalance < price) {
+                showToast('Недостаточно XTR', 'error');
                 return;
             }
             
-            state.starsBalance -= price;
+            // In real app, here you would process payment via Telegram Payments
+            state.xtrBalance -= price;
             state.paidSpins += spins;
             
-            showToast(`Успешно! Куплено ${spins} круток за ${price} ⭐`);
+            showToast(`Успешно! Куплено ${spins} круток за ${price} XTR`);
             updateUI();
         }
 
@@ -1586,8 +1619,8 @@
         function requestWithdrawal() {
             const amount = parseInt(elements.withdrawAmount.value);
             
-            if (state.starsBalance < amount) {
-                showToast('Недостаточно звезд для вывода', 'error');
+            if (state.xtrBalance < amount) {
+                showToast('Недостаточно XTR для вывода', 'error');
                 return;
             }
             
@@ -1612,7 +1645,7 @@
                 }));
             }
             
-            showToast(`Запрос на вывод ${amount} ⭐ отправлен администратору`);
+            showToast(`Запрос на вывод ${amount} XTR отправлен администратору`);
             renderWithdrawals();
         }
 
@@ -1623,7 +1656,7 @@
             
             withdrawal.status = "approved";
             
-            // In real app, here you would send stars to user via Telegram payment
+            // In real app, here you would send XTR to user via Telegram payment
             showToast(`Вывод #${id} одобрен. Средства отправлены пользователю.`);
             renderWithdrawals();
         }
@@ -1864,4 +1897,4 @@
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
-    </html>
+</html>
