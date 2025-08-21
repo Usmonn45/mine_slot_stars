@@ -42,6 +42,128 @@
             overflow-x: hidden;
         }
         
+        /* Welcome Screen */
+        .welcome-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .welcome-logo {
+            font-size: 60px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        .welcome-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+        
+        .welcome-text {
+            margin-bottom: 25px;
+            max-width: 400px;
+            line-height: 1.5;
+        }
+        
+        .verification-steps {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .verification-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        .verification-step:last-child {
+            margin-bottom: 0;
+        }
+        
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: var(--dark);
+            font-weight: bold;
+        }
+        
+        .step-text {
+            flex: 1;
+            text-align: left;
+        }
+        
+        .step-completed {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .step-action {
+            background-color: var(--primary);
+            color: var(--dark);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .step-action:hover {
+            background-color: var(--secondary);
+        }
+        
+        .open-app-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--dark);
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+        
+        .open-app-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.6);
+        }
+        
+        .open-app-btn:disabled {
+            background: #6c757d;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
         /* Header */
         .header {
             background-color: var(--darker);
@@ -870,7 +992,36 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <div class="app-container">
+    <!-- Welcome Screen -->
+    <div class="welcome-screen" id="welcome-screen">
+        <div class="welcome-logo">🎰</div>
+        <h1 class="welcome-title">777 Slots XTR</h1>
+        <p class="welcome-text">Для доступа к приложению необходимо выполнить проверку и подписаться на наш канал</p>
+        
+        <div class="verification-steps">
+            <div class="verification-step" id="bot-check-step">
+                <div class="step-icon">1</div>
+                <div class="step-text">Пройдите проверку на бота</div>
+                <button class="step-action" id="bot-check-btn">Проверить</button>
+            </div>
+            
+            <div class="verification-step" id="channel-sub-step">
+                <div class="step-icon">2</div>
+                <div class="step-text">Подпишитесь на наш канал</div>
+                <button class="step-action" id="channel-sub-btn">Подписаться</button>
+            </div>
+            
+            <div class="verification-step" id="complete-step">
+                <div class="step-icon">3</div>
+                <div class="step-text">Все условия выполнены</div>
+                <button class="step-action" id="complete-btn" disabled>Завершить</button>
+            </div>
+        </div>
+        
+        <button class="open-app-btn" id="open-app-btn" disabled>Открыть приложение</button>
+    </div>
+    
+    <div class="app-container" id="app-container" style="display: none;">
         <!-- Header -->
         <header class="header">
             <div class="user-info">
@@ -1175,6 +1326,10 @@
             invitedFriends: [],
             isSpinning: false,
             isAdmin: false,
+            verification: {
+                botCheck: false,
+                channelSub: false
+            },
             tasks: [
                 { id: 1, title: "Подписаться на канал", url: "https://t.me/777slots_channel", completed: false },
                 { id: 2, title: "Пригласить друга", url: "https://t.me/share/url?url=https://t.me/777slots_bot", completed: false },
@@ -1188,6 +1343,15 @@
 
         // DOM Elements
         const elements = {
+            welcomeScreen: document.getElementById('welcome-screen'),
+            appContainer: document.getElementById('app-container'),
+            botCheckStep: document.getElementById('bot-check-step'),
+            channelSubStep: document.getElementById('channel-sub-step'),
+            completeStep: document.getElementById('complete-step'),
+            botCheckBtn: document.getElementById('bot-check-btn'),
+            channelSubBtn: document.getElementById('channel-sub-btn'),
+            completeBtn: document.getElementById('complete-btn'),
+            openAppBtn: document.getElementById('open-app-btn'),
             username: document.getElementById('username'),
             userAvatar: document.getElementById('user-avatar-img'),
             xtrBalance: document.getElementById('xtr-balance'),
@@ -1235,7 +1399,10 @@
                 // For testing outside Telegram
                 state.userId = Math.floor(Math.random() * 1000000);
                 state.isAdmin = true; // For demo purposes
-                updateUI();
+                // Skip verification for testing
+                state.verification.botCheck = true;
+                state.verification.channelSub = true;
+                updateVerificationUI();
             }
             
             setupEventListeners();
@@ -1271,7 +1438,7 @@
             document.documentElement.style.setProperty('--dark', tg.themeParams.secondary_bg_color || '#1a1a2e');
             document.documentElement.style.setProperty('--light', tg.themeParams.text_color || '#f8f9fa');
             
-            updateUI();
+            updateVerificationUI();
             
             // Handle back button
             tg.BackButton.onClick(() => {
@@ -1282,6 +1449,27 @@
             tg.onEvent('viewportChanged', () => {
                 checkReferral();
             });
+        }
+
+        // Update verification UI
+        function updateVerificationUI() {
+            if (state.verification.botCheck) {
+                elements.botCheckStep.classList.add('step-completed');
+                elements.botCheckBtn.textContent = '✓ Выполнено';
+                elements.botCheckBtn.disabled = true;
+            }
+            
+            if (state.verification.channelSub) {
+                elements.channelSubStep.classList.add('step-completed');
+                elements.channelSubBtn.textContent = '✓ Выполнено';
+                elements.channelSubBtn.disabled = true;
+            }
+            
+            if (state.verification.botCheck && state.verification.channelSub) {
+                elements.completeStep.classList.add('step-completed');
+                elements.completeBtn.textContent = '✓ Завершено';
+                elements.openAppBtn.disabled = false;
+            }
         }
 
         // Check if user came from referral link
@@ -1764,8 +1952,44 @@
                 .catch(() => showToast('Не удалось скопировать ссылку', 'error'));
         }
 
+        // Bot verification
+        function verifyBot() {
+            // In real app, this would be a CAPTCHA or other verification
+            showToast('Проверка на бота...');
+            
+            setTimeout(() => {
+                state.verification.botCheck = true;
+                updateVerificationUI();
+                showToast('Проверка пройдена успешно!');
+            }, 2000);
+        }
+
+        // Channel subscription
+        function subscribeToChannel() {
+            // In real app, this would open the channel and check subscription
+            showToast('Переход в канал...');
+            
+            setTimeout(() => {
+                state.verification.channelSub = true;
+                updateVerificationUI();
+                showToast('Подписка выполнена успешно!');
+            }, 2000);
+        }
+
+        // Open app
+        function openApp() {
+            elements.welcomeScreen.style.display = 'none';
+            elements.appContainer.style.display = 'flex';
+            updateUI();
+        }
+
         // Setup event listeners
         function setupEventListeners() {
+            // Verification buttons
+            elements.botCheckBtn.addEventListener('click', verifyBot);
+            elements.channelSubBtn.addEventListener('click', subscribeToChannel);
+            elements.openAppBtn.addEventListener('click', openApp);
+            
             // Spin button
             elements.spinBtn.addEventListener('click', spinSlots);
             
