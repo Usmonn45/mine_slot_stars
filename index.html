@@ -211,6 +211,7 @@
         .balance-container {
             display: flex;
             gap: 15px;
+            align-items: center;
         }
         
         .balance {
@@ -826,6 +827,7 @@
         .task-management-title {
             font-weight: 600;
             flex: 1;
+            font-size: 14px;
         }
         
         .task-management-actions {
@@ -840,6 +842,7 @@
             padding: 5px 10px;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 12px;
         }
         
         .task-management-delete {
@@ -849,6 +852,7 @@
             padding: 5px 10px;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 12px;
         }
         
         /* Users List */
@@ -888,6 +892,7 @@
         .user-name {
             font-weight: 600;
             margin-bottom: 3px;
+            font-size: 14px;
         }
         
         .user-id {
@@ -902,6 +907,7 @@
         .user-stars {
             color: var(--primary);
             font-weight: 600;
+            font-size: 14px;
         }
         
         /* Animations */
@@ -967,6 +973,21 @@
             background-color: var(--danger);
         }
         
+        /* Loading */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
         /* Responsive */
         @media (max-width: 480px) {
             .balance-container {
@@ -985,6 +1006,14 @@
             
             .buy-spins-container {
                 grid-template-columns: 1fr;
+            }
+            
+            .task-management-title {
+                font-size: 12px;
+            }
+            
+            .user-name {
+                font-size: 12px;
             }
         }
     </style>
@@ -1039,6 +1068,9 @@
                     <i class="fas fa-coins balance-icon"></i>
                     <span class="balance-amount" id="bonus-balance">0</span>
                 </div>
+                <button class="balance" id="refresh-btn" title="Обновить баланс">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
             </div>
         </header>
         
@@ -1317,7 +1349,7 @@
             userId: null,
             username: "Username",
             avatar: "https://i.imgur.com/JYj3Q3D.png",
-            xtrBalance: 0, // Telegram Stars (XTR)
+            xtrBalance: 0,
             bonusBalance: 0,
             freeSpins: 5,
             friendSpins: 0,
@@ -1387,22 +1419,44 @@
             addTaskBtn: document.getElementById('add-task-btn'),
             saveTaskBtn: document.getElementById('save-task-btn'),
             adminNavItem: document.getElementById('admin-nav-item'),
-            buySpinsOptions: document.querySelectorAll('.buy-spins-option')
+            buySpinsOptions: document.querySelectorAll('.buy-spins-option'),
+            refreshBtn: document.getElementById('refresh-btn')
+        };
+
+        // API endpoints (замените на реальные URL вашего бэкенда)
+        const API = {
+            BASE_URL: 'https://your-backend-domain.com/api',
+            ENDPOINTS: {
+                USER: '/user',
+                BALANCE: '/balance',
+                SPIN: '/spin',
+                VERIFY: '/verify',
+                SUBSCRIBE: '/subscribe',
+                TASKS: '/tasks',
+                PROMO: '/promo',
+                WITHDRAWAL: '/withdrawal',
+                PAYMENT: '/payment',
+                REFERRAL: '/referral',
+                ADMIN: '/admin'
+            }
         };
 
         // Initialize the app
-        function init() {
+        async function init() {
             // Check if running in Telegram WebApp
             if (window.Telegram && Telegram.WebApp) {
-                initTelegramWebApp();
+                await initTelegramWebApp();
             } else {
                 // For testing outside Telegram
                 state.userId = Math.floor(Math.random() * 1000000);
-                state.isAdmin = true; // For demo purposes
+                state.isAdmin = true;
                 // Skip verification for testing
                 state.verification.botCheck = true;
                 state.verification.channelSub = true;
                 updateVerificationUI();
+                
+                // Load test data
+                await loadUserData();
             }
             
             setupEventListeners();
@@ -1415,7 +1469,7 @@
         }
 
         // Initialize Telegram WebApp
-        function initTelegramWebApp() {
+        async function initTelegramWebApp() {
             const tg = window.Telegram.WebApp;
             
             // Expand the app
@@ -1428,8 +1482,8 @@
                 state.username = user.username || `${user.first_name}${user.last_name ? ' ' + user.last_name : ''}`;
                 state.avatar = user.photo_url || "https://i.imgur.com/JYj3Q3D.png";
                 
-                // Check if user is admin (in real app, this should come from your backend)
-                state.isAdmin = user.id === 6079178039; // Replace with your admin ID
+                // Check if user is admin
+                state.isAdmin = await checkAdminStatus(state.userId);
             }
             
             // Set theme colors
@@ -1437,6 +1491,9 @@
             document.documentElement.style.setProperty('--darker', tg.themeParams.bg_color || '#16213e');
             document.documentElement.style.setProperty('--dark', tg.themeParams.secondary_bg_color || '#1a1a2e');
             document.documentElement.style.setProperty('--light', tg.themeParams.text_color || '#f8f9fa');
+            
+            // Load user data
+            await loadUserData();
             
             updateVerificationUI();
             
@@ -1449,6 +1506,188 @@
             tg.onEvent('viewportChanged', () => {
                 checkReferral();
             });
+        }
+
+        // API functions
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${state.userId}`
+                    }
+                };
+                
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                const response = await fetch(`${API.BASE_URL}${endpoint}`, options);
+                
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('API call failed:', error);
+                showToast('Ошибка соединения с сервером', 'error');
+                return null;
+            }
+        }
+
+        async function loadUserData() {
+            showToast('Загрузка данных...');
+            
+            const data = await apiCall(`${API.ENDPOINTS.USER}/${state.userId}`);
+            if (data) {
+                state.xtrBalance = data.xtrBalance || 0;
+                state.bonusBalance = data.bonusBalance || 0;
+                state.freeSpins = data.freeSpins || 0;
+                state.friendSpins = data.friendSpins || 0;
+                state.paidSpins = data.paidSpins || 0;
+                state.invitedCount = data.invitedCount || 0;
+                state.invitedFriends = data.invitedFriends || [];
+                state.verification = data.verification || { botCheck: false, channelSub: false };
+                
+                updateUI();
+                updateVerificationUI();
+            }
+        }
+
+        async function checkAdminStatus(userId) {
+            const data = await apiCall(`${API.ENDPOINTS.ADMIN}/check/${userId}`);
+            return data && data.isAdmin;
+        }
+
+        async function verifyBot() {
+            showToast('Проверка на бота...');
+            
+            const result = await apiCall(API.ENDPOINTS.VERIFY, 'POST', {
+                userId: state.userId
+            });
+            
+            if (result && result.success) {
+                state.verification.botCheck = true;
+                updateVerificationUI();
+                showToast('Проверка пройдена успешно!');
+                
+                // Сохраняем статус проверки
+                await apiCall(API.ENDPOINTS.USER, 'PATCH', {
+                    userId: state.userId,
+                    verification: state.verification
+                });
+            } else {
+                showToast('Ошибка проверки', 'error');
+            }
+        }
+
+        async function subscribeToChannel() {
+            showToast('Проверка подписки...');
+            
+            if (window.Telegram && Telegram.WebApp) {
+                // Открываем канал в Telegram
+                Telegram.WebApp.openTelegramLink('https://t.me/777slots_channel');
+                
+                // Проверяем подписку через API
+                setTimeout(async () => {
+                    const result = await apiCall(API.ENDPOINTS.SUBSCRIBE, 'POST', {
+                        userId: state.userId,
+                        username: state.username
+                    });
+                    
+                    if (result && result.subscribed) {
+                        state.verification.channelSub = true;
+                        updateVerificationUI();
+                        showToast('Подписка выполнена успешно!');
+                        
+                        // Сохраняем статус подписки
+                        await apiCall(API.ENDPOINTS.USER, 'PATCH', {
+                            userId: state.userId,
+                            verification: state.verification
+                        });
+                    } else {
+                        showToast('Вы не подписались на канал', 'error');
+                    }
+                }, 3000);
+            }
+        }
+
+        async function processTelegramPayment(product) {
+            if (window.Telegram && Telegram.WebApp) {
+                try {
+                    const result = await Telegram.WebApp.openInvoice({
+                        title: product.title,
+                        description: `Покупка ${product.spins} круток`,
+                        currency: 'XTR',
+                        prices: [
+                            {
+                                label: product.title,
+                                amount: product.price * 100 // В копейках
+                            }
+                        ]
+                    });
+                    
+                    if (result === 'succeeded') {
+                        // Payment successful
+                        state.paidSpins += product.spins;
+                        updateUI();
+                        showToast(`Успешно! Куплено ${product.spins} круток`);
+                        
+                        // Сохраняем в бэкенде
+                        await apiCall(API.ENDPOINTS.PAYMENT, 'POST', {
+                            userId: state.userId,
+                            amount: product.price,
+                            spins: product.spins,
+                            type: 'purchase'
+                        });
+                    }
+                } catch (error) {
+                    showToast('Ошибка оплаты', 'error');
+                }
+            }
+        }
+
+        async function processWithdrawal(amount) {
+            const result = await apiCall(API.ENDPOINTS.WITHDRAWAL, 'POST', {
+                userId: state.userId,
+                username: state.username,
+                amount: amount
+            });
+            
+            if (result && result.success) {
+                state.xtrBalance -= amount;
+                updateUI();
+                showToast('Запрос на вывод отправлен администратору');
+            }
+        }
+
+        async function activatePromoCode(code) {
+            const result = await apiCall(`${API.ENDPOINTS.PROMO}/activate`, 'POST', {
+                userId: state.userId,
+                code: code.toUpperCase()
+            });
+            
+            if (result && result.success) {
+                state.freeSpins += result.spins;
+                updateUI();
+                showToast(`Промокод активирован! +${result.spins} круток`);
+            } else {
+                showToast('Неверный промокод', 'error');
+            }
+        }
+
+        async function createPromoCode(code, spins, uses) {
+            const result = await apiCall(API.ENDPOINTS.PROMO, 'POST', {
+                code: code.toUpperCase(),
+                spins: spins,
+                maxUses: uses
+            });
+            
+            if (result && result.success) {
+                showToast('Промокод создан успешно!');
+            }
         }
 
         // Update verification UI
@@ -1484,39 +1723,16 @@
             if (startParam.startsWith('ref_')) {
                 const referrerId = startParam.split('_')[1];
                 if (referrerId && referrerId !== state.userId) {
-                    // In real app, here you would send this to your backend
-                    // For demo, we'll simulate it
-                    setTimeout(() => {
-                        showToast(`🎉 Вы зашли по ссылке друга!`);
-                        
-                        // Simulate notification to referrer
-                        if (window.Telegram && Telegram.WebApp) {
-                            Telegram.WebApp.sendData(JSON.stringify({
-                                action: "referral_joined",
-                                referrerId: referrerId,
-                                newUserId: state.userId,
-                                username: state.username
-                            }));
-                        }
-                    }, 2000);
+                    // Сообщаем бэкенду о реферале
+                    apiCall(API.ENDPOINTS.REFERRAL, 'POST', {
+                        referrerId: referrerId,
+                        newUserId: state.userId,
+                        username: state.username
+                    });
+                    
+                    showToast('🎉 Вы зашли по ссылке друга!');
                 }
             }
-        }
-
-        // Handle referral notification from bot
-        function handleReferralNotification(friendData) {
-            state.invitedCount++;
-            state.friendSpins++;
-            state.invitedFriends.push({
-                id: friendData.id,
-                username: friendData.username,
-                avatar: friendData.avatar,
-                date: new Date().toLocaleDateString()
-            });
-            
-            showToast(`🎉 Ваш друг @${friendData.username} присоединился! +1 крутка`);
-            updateUI();
-            renderFriends();
         }
 
         // Update UI based on state
@@ -1543,7 +1759,7 @@
             elements.adminNavItem.style.display = state.isAdmin ? 'flex' : 'none';
         }
 
-        // Render friends list
+        // Render functions
         function renderFriends() {
             elements.friendsList.innerHTML = '';
             
@@ -1570,7 +1786,6 @@
             });
         }
 
-        // Render tasks
         function renderTasks() {
             elements.taskList.innerHTML = '';
             
@@ -1595,7 +1810,6 @@
             });
         }
 
-        // Render task management
         function renderTaskManagement() {
             elements.taskManagementList.innerHTML = '';
             
@@ -1619,7 +1833,6 @@
             });
         }
 
-        // Render withdrawal requests
         function renderWithdrawals() {
             elements.withdrawalList.innerHTML = '';
             
@@ -1653,7 +1866,6 @@
             });
         }
 
-        // Render users list
         function renderUsers() {
             elements.usersList.innerHTML = '';
             
@@ -1678,8 +1890,8 @@
             });
         }
 
-        // Spin the slots
-        function spinSlots() {
+        // Game functions
+        async function spinSlots() {
             if (state.isSpinning) return;
             
             const totalSpins = state.freeSpins + state.friendSpins + state.paidSpins;
@@ -1729,16 +1941,12 @@
                 const targetPosition = -symbolIndex * 80; // Each symbol is 80px tall
                 
                 // Apply different animations to each reel
-                const animationClass = index === 0 ? 'reel-spinning-fast' : 
-                                      index === 1 ? 'reel-spinning-medium' : 
-                                      'reel-spinning-slow';
-                
                 reel.style.transform = `translateY(${targetPosition}px)`;
                 reel.style.transition = `transform ${spinDurations[index]}ms cubic-bezier(0.2, 0.8, 0.3, 1)`;
             });
             
             // Check results after all reels stop
-            setTimeout(() => {
+            setTimeout(async () => {
                 state.isSpinning = false;
                 
                 // Check for win (all symbols match)
@@ -1747,10 +1955,24 @@
                     state.xtrBalance += winAmount;
                     elements.slotsResult.textContent = `🎉 Джекпот! +${winAmount} XTR`;
                     elements.slotsResult.classList.add('slots-win');
+                    
+                    // Сохраняем выигрыш в бэкенде
+                    await apiCall(API.ENDPOINTS.SPIN, 'POST', {
+                        userId: state.userId,
+                        win: true,
+                        amount: winAmount
+                    });
                 } else {
                     const coinsAmount = 10; // LOSS_REWARD in bonus coins
                     state.bonusBalance += coinsAmount;
                     elements.slotsResult.textContent = `😢 Вы проиграли, но +${coinsAmount} бонусных монет`;
+                    
+                    // Сохраняем результат в бэкенде
+                    await apiCall(API.ENDPOINTS.SPIN, 'POST', {
+                        userId: state.userId,
+                        win: false,
+                        amount: coinsAmount
+                    });
                 }
                 
                 // Deduct spin
@@ -1766,8 +1988,7 @@
             }, Math.max(...spinDurations) + 100);
         }
 
-        // Convert coins to spins
-        function convertCoins() {
+        async function convertCoins() {
             const amount = parseInt(elements.convertAmount.value);
             if (isNaN(amount) || amount < 10) {
                 showToast('Минимальная сумма обмена - 10 монет', 'error');
@@ -1785,26 +2006,32 @@
             
             showToast(`Успешно! Обменяно ${amount} монет на ${spins} круток`);
             elements.convertAmount.value = '';
+            
+            // Сохраняем в бэкенде
+            await apiCall(API.ENDPOINTS.BALANCE, 'POST', {
+                userId: state.userId,
+                bonusBalance: state.bonusBalance,
+                freeSpins: state.freeSpins
+            });
+            
             updateUI();
         }
 
-        // Buy spins with XTR
-        function buySpins(spins, price) {
+        async function buySpins(spins, price) {
             if (state.xtrBalance < price) {
                 showToast('Недостаточно XTR', 'error');
                 return;
             }
             
-            // In real app, here you would process payment via Telegram Payments
-            state.xtrBalance -= price;
-            state.paidSpins += spins;
-            
-            showToast(`Успешно! Куплено ${spins} круток за ${price} XTR`);
-            updateUI();
+            // Process payment through Telegram
+            await processTelegramPayment({
+                title: `${spins} круток`,
+                spins: spins,
+                price: price
+            });
         }
 
-        // Request withdrawal
-        function requestWithdrawal() {
+        async function requestWithdrawal() {
             const amount = parseInt(elements.withdrawAmount.value);
             
             if (state.xtrBalance < amount) {
@@ -1812,57 +2039,10 @@
                 return;
             }
             
-            // Add to withdrawal requests
-            const newId = state.withdrawals.length + 1;
-            state.withdrawals.push({
-                id: newId,
-                userId: state.userId,
-                username: state.username,
-                avatar: state.avatar,
-                amount: amount,
-                status: "pending"
-            });
-            
-            // In real app, send this to backend
-            if (window.Telegram && Telegram.WebApp) {
-                Telegram.WebApp.sendData(JSON.stringify({
-                    action: "withdraw_request",
-                    userId: state.userId,
-                    amount: amount,
-                    username: state.username
-                }));
-            }
-            
-            showToast(`Запрос на вывод ${amount} XTR отправлен администратору`);
-            renderWithdrawals();
+            await processWithdrawal(amount);
         }
 
-        // Approve withdrawal
-        function approveWithdrawal(id) {
-            const withdrawal = state.withdrawals.find(w => w.id === id);
-            if (!withdrawal) return;
-            
-            withdrawal.status = "approved";
-            
-            // In real app, here you would send XTR to user via Telegram payment
-            showToast(`Вывод #${id} одобрен. Средства отправлены пользователю.`);
-            renderWithdrawals();
-        }
-
-        // Decline withdrawal
-        function declineWithdrawal(id) {
-            const withdrawal = state.withdrawals.find(w => w.id === id);
-            if (!withdrawal) return;
-            
-            withdrawal.status = "declined";
-            
-            // In real app, here you would notify user about declined withdrawal
-            showToast(`Вывод #${id} отклонен`);
-            renderWithdrawals();
-        }
-
-        // Redeem promo code
-        function redeemPromo() {
+        async function redeemPromo() {
             const code = elements.promoCode.value.trim();
             
             if (!code) {
@@ -1870,19 +2050,11 @@
                 return;
             }
             
-            // Simulate promo check
-            if (code.toUpperCase() === 'BONUS10') {
-                state.freeSpins += 3;
-                showToast('Промокод активирован! +3 крутки');
-                elements.promoCode.value = '';
-                updateUI();
-            } else {
-                showToast('Неверный промокод', 'error');
-            }
+            await activatePromoCode(code);
+            elements.promoCode.value = '';
         }
 
-        // Complete task
-        function completeTask(taskId) {
+        async function completeTask(taskId) {
             const task = state.tasks.find(t => t.id === taskId);
             if (!task || task.completed) return;
             
@@ -1891,11 +2063,17 @@
             
             showToast('Задание выполнено! +1 крутка');
             renderTasks();
+            
+            // Сохраняем в бэкенде
+            await apiCall(`${API.ENDPOINTS.TASKS}/complete`, 'POST', {
+                userId: state.userId,
+                taskId: taskId
+            });
+            
             updateUI();
         }
 
-        // Add new task
-        function addNewTask() {
+        async function addNewTask() {
             const title = document.getElementById('new-task-title').value.trim();
             const url = document.getElementById('new-task-url').value.trim();
             
@@ -1921,7 +2099,7 @@
             renderTaskManagement();
         }
 
-        // Show toast message
+        // Utility functions
         function showToast(message, type = 'success') {
             elements.toast.textContent = message;
             elements.toast.className = `toast ${type}`;
@@ -1932,7 +2110,6 @@
             }, 3000);
         }
 
-        // Close all modals
         function closeAllModals() {
             document.querySelectorAll('.modal').forEach(modal => {
                 modal.classList.remove('active');
@@ -1944,7 +2121,6 @@
             });
         }
 
-        // Copy referral link
         function copyReferralLink() {
             const link = elements.refLink.textContent;
             navigator.clipboard.writeText(link)
@@ -1952,31 +2128,6 @@
                 .catch(() => showToast('Не удалось скопировать ссылку', 'error'));
         }
 
-        // Bot verification
-        function verifyBot() {
-            // In real app, this would be a CAPTCHA or other verification
-            showToast('Проверка на бота...');
-            
-            setTimeout(() => {
-                state.verification.botCheck = true;
-                updateVerificationUI();
-                showToast('Проверка пройдена успешно!');
-            }, 2000);
-        }
-
-        // Channel subscription
-        function subscribeToChannel() {
-            // In real app, this would open the channel and check subscription
-            showToast('Переход в канал...');
-            
-            setTimeout(() => {
-                state.verification.channelSub = true;
-                updateVerificationUI();
-                showToast('Подписка выполнена успешно!');
-            }, 2000);
-        }
-
-        // Open app
         function openApp() {
             elements.welcomeScreen.style.display = 'none';
             elements.appContainer.style.display = 'flex';
@@ -1989,6 +2140,9 @@
             elements.botCheckBtn.addEventListener('click', verifyBot);
             elements.channelSubBtn.addEventListener('click', subscribeToChannel);
             elements.openAppBtn.addEventListener('click', openApp);
+            
+            // Refresh button
+            elements.refreshBtn.addEventListener('click', loadUserData);
             
             // Spin button
             elements.spinBtn.addEventListener('click', spinSlots);
@@ -2034,7 +2188,7 @@
             elements.taskManagementList.addEventListener('click', (e) => {
                 if (e.target.closest('.task-management-edit')) {
                     const taskId = parseInt(e.target.closest('.task-management-edit').dataset.taskId);
-                    showToast(`Редактирование задания #${taskId} (симуляция)`);
+                    showToast(`Редактирование задания #${taskId} (в разработке)`);
                 } else if (e.target.closest('.task-management-delete')) {
                     const taskId = parseInt(e.target.closest('.task-management-delete').dataset.taskId);
                     state.tasks = state.tasks.filter(t => t.id !== taskId);
@@ -2091,8 +2245,17 @@
             });
             
             // Admin buttons
-            elements.createPromoBtn.addEventListener('click', () => {
-                showToast('Промокод создан (симуляция)');
+            elements.createPromoBtn.addEventListener('click', async () => {
+                const code = document.getElementById('promo-code-input').value.trim();
+                const spins = parseInt(document.getElementById('promo-spins').value);
+                const uses = parseInt(document.getElementById('promo-uses').value);
+                
+                if (!code || isNaN(spins) || isNaN(uses)) {
+                    showToast('Заполните все поля корректно', 'error');
+                    return;
+                }
+                
+                await createPromoCode(code, spins, uses);
             });
             
             elements.addTaskBtn.addEventListener('click', () => {
@@ -2108,13 +2271,6 @@
             
             // Copy referral link
             elements.copyRefBtn.addEventListener('click', copyReferralLink);
-            
-            // Handle messages from bot
-            window.addEventListener('message', (event) => {
-                if (event.data && event.data.action === "referral_notification") {
-                    handleReferralNotification(event.data.friend);
-                }
-            });
         }
 
         // Initialize the app
