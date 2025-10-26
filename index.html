@@ -2,2279 +2,974 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>777 Slots XTR</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Космический сборщик</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --primary: #ffc107;
-            --secondary: #ff9800;
-            --dark: #1a1a2e;
-            --darker: #16213e;
-            --light: #f8f9fa;
-            --danger: #dc3545;
-            --success: #28a745;
-            --info: #17a2b8;
-            --telegram: #0088cc;
-            --xtr: #ffd700;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif;
-        }
-        
-        body {
-            background-color: var(--dark);
-            color: var(--light);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .app-container {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            max-width: 100%;
-            overflow-x: hidden;
-        }
-        
-        /* Welcome Screen */
-        .welcome-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, var(--darker), var(--dark));
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .welcome-logo {
-            font-size: 60px;
-            margin-bottom: 20px;
-            animation: pulse 2s infinite;
-        }
-        
-        .welcome-title {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: var(--primary);
-        }
-        
-        .welcome-text {
-            margin-bottom: 25px;
-            max-width: 400px;
-            line-height: 1.5;
-        }
-        
-        .verification-steps {
-            background-color: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 25px;
-            max-width: 400px;
-            width: 100%;
-        }
-        
-        .verification-step {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            padding: 10px;
-            border-radius: 8px;
-            background-color: rgba(0, 0, 0, 0.2);
-        }
-        
-        .verification-step:last-child {
-            margin-bottom: 0;
-        }
-        
-        .step-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-            color: var(--dark);
-            font-weight: bold;
-        }
-        
-        .step-text {
-            flex: 1;
-            text-align: left;
-        }
-        
-        .step-completed {
-            background-color: var(--success);
-            color: white;
-        }
-        
-        .step-action {
-            background-color: var(--primary);
-            color: var(--dark);
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .step-action:hover {
-            background-color: var(--secondary);
-        }
-        
-        .open-app-btn {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: var(--dark);
-            border: none;
-            padding: 15px 40px;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
-            transition: all 0.3s;
-            text-transform: uppercase;
-        }
-        
-        .open-app-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.6);
-        }
-        
-        .open-app-btn:disabled {
-            background: #6c757d;
-            box-shadow: none;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        /* Header */
-        .header {
-            background-color: var(--darker);
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-            z-index: 100;
-        }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: var(--dark);
-            overflow: hidden;
-        }
-        
-        .avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .username {
-            font-weight: 600;
-            max-width: 120px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .balance-container {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-        
-        .balance {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            background-color: rgba(0, 0, 0, 0.3);
-            padding: 5px 10px;
-            border-radius: 20px;
-        }
-        
-        .xtr-balance {
-            background: linear-gradient(135deg, var(--xtr), #ff9900);
-            color: var(--dark);
-            font-weight: bold;
-        }
-        
-        .balance-icon {
-            color: var(--primary);
-        }
-        
-        .balance-amount {
-            font-weight: 600;
-        }
-        
-        /* Main Content - Slots */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            position: relative;
-        }
-        
-        .slots-container {
-            width: 100%;
-            max-width: 320px;
-            background-color: var(--darker);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-            margin-bottom: 25px;
-        }
-        
-        .slots-machine {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-            position: relative;
-        }
-        
-        .slots-reel {
-            height: 80px;
-            background-color: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .slots-symbol {
-            font-size: 40px;
-            height: 80px;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: absolute;
-            will-change: transform;
-        }
-        
-        .slots-payline {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background-color: var(--primary);
-            transform: translateY(-50%);
-            z-index: 5;
-            box-shadow: 0 0 10px var(--primary);
-        }
-        
-        .slots-result {
-            text-align: center;
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            min-height: 27px;
-        }
-        
-        .slots-win {
-            color: var(--primary);
-            animation: pulse 0.5s infinite alternate;
-        }
-        
-        .spin-btn {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: var(--dark);
-            border: none;
-            padding: 15px 40px;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
-            transition: all 0.3s;
-            text-transform: uppercase;
-            width: 100%;
-            max-width: 320px;
-        }
-        
-        .spin-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.6);
-        }
-        
-        .spin-btn:disabled {
-            background: #6c757d;
-            box-shadow: none;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .spins-count {
-            margin-top: 15px;
-            font-size: 16px;
-            color: var(--primary);
-            font-weight: 600;
-            text-align: center;
-        }
-        
-        /* Bottom Navigation */
-        .bottom-nav {
-            background-color: var(--darker);
-            display: flex;
-            justify-content: space-around;
-            padding: 15px 0;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
-        }
-        
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--light);
-            text-decoration: none;
-            font-size: 12px;
-            gap: 5px;
-            opacity: 0.7;
-            transition: all 0.3s;
-        }
-        
-        .nav-item.active {
-            opacity: 1;
-            color: var(--primary);
-        }
-        
-        .nav-item i {
-            font-size: 20px;
-        }
-        
-        /* Modals */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-        
-        .modal.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-        
-        .modal-content {
-            background-color: var(--darker);
-            border-radius: 10px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 80vh;
-            overflow-y: auto;
-            padding: 20px;
-            position: relative;
-            animation: modalFadeIn 0.3s;
-        }
-        
-        @keyframes modalFadeIn {
-            from {
-                transform: translateY(-20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .modal-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--primary);
-        }
-        
-        .close-modal {
-            background: none;
-            border: none;
-            color: var(--light);
-            font-size: 24px;
-            cursor: pointer;
-        }
-        
-        /* Tasks */
-        .task-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .task-item {
-            background-color: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .task-title {
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .task-link {
-            color: var(--info);
-            text-decoration: none;
-            word-break: break-all;
-        }
-        
-        .task-complete {
-            background-color: var(--primary);
-            color: var(--dark);
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .task-complete:hover {
-            background-color: var(--secondary);
-        }
-        
-        .task-completed {
-            background-color: var(--success);
-            color: white;
-        }
-        
-        /* Friends */
-        .ref-link-container {
-            background-color: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        
-        .ref-link {
-            background-color: rgba(0, 0, 0, 0.3);
-            padding: 10px;
-            border-radius: 5px;
-            word-break: break-all;
-            margin-top: 10px;
-            display: block;
-        }
-        
-        .friends-stats {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-        }
-        
-        .stat-card {
-            background-color: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            flex: 1;
-            margin: 0 5px;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: 600;
-            color: var(--primary);
-            margin-top: 5px;
+            --bg-color-dark: #0A0A23;
+            --bg-color-light: #1B263B;
+            --text-color: #fff;
+            --score-color: #00FF00;
+            --lives-color: #FFD700;
+            --gameover-color: #ff4d4d;
+            --button-bg: #1E90FF;
+            --button-hover-bg: #4169E1;
+            --overlay-bg: rgba(0, 0, 0, 0.9);
+            --shield-color: #00FFFF;
+            --progress-bg: rgba(255, 255, 255, 0.2);
+            --progress-fill: #00FFFF;
         }
 
-        /* Friends List */
-        .friends-list {
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, var(--bg-color-dark) 0%, var(--bg-color-light) 100%);
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .friend-item {
-            background-color: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 8px;
-            display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 15px;
-        }
-        
-        .friend-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            min-height: 100vh;
+            font-family: 'Press Start 2P', cursive, Arial, sans-serif;
+            color: var(--text-color);
             overflow: hidden;
+            position: relative;
         }
-        
-        .friend-avatar img {
+
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        canvas {
+            border: 3px solid #4A4AFF;
+            border-radius: 10px;
+            background: #000;
+            display: block;
+            touch-action: none;
+            box-shadow: 0 0 20px rgba(74, 74, 255, 0.3);
+        }
+
+        #score, #lives, #level {
+            position: absolute;
+            font-size: 14px;
+            color: var(--text-color);
+            z-index: 10;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 8px;
+            border: 1px solid #4A4AFF;
+        }
+        #score { top: 15px; left: 15px; color: var(--score-color); }
+        #lives { top: 15px; right: 15px; color: var(--lives-color); }
+        #level { top: 55px; left: 15px; color: #FF69B4; }
+
+        #shieldProgress {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 10px;
+            background: var(--progress-bg);
+            border-radius: 5px;
+            overflow: hidden;
+            z-index: 10;
+            display: none;
+            border: 1px solid var(--shield-color);
+        }
+        #shieldFill {
+            height: 100%;
+            background: var(--progress-fill);
+            width: 0;
+            transition: width 0.2s ease;
+        }
+
+        .overlay-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
-        }
-        
-        .friend-details {
-            flex: 1;
-        }
-        
-        .friend-name {
-            font-weight: 600;
-            margin-bottom: 3px;
-        }
-        
-        .friend-date {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.6);
-        }
-        
-        /* Wallet */
-        .wallet-section {
-            margin-bottom: 25px;
-        }
-        
-        .section-title {
-            font-size: 18px;
-            margin-bottom: 15px;
-            color: var(--primary);
+            background: var(--overlay-bg);
             display: flex;
+            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            gap: 10px;
-        }
-        
-        .convert-form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            background-color: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 8px;
-        }
-        
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        
-        .form-label {
-            font-size: 14px;
-        }
-        
-        .form-input {
-            background-color: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            padding: 10px 15px;
-            color: white;
-        }
-        
-        .form-submit {
-            background-color: var(--primary);
-            color: var(--dark);
-            border: none;
-            padding: 12px;
-            border-radius: 5px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .form-submit:hover {
-            background-color: var(--secondary);
-        }
-        
-        .withdraw-btn {
-            background-color: var(--success);
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 5px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            width: 100%;
-            margin-top: 10px;
-        }
-        
-        .withdraw-btn:hover {
-            background-color: #218838;
-        }
-        
-        .buy-spins-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .buy-spins-option {
-            background-color: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            padding: 15px;
             text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
+            z-index: 20;
+            display: none;
+            padding: 20px;
+            animation: fadeIn 0.5s ease-in-out;
         }
-        
-        .buy-spins-option:hover {
-            background-color: rgba(255, 255, 255, 0.1);
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
-        
-        .buy-spins-count {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--primary);
-        }
-        
-        .buy-spins-price {
-            font-size: 14px;
-            color: var(--light);
-            margin-top: 5px;
-        }
-        
-        /* Promo */
-        .promo-form {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .promo-input {
-            flex: 1;
-            background-color: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            padding: 10px 15px;
-            color: white;
-        }
-        
-        .promo-submit {
-            background-color: var(--primary);
-            color: var(--dark);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .promo-submit:hover {
-            background-color: var(--secondary);
-        }
-        
-        /* Admin */
-        .admin-section {
+
+        .overlay-screen h2 {
+            font-size: 24px;
             margin-bottom: 25px;
+            color: var(--gameover-color);
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+            line-height: 1.4;
+            animation: pulse 1.5s infinite;
         }
-        
-        .admin-btn {
-            background-color: var(--danger);
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 5px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-        
-        .admin-btn:hover {
-            background-color: #c82333;
-        }
-        
-        /* Withdrawal Requests */
-        .withdrawal-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .withdrawal-item {
-            background-color: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .withdrawal-info {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            flex: 1;
-        }
-        
-        .withdrawal-user {
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .withdrawal-user-avatar {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            overflow: hidden;
-        }
-        
-        .withdrawal-user-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .withdrawal-amount {
-            color: var(--primary);
-        }
-        
-        .withdrawal-actions {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .withdrawal-approve {
-            background-color: var(--success);
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        
-        .withdrawal-decline {
-            background-color: var(--danger);
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        
-        /* Task Management */
-        .task-management-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .task-management-item {
-            background-color: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .task-management-title {
-            font-weight: 600;
-            flex: 1;
-            font-size: 14px;
-        }
-        
-        .task-management-actions {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .task-management-edit {
-            background-color: var(--info);
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        
-        .task-management-delete {
-            background-color: var(--danger);
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        
-        /* Users List */
-        .users-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .user-item {
-            background-color: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            overflow: hidden;
-        }
-        
-        .user-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .user-details {
-            flex: 1;
-        }
-        
-        .user-name {
-            font-weight: 600;
-            margin-bottom: 3px;
-            font-size: 14px;
-        }
-        
-        .user-id {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.6);
-        }
-        
-        .user-balance {
-            text-align: right;
-        }
-        
-        .user-stars {
-            color: var(--primary);
-            font-weight: 600;
-            font-size: 14px;
-        }
-        
-        /* Animations */
+
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
-        
-        .pulse {
-            animation: pulse 2s infinite;
+
+        .overlay-screen p {
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #ccc;
         }
-        
-        /* Новые анимации для исправленных барабанов */
-        @keyframes reelSpinFast {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-1000px); }
-        }
-        
-        @keyframes reelSpinMedium {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-1000px); }
-        }
-        
-        @keyframes reelSpinSlow {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-1000px); }
-        }
-        
-        .reel-spinning-fast {
-            animation: reelSpinFast 2s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
-        }
-        
-        .reel-spinning-medium {
-            animation: reelSpinMedium 2.2s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
-        }
-        
-        .reel-spinning-slow {
-            animation: reelSpinSlow 2.4s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
-        }
-        
-        /* Toast */
-        .toast {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--success);
-            color: white;
+        .overlay-screen button {
+            background: var(--button-bg);
+            color: var(--text-color);
+            border: none;
             padding: 15px 25px;
-            border-radius: 5px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            z-index: 1100;
-            opacity: 0;
-            transition: opacity 0.3s;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 8px;
+            margin: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            font-family: 'Press Start 2P', cursive, Arial, sans-serif;
+            border: 2px solid transparent;
         }
-        
-        .toast.show {
-            opacity: 1;
+        .overlay-screen button:hover {
+            background: var(--button-hover-bg);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
         }
-        
-        .toast.error {
-            background-color: var(--danger);
+
+        #startScreen h2 { 
+            color: var(--score-color); 
+            font-size: 28px;
+            margin-bottom: 30px;
         }
-        
-        /* Loading */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
+
+        #controls {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 400px;
+            margin-top: 20px;
+            position: relative;
+            z-index: 10;
+            padding: 0 20px;
+        }
+        .control-button {
+            background: linear-gradient(145deg, #1E90FF, #0066CC);
+            color: white;
+            border: none;
+            padding: 20px;
+            font-size: 20px;
+            cursor: pointer;
             border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            border: 2px solid #4A4AFF;
+            transition: all 0.1s ease;
         }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .control-button:active {
+            background: linear-gradient(145deg, #0066CC, #1E90FF);
+            transform: scale(0.95);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
         }
-        
-        /* Responsive */
-        @media (max-width: 480px) {
-            .balance-container {
-                gap: 8px;
-            }
-            
-            .balance {
-                padding: 5px 8px;
-                font-size: 14px;
-            }
-            
-            .spin-btn {
-                padding: 12px 30px;
-                font-size: 16px;
-            }
-            
-            .buy-spins-container {
-                grid-template-columns: 1fr;
-            }
-            
-            .task-management-title {
-                font-size: 12px;
-            }
-            
-            .user-name {
-                font-size: 12px;
-            }
+
+        #pauseButton {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--text-color);
+            border: none;
+            padding: 10px 15px;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 5px;
+            z-index: 15;
+            display: none;
+            font-family: 'Press Start 2P', cursive, Arial, sans-serif;
+            border: 1px solid #4A4AFF;
+        }
+        #pauseButton:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .floating-score {
+            position: absolute;
+            font-size: 16px;
+            color: var(--score-color);
+            opacity: 1;
+            transition: all 0.8s ease-out;
+            pointer-events: none;
+            z-index: 10;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            font-family: 'Press Start 2P', cursive, Arial, sans-serif;
+        }
+
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <!-- Welcome Screen -->
-    <div class="welcome-screen" id="welcome-screen">
-        <div class="welcome-logo">🎰</div>
-        <h1 class="welcome-title">777 Slots XTR</h1>
-        <p class="welcome-text">Для доступа к приложению необходимо выполнить проверку и подписаться на наш канал</p>
-        
-        <div class="verification-steps">
-            <div class="verification-step" id="bot-check-step">
-                <div class="step-icon">1</div>
-                <div class="step-text">Пройдите проверку на бота</div>
-                <button class="step-action" id="bot-check-btn">Проверить</button>
-            </div>
-            
-            <div class="verification-step" id="channel-sub-step">
-                <div class="step-icon">2</div>
-                <div class="step-text">Подпишитесь на наш канал</div>
-                <button class="step-action" id="channel-sub-btn">Подписаться</button>
-            </div>
-            
-            <div class="verification-step" id="complete-step">
-                <div class="step-icon">3</div>
-                <div class="step-text">Все условия выполнены</div>
-                <button class="step-action" id="complete-btn" disabled>Завершить</button>
-            </div>
-        </div>
-        
-        <button class="open-app-btn" id="open-app-btn" disabled>Открыть приложение</button>
-    </div>
-    
-    <div class="app-container" id="app-container" style="display: none;">
-        <!-- Header -->
-        <header class="header">
-            <div class="user-info">
-                <div class="avatar" id="user-avatar">
-                    <img id="user-avatar-img" src="https://i.imgur.com/JYj3Q3D.png" alt="User Avatar">
-                </div>
-                <div class="username" id="username">Username</div>
-            </div>
-            <div class="balance-container">
-                <div class="balance xtr-balance">
-                    <i class="fas fa-star balance-icon"></i>
-                    <span class="balance-amount" id="xtr-balance">0</span>
-                </div>
-                <div class="balance">
-                    <i class="fas fa-coins balance-icon"></i>
-                    <span class="balance-amount" id="bonus-balance">0</span>
-                </div>
-                <button class="balance" id="refresh-btn" title="Обновить баланс">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
-            </div>
-        </header>
-        
-        <!-- Main Content - Slots -->
-        <main class="main-content">
-            <div class="slots-container">
-                <div class="slots-machine">
-                    <div class="slots-reel" id="reel1">
-                        <div class="slots-symbol">🍒</div>
-                        <div class="slots-symbol">🍋</div>
-                        <div class="slots-symbol">🍊</div>
-                        <div class="slots-symbol">🍇</div>
-                        <div class="slots-symbol">🍉</div>
-                        <div class="slots-symbol">🍎</div>
-                        <div class="slots-symbol">🍓</div>
-                        <div class="slots-symbol">🍍</div>
-                        <div class="slots-symbol">🍌</div>
-                        <div class="slots-symbol">7️⃣</div>
-                    </div>
-                    <div class="slots-reel" id="reel2">
-                        <div class="slots-symbol">🍒</div>
-                        <div class="slots-symbol">🍋</div>
-                        <div class="slots-symbol">🍊</div>
-                        <div class="slots-symbol">🍇</div>
-                        <div class="slots-symbol">🍉</div>
-                        <div class="slots-symbol">🍎</div>
-                        <div class="slots-symbol">🍓</div>
-                        <div class="slots-symbol">🍍</div>
-                        <div class="slots-symbol">🍌</div>
-                        <div class="slots-symbol">7️⃣</div>
-                    </div>
-                    <div class="slots-reel" id="reel3">
-                        <div class="slots-symbol">🍒</div>
-                        <div class="slots-symbol">🍋</div>
-                        <div class="slots-symbol">🍊</div>
-                        <div class="slots-symbol">🍇</div>
-                        <div class="slots-symbol">🍉</div>
-                        <div class="slots-symbol">🍎</div>
-                        <div class="slots-symbol">🍓</div>
-                        <div class="slots-symbol">🍍</div>
-                        <div class="slots-symbol">🍌</div>
-                        <div class="slots-symbol">7️⃣</div>
-                    </div>
-                    <div class="slots-payline"></div>
-                </div>
-                <div class="slots-result" id="slots-result"></div>
-            </div>
-            
-            <button class="spin-btn" id="spin-btn">Крутить</button>
-            <div class="spins-count" id="spins-count">Доступно круток: 0</div>
-        </main>
-        
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <a href="#" class="nav-item" data-modal="tasks">
-                <i class="fas fa-tasks"></i>
-                <span>Задания</span>
-            </a>
-            <a href="#" class="nav-item" data-modal="friends">
-                <i class="fas fa-users"></i>
-                <span>Друзья</span>
-            </a>
-            <a href="#" class="nav-item" data-modal="wallet">
-                <i class="fas fa-wallet"></i>
-                <span>Кошелёк</span>
-            </a>
-            <a href="#" class="nav-item" data-modal="admin" id="admin-nav-item" style="display: none;">
-                <i class="fas fa-user-shield"></i>
-                <span>Админ</span>
-            </a>
-        </nav>
-        
-        <!-- Toast -->
-        <div class="toast" id="toast"></div>
-        
-        <!-- Tasks Modal -->
-        <div class="modal" id="tasks-modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title"><i class="fas fa-tasks"></i> Задания</h3>
-                    <button class="close-modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p>Выполняйте задания и получайте бесплатные крутки!</p>
-                    <div class="task-list" id="task-list">
-                        <!-- Tasks will be added here dynamically -->
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Friends Modal -->
-        <div class="modal" id="friends-modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title"><i class="fas fa-users"></i> Друзья</h3>
-                    <button class="close-modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="ref-link-container">
-                        <p>Приглашайте друзей и получайте +1 крутку за каждого!</p>
-                        <span class="ref-link" id="ref-link">https://t.me/777slots_bot?start=ref_123</span>
-                        <button class="form-submit" id="copy-ref-btn" style="margin-top: 10px;">
-                            <i class="fas fa-copy"></i> Копировать ссылку
-                        </button>
-                    </div>
-                    
-                    <div class="friends-stats">
-                        <div class="stat-card">
-                            <div>Приглашено</div>
-                            <div class="stat-value" id="invited-count">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <div>Круток</div>
-                            <div class="stat-value" id="friend-spins">0</div>
-                        </div>
-                    </div>
+    <div class="stars" id="stars"></div>
 
-                    <h4 class="section-title" style="margin-top: 20px;"><i class="fas fa-user-friends"></i> Ваши друзья</h4>
-                    <div class="friends-list" id="friends-list">
-                        <!-- Friends will be added here dynamically -->
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Wallet Modal -->
-        <div class="modal" id="wallet-modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title"><i class="fas fa-wallet"></i> Кошелёк</h3>
-                    <button class="close-modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="wallet-section">
-                        <h4 class="section-title"><i class="fas fa-exchange-alt"></i> Обмен</h4>
-                        <div class="convert-form">
-                            <div class="form-group">
-                                <label class="form-label">Обменять бонусные монеты на крутки</label>
-                                <input type="number" class="form-input" id="convert-amount" placeholder="Количество монет" min="10">
-                                <small>1 крутка = 10 бонусных монет</small>
-                            </div>
-                            <button class="form-submit" id="convert-btn">Обменять</button>
-                        </div>
-                    </div>
-                    
-                    <div class="wallet-section">
-                        <h4 class="section-title"><i class="fas fa-shopping-cart"></i> Купить крутки</h4>
-                        <div class="buy-spins-container">
-                            <div class="buy-spins-option" data-spins="1" data-price="50">
-                                <div class="buy-spins-count">1 крутка</div>
-                                <div class="buy-spins-price">50 XTR</div>
-                            </div>
-                            <div class="buy-spins-option" data-spins="5" data-price="200">
-                                <div class="buy-spins-count">5 круток</div>
-                                <div class="buy-spins-price">200 XTR</div>
-                            </div>
-                            <div class="buy-spins-option" data-spins="10" data-price="350">
-                                <div class="buy-spins-count">10 круток</div>
-                                <div class="buy-spins-price">350 XTR</div>
-                            </div>
-                            <div class="buy-spins-option" data-spins="20" data-price="600">
-                                <div class="buy-spins-count">20 круток</div>
-                                <div class="buy-spins-price">600 XTR</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="wallet-section">
-                        <h4 class="section-title"><i class="fas fa-money-bill-wave"></i> Вывод</h4>
-                        <div class="convert-form">
-                            <div class="form-group">
-                                <label class="form-label">Сумма вывода (XTR)</label>
-                                <select class="form-input" id="withdraw-amount">
-                                    <option value="150">150 XTR</option>
-                                    <option value="250">250 XTR</option>
-                                    <option value="500">500 XTR</option>
-                                    <option value="1000">1000 XTR</option>
-                                </select>
-                            </div>
-                            <button class="withdraw-btn" id="withdraw-btn">Запросить вывод</button>
-                        </div>
-                    </div>
-                    
-                    <div class="wallet-section">
-                        <h4 class="section-title"><i class="fas fa-gift"></i> Промокод</h4>
-                        <p>Введите промокод, чтобы получить бонусные крутки:</p>
-                        <div class="promo-form">
-                            <input type="text" class="promo-input" id="promo-code" placeholder="Введите промокод">
-                            <button class="promo-submit" id="promo-submit">Активировать</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Admin Modal -->
-        <div class="modal" id="admin-modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title"><i class="fas fa-user-shield"></i> Админ панель</h3>
-                    <button class="close-modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="admin-section">
-                        <h4 class="section-title"><i class="fas fa-plus-circle"></i> Создать промокод</h4>
-                        <div class="convert-form">
-                            <div class="form-group">
-                                <label class="form-label">Код</label>
-                                <input type="text" class="form-input" id="promo-code-input" placeholder="PROMO123">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Крутки</label>
-                                <input type="number" class="form-input" id="promo-spins" placeholder="5" min="1">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Лимит использований</label>
-                                <input type="number" class="form-input" id="promo-uses" placeholder="100" min="1">
-                            </div>
-                            <button class="form-submit" id="create-promo-btn">Создать</button>
-                        </div>
-                    </div>
-                    
-                    <div class="admin-section">
-                        <h4 class="section-title"><i class="fas fa-tasks"></i> Управление заданиями</h4>
-                        <div class="task-management-list" id="task-management-list">
-                            <!-- Tasks will be added here dynamically -->
-                        </div>
-                        <button class="admin-btn" id="add-task-btn">Добавить новое задание</button>
-                    </div>
-                    
-                    <div class="admin-section">
-                        <h4 class="section-title"><i class="fas fa-money-bill-wave"></i> Запросы на вывод</h4>
-                        <div class="withdrawal-list" id="withdrawal-list">
-                            <!-- Withdrawals will be added here dynamically -->
-                        </div>
-                    </div>
-                    
-                    <div class="admin-section">
-                        <h4 class="section-title"><i class="fas fa-users"></i> Пользователи</h4>
-                        <div class="users-list" id="users-list">
-                            <!-- Users will be added here dynamically -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Add Task Modal -->
-        <div class="modal" id="add-task-modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title"><i class="fas fa-plus-circle"></i> Добавить задание</h3>
-                    <button class="close-modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="convert-form">
-                        <div class="form-group">
-                            <label class="form-label">Название задания</label>
-                            <input type="text" class="form-input" id="new-task-title" placeholder="Подписаться на канал">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Ссылка</label>
-                            <input type="text" class="form-input" id="new-task-url" placeholder="https://t.me/777slots_channel">
-                        </div>
-                        <button class="form-submit" id="save-task-btn">Сохранить</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div id="score">ОЧКИ: 0</div>
+    <div id="lives">ЖИЗНИ: 3</div>
+    <div id="level">УРОВЕНЬ: 1</div>
+    <button id="pauseButton" onclick="pauseGame()">ПАУЗА</button>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="startScreen" class="overlay-screen">
+        <h2>КОСМИЧЕСКИЙ СБОРЩИК</h2>
+        <p>Собирай кристаллы (+5 очков), редкие кристаллы (+10 очков)</p>
+        <p>Избегай метеоритов и астероидов!</p>
+        <p>Собирай бонусы для щита или ускорения</p>
+        <p>Достигай новых уровней для большего вызова!</p>
+        <button onclick="startGame()">НАЧАТЬ ИГРУ</button>
+    </div>
+
+    <div id="gameOverScreen" class="overlay-screen">
+        <h2>ИГРА ОКОНЧЕНА!</h2>
+        <p id="finalScoreDisplay"></p>
+        <p id="finalLevelDisplay"></p>
+        <button onclick="restartGame()">ИГРАТЬ СНОВА</button>
+        <button id="submitScoreButton" onclick="submitScore()">ОТПРАВИТЬ РЕКОРД</button>
+    </div>
+
+    <div id="pauseScreen" class="overlay-screen">
+        <h2>ПАУЗА</h2>
+        <button onclick="resumeGame()">ПРОДОЛЖИТЬ</button>
+        <button onclick="restartGame()">ЗАНОВО</button>
+    </div>
+
+    <div id="controls">
+        <button class="control-button" id="leftButton">◀</button>
+        <button class="control-button" id="rightButton">▶</button>
+    </div>
+
+    <div id="shieldProgress">
+        <div id="shieldFill"></div>
     </div>
 
     <script>
-        // Game State
-        const state = {
-            userId: null,
-            username: "Username",
-            avatar: "https://i.imgur.com/JYj3Q3D.png",
-            xtrBalance: 0,
-            bonusBalance: 0,
-            freeSpins: 5,
-            friendSpins: 0,
-            paidSpins: 0,
-            invitedCount: 0,
-            invitedFriends: [],
-            isSpinning: false,
-            isAdmin: false,
-            verification: {
-                botCheck: false,
-                channelSub: false
-            },
-            tasks: [
-                { id: 1, title: "Подписаться на канал", url: "https://t.me/777slots_channel", completed: false },
-                { id: 2, title: "Пригласить друга", url: "https://t.me/share/url?url=https://t.me/777slots_bot", completed: false },
-                { id: 3, title: "Сыграть в слоты", url: "#", completed: false }
-            ],
-            withdrawals: [],
-            users: [],
-            symbols: ["🍒", "🍋", "🍊", "🍇", "🍉", "🍎", "🍓", "🍍", "🍌", "7️⃣"],
-            winSymbols: ["7️⃣", "🍌", "🍍", "🍓"]
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        // --- DOM Элементы ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const starsContainer = document.getElementById('stars');
+        const scoreElement = document.getElementById('score');
+        const livesElement = document.getElementById('lives');
+        const levelElement = document.getElementById('level');
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const pauseScreen = document.getElementById('pauseScreen');
+        const finalScoreDisplay = document.getElementById('finalScoreDisplay');
+        const finalLevelDisplay = document.getElementById('finalLevelDisplay');
+        const submitScoreButton = document.getElementById('submitScoreButton');
+        const pauseButton = document.getElementById('pauseButton');
+        const controlsDiv = document.getElementById('controls');
+        const leftButton = document.getElementById('leftButton');
+        const rightButton = document.getElementById('rightButton');
+        const shieldProgress = document.getElementById('shieldProgress');
+        const shieldFill = document.getElementById('shieldFill');
+
+        // --- Константы Игры ---
+        const GAME_STATE = {
+            START: 'start',
+            PLAYING: 'playing',
+            PAUSED: 'paused',
+            GAME_OVER: 'gameOver'
         };
+        
+        const SHIP_SPEED_BASE = 7; // Увеличена скорость для лучшей отзывчивости
+        const OBJECT_SPAWN_RATE_BASE = 0.04; // Чуть чаще спавн
+        const OBJECT_SPEED_CRYSTAL = 3;
+        const OBJECT_SPEED_RARE_CRYSTAL = 3.5;
+        const OBJECT_SPEED_BONUS = 2.5;
+        const OBJECT_SPEED_METEOR = 4;
+        const OBJECT_SPEED_ASTEROID = 3.8; // Новый тип
+        const SHIELD_DURATION_FRAMES = 450; // Дольше щит
+        const SPEED_BOOST_DURATION_FRAMES = 300; // Новый бонус ускорения
+        const HIT_FLASH_DURATION_FRAMES = 15;
+        const SCORE_CRYSTAL = 5;
+        const SCORE_RARE_CRYSTAL = 10; // Новый тип кристалла
+        const SHIP_WIDTH = 50;
+        const SHIP_HEIGHT = 30;
+        const CRYSTAL_SIZE = 25;
+        const RARE_CRYSTAL_SIZE = 30;
+        const METEOR_SIZE = 35;
+        const ASTEROID_SIZE = 40; // Новый
+        const BONUS_SIZE = 28;
+        const TOUCH_MOVE_SENSITIVITY = 0.18; // Лучшая чувствительность
+        const LEVEL_UP_SCORE = 100; // Очки для уровня
 
-        // DOM Elements
-        const elements = {
-            welcomeScreen: document.getElementById('welcome-screen'),
-            appContainer: document.getElementById('app-container'),
-            botCheckStep: document.getElementById('bot-check-step'),
-            channelSubStep: document.getElementById('channel-sub-step'),
-            completeStep: document.getElementById('complete-step'),
-            botCheckBtn: document.getElementById('bot-check-btn'),
-            channelSubBtn: document.getElementById('channel-sub-btn'),
-            completeBtn: document.getElementById('complete-btn'),
-            openAppBtn: document.getElementById('open-app-btn'),
-            username: document.getElementById('username'),
-            userAvatar: document.getElementById('user-avatar-img'),
-            xtrBalance: document.getElementById('xtr-balance'),
-            bonusBalance: document.getElementById('bonus-balance'),
-            spinsCount: document.getElementById('spins-count'),
-            spinBtn: document.getElementById('spin-btn'),
-            slotsResult: document.getElementById('slots-result'),
-            reels: [
-                document.getElementById('reel1'),
-                document.getElementById('reel2'),
-                document.getElementById('reel3')
-            ],
-            taskList: document.getElementById('task-list'),
-            taskManagementList: document.getElementById('task-management-list'),
-            withdrawalList: document.getElementById('withdrawal-list'),
-            usersList: document.getElementById('users-list'),
-            friendsList: document.getElementById('friends-list'),
-            refLink: document.getElementById('ref-link'),
-            copyRefBtn: document.getElementById('copy-ref-btn'),
-            invitedCount: document.getElementById('invited-count'),
-            friendSpins: document.getElementById('friend-spins'),
-            convertAmount: document.getElementById('convert-amount'),
-            convertBtn: document.getElementById('convert-btn'),
-            withdrawAmount: document.getElementById('withdraw-amount'),
-            withdrawBtn: document.getElementById('withdraw-btn'),
-            promoCode: document.getElementById('promo-code'),
-            promoSumbit: document.getElementById('promo-submit'),
-            toast: document.getElementById('toast'),
-            navItems: document.querySelectorAll('.nav-item'),
-            modals: document.querySelectorAll('.modal'),
-            closeModalBtns: document.querySelectorAll('.close-modal'),
-            createPromoBtn: document.getElementById('create-promo-btn'),
-            addTaskBtn: document.getElementById('add-task-btn'),
-            saveTaskBtn: document.getElementById('save-task-btn'),
-            adminNavItem: document.getElementById('admin-nav-item'),
-            buySpinsOptions: document.querySelectorAll('.buy-spins-option'),
-            refreshBtn: document.getElementById('refresh-btn')
-        };
+        // --- Игровые Переменные ---
+        let currentGameState = GAME_STATE.START;
+        let score = 0;
+        let lives = 3;
+        let level = 1;
+        let objects = [];
+        let ship = { x: 0, y: 0, width: SHIP_WIDTH, height: SHIP_HEIGHT, speed: SHIP_SPEED_BASE };
+        let shieldActive = false;
+        let shieldTimer = 0;
+        let speedBoostActive = false;
+        let speedBoostTimer = 0;
+        let hitFlashTimer = 0;
+        let difficulty = 1;
+        let keys = {};
+        let touchStartX = 0;
+        let animationFrameId;
+        let floatingScores = [];
+        let stars = [];
+        let audioCtx; // Для простых звуков
 
-        // API endpoints (замените на реальные URL вашего бэкенда)
-        const API = {
-            BASE_URL: 'https://your-backend-domain.com/api',
-            ENDPOINTS: {
-                USER: '/user',
-                BALANCE: '/balance',
-                SPIN: '/spin',
-                VERIFY: '/verify',
-                SUBSCRIBE: '/subscribe',
-                TASKS: '/tasks',
-                PROMO: '/promo',
-                WITHDRAWAL: '/withdrawal',
-                PAYMENT: '/payment',
-                REFERRAL: '/referral',
-                ADMIN: '/admin'
-            }
-        };
-
-        // Initialize the app
-        async function init() {
-            // Check if running in Telegram WebApp
-            if (window.Telegram && Telegram.WebApp) {
-                await initTelegramWebApp();
-            } else {
-                // For testing outside Telegram
-                state.userId = Math.floor(Math.random() * 1000000);
-                state.isAdmin = true;
-                // Skip verification for testing
-                state.verification.botCheck = true;
-                state.verification.channelSub = true;
-                updateVerificationUI();
-                
-                // Load test data
-                await loadUserData();
-            }
-            
-            setupEventListeners();
-            renderTasks();
-            renderTaskManagement();
-            renderWithdrawals();
-            renderUsers();
-            renderFriends();
-            checkReferral();
-        }
-
-        // Initialize Telegram WebApp
-        async function initTelegramWebApp() {
-            const tg = window.Telegram.WebApp;
-            
-            // Expand the app
-            tg.expand();
-            
-            // Get user data
-            const user = tg.initDataUnsafe.user;
-            if (user) {
-                state.userId = user.id;
-                state.username = user.username || `${user.first_name}${user.last_name ? ' ' + user.last_name : ''}`;
-                state.avatar = user.photo_url || "https://i.imgur.com/JYj3Q3D.png";
-                
-                // Check if user is admin
-                state.isAdmin = await checkAdminStatus(state.userId);
-            }
-            
-            // Set theme colors
-            document.documentElement.style.setProperty('--primary', tg.themeParams.button_color || '#ffc107');
-            document.documentElement.style.setProperty('--darker', tg.themeParams.bg_color || '#16213e');
-            document.documentElement.style.setProperty('--dark', tg.themeParams.secondary_bg_color || '#1a1a2e');
-            document.documentElement.style.setProperty('--light', tg.themeParams.text_color || '#f8f9fa');
-            
-            // Load user data
-            await loadUserData();
-            
-            updateVerificationUI();
-            
-            // Handle back button
-            tg.BackButton.onClick(() => {
-                closeAllModals();
-            });
-
-            // Handle referral from bot
-            tg.onEvent('viewportChanged', () => {
-                checkReferral();
-            });
-        }
-
-        // API functions
-        async function apiCall(endpoint, method = 'GET', data = null) {
-            try {
-                const options = {
-                    method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${state.userId}`
-                    }
-                };
-                
-                if (data) {
-                    options.body = JSON.stringify(data);
-                }
-                
-                const response = await fetch(`${API.BASE_URL}${endpoint}`, options);
-                
-                if (!response.ok) {
-                    throw new Error(`API error: ${response.status}`);
-                }
-                
-                return await response.json();
-            } catch (error) {
-                console.error('API call failed:', error);
-                showToast('Ошибка соединения с сервером', 'error');
-                return null;
+        // --- Инициализация аудио ---
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
         }
 
-        async function loadUserData() {
-            showToast('Загрузка данных...');
-            
-            const data = await apiCall(`${API.ENDPOINTS.USER}/${state.userId}`);
-            if (data) {
-                state.xtrBalance = data.xtrBalance || 0;
-                state.bonusBalance = data.bonusBalance || 0;
-                state.freeSpins = data.freeSpins || 0;
-                state.friendSpins = data.friendSpins || 0;
-                state.paidSpins = data.paidSpins || 0;
-                state.invitedCount = data.invitedCount || 0;
-                state.invitedFriends = data.invitedFriends || [];
-                state.verification = data.verification || { botCheck: false, channelSub: false };
-                
-                updateUI();
-                updateVerificationUI();
-            }
+        function playSound(frequency, duration, type = 'sine') {
+            if (!audioCtx) return;
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+            gainNode.gain.value = 0.1;
+            oscillator.start();
+            setTimeout(() => {
+                oscillator.stop();
+            }, duration);
         }
 
-        async function checkAdminStatus(userId) {
-            const data = await apiCall(`${API.ENDPOINTS.ADMIN}/check/${userId}`);
-            return data && data.isAdmin;
-        }
-
-        async function verifyBot() {
-            showToast('Проверка на бота...');
-            
-            const result = await apiCall(API.ENDPOINTS.VERIFY, 'POST', {
-                userId: state.userId
-            });
-            
-            if (result && result.success) {
-                state.verification.botCheck = true;
-                updateVerificationUI();
-                showToast('Проверка пройдена успешно!');
-                
-                // Сохраняем статус проверки
-                await apiCall(API.ENDPOINTS.USER, 'PATCH', {
-                    userId: state.userId,
-                    verification: state.verification
+        // --- Создание звездного фона с улучшениями ---
+        function createStars() {
+            stars = [];
+            for (let i = 0; i = 150; i++) { // Больше звезд
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2 + 1,
+                    speed: Math.random() * 1.5 + 0.5, // Разная скорость
+                    brightness: Math.random() * 0.5 + 0.5 // Для мерцания
                 });
-            } else {
-                showToast('Ошибка проверки', 'error');
             }
         }
 
-        async function subscribeToChannel() {
-            showToast('Проверка подписки...');
-            
-            if (window.Telegram && Telegram.WebApp) {
-                // Открываем канал в Telegram
-                Telegram.WebApp.openTelegramLink('https://t.me/777slots_channel');
+        function drawStars() {
+            for (const star of stars) {
+                ctx.fillStyle = `rgba(255, 255, 255, ${star.brightness * (Math.sin(Date.now() / 1000) * 0.2 + 0.8)})`;
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
                 
-                // Проверяем подписку через API
-                setTimeout(async () => {
-                    const result = await apiCall(API.ENDPOINTS.SUBSCRIBE, 'POST', {
-                        userId: state.userId,
-                        username: state.username
-                    });
-                    
-                    if (result && result.subscribed) {
-                        state.verification.channelSub = true;
-                        updateVerificationUI();
-                        showToast('Подписка выполнена успешно!');
-                        
-                        // Сохраняем статус подписки
-                        await apiCall(API.ENDPOINTS.USER, 'PATCH', {
-                            userId: state.userId,
-                            verification: state.verification
+                // Движение звезд
+                star.y += star.speed;
+                if (star.y > canvas.height) {
+                    star.y = 0;
+                    star.x = Math.random() * canvas.width;
+                }
+            }
+        }
+
+        // --- Улучшенные функции рисования игровых объектов ---
+        function drawShip() {
+            const centerX = ship.x + ship.width / 2;
+            const centerY = ship.y + ship.height / 2;
+            
+            // Мигание при попадании
+            if (hitFlashTimer > 0 && hitFlashTimer % 3 === 0) {
+                return;
+            }
+
+            // Основной корпус корабля с градиентом
+            const shipGradient = ctx.createLinearGradient(ship.x, ship.y, ship.x + ship.width, ship.y + ship.height);
+            shipGradient.addColorStop(0, shieldActive ? '#4A4AFF' : '#00AAFF');
+            shipGradient.addColorStop(1, shieldActive ? '#0000FF' : '#0066FF');
+            ctx.fillStyle = shipGradient;
+            ctx.beginPath();
+            ctx.moveTo(centerX, ship.y);
+            ctx.lineTo(ship.x + ship.width, ship.y + ship.height);
+            ctx.lineTo(ship.x, ship.y + ship.height);
+            ctx.closePath();
+            ctx.fill();
+
+            // Детали корабля
+            ctx.fillStyle = '#FFAA00';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY - 5, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Огни двигателя с анимацией
+            const engineSize = 4 + Math.sin(Date.now() / 100) * 1;
+            ctx.fillStyle = '#FF4400';
+            ctx.beginPath();
+            ctx.arc(centerX - 10, ship.y + ship.height - 5, engineSize, 0, Math.PI * 2);
+            ctx.arc(centerX + 10, ship.y + ship.height - 5, engineSize, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Щит с улучшенной анимацией
+            if (shieldActive) {
+                const shieldRadius = ship.width / 1.3 + Math.sin(Date.now() / 200) * 2;
+                ctx.strokeStyle = 'rgba(0, 255, 255, 0.6)';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, shieldRadius, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                ctx.strokeStyle = 'rgba(0, 255, 255, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, shieldRadius + 5, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            // Эффект ускорения
+            if (speedBoostActive) {
+                ctx.strokeStyle = 'rgba(255, 165, 0, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(centerX - 15, ship.y + ship.height);
+                ctx.lineTo(centerX - 20, ship.y + ship.height + 10);
+                ctx.moveTo(centerX + 15, ship.y + ship.height);
+                ctx.lineTo(centerX + 20, ship.y + ship.height + 10);
+                ctx.stroke();
+            }
+        }
+
+        function drawCrystal(x, y, size, isRare = false) {
+            // Основной кристалл с градиентом
+            const crystalGradient = ctx.createRadialGradient(x + size/2, y + size/2, 0, x + size/2, y + size/2, size/2);
+            crystalGradient.addColorStop(0, isRare ? '#FF00FF' : '#00FF88');
+            crystalGradient.addColorStop(1, isRare ? '#AA00AA' : '#008844');
+            ctx.fillStyle = crystalGradient;
+            ctx.beginPath();
+            ctx.moveTo(x + size/2, y);
+            ctx.lineTo(x + size, y + size/2);
+            ctx.lineTo(x + size/2, y + size);
+            ctx.lineTo(x, y + size/2);
+            ctx.closePath();
+            ctx.fill();
+
+            // Блеск с анимацией
+            ctx.fillStyle = isRare ? '#FF88FF' : '#88FFCC';
+            const blinkSize = size / 4 + Math.sin(Date.now() / 300) * 2;
+            ctx.beginPath();
+            ctx.moveTo(x + size/2, y + blinkSize);
+            ctx.lineTo(x + size/1.5, y + size/2);
+            ctx.lineTo(x + size/2, y + size/1.5);
+            ctx.lineTo(x + size/3, y + size/2);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawMeteor(x, y, size, isAsteroid = false) {
+            // Основной метеорит с текстурой
+            const meteorGradient = ctx.createRadialGradient(x + size/2, y + size/2, 0, x + size/2, y + size/2, size/2);
+            meteorGradient.addColorStop(0, isAsteroid ? '#A52A2A' : '#888888');
+            meteorGradient.addColorStop(1, isAsteroid ? '#8B0000' : '#444444');
+            ctx.fillStyle = meteorGradient;
+            ctx.beginPath();
+            ctx.arc(x + size/2, y + size/2, size/2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Кратеры
+            ctx.fillStyle = isAsteroid ? '#CD5C5C' : '#666666';
+            ctx.beginPath();
+            ctx.arc(x + size/3, y + size/3, size/6, 0, Math.PI * 2);
+            ctx.arc(x + size/1.5, y + size/1.7, size/7, 0, Math.PI * 2);
+            ctx.arc(x + size/2.5, y + size/1.3, size/5, 0, Math.PI * 2);
+            if (isAsteroid) {
+                ctx.arc(x + size/4, y + size/1.5, size/8, 0, Math.PI * 2);
+            }
+            ctx.fill();
+
+            // Огненный хвост с анимацией
+            const tailLength = 15 + Math.sin(Date.now() / 200) * 5;
+            const gradient = ctx.createLinearGradient(x + size/2, y + size, x + size/2, y + size + tailLength);
+            gradient.addColorStop(0, isAsteroid ? '#FFD700' : '#FF4400');
+            gradient.addColorStop(0.5, isAsteroid ? '#FFA500' : '#FFAA00');
+            gradient.addColorStop(1, 'transparent');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.moveTo(x + size/3, y + size);
+            ctx.lineTo(x + size/1.5, y + size);
+            ctx.lineTo(x + size/2, y + size + tailLength);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawBonus(x, y, size, type = 'shield') {
+            // Основной бонус
+            const bonusColor = type === 'shield' ? '#4A4AFF' : '#FFAA00'; // Ускорение - оранжевый
+            ctx.strokeStyle = bonusColor;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(x + size/2, y + size/2, size/2, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Внутренние круги с анимацией
+            const innerRadius = size/3 + Math.sin(Date.now() / 400) * 2;
+            ctx.strokeStyle = type === 'shield' ? '#8888FF' : '#FFCC66';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(x + size/2, y + size/2, innerRadius, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.strokeStyle = type === 'shield' ? '#AAAAFF' : '#FFE066';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(x + size/2, y + size/2, innerRadius / 1.5, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Центральная иконка
+            ctx.fillStyle = bonusColor;
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(type === 'shield' ? 'S' : '>', x + size/2, y + size/2);
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'alphabetic';
+        }
+
+        function drawObject(obj) {
+            switch(obj.type) {
+                case 'crystal':
+                    drawCrystal(obj.x, obj.y, obj.width);
+                    break;
+                case 'rare_crystal':
+                    drawCrystal(obj.x, obj.y, obj.width, true);
+                    break;
+                case 'meteor':
+                    drawMeteor(obj.x, obj.y, obj.width);
+                    break;
+                case 'asteroid':
+                    drawMeteor(obj.x, obj.y, obj.width, true);
+                    break;
+                case 'shield_bonus':
+                    drawBonus(obj.x, obj.y, obj.width, 'shield');
+                    break;
+                case 'speed_bonus':
+                    drawBonus(obj.x, obj.y, obj.width, 'speed');
+                    break;
+            }
+        }
+
+        function drawFloatingScores() {
+            ctx.font = '16px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            
+            for (let i = floatingScores.length - 1; i >= 0; i--) {
+                const fs = floatingScores[i];
+                ctx.fillStyle = `rgba(0, 255, 128, ${fs.alpha})`;
+                ctx.font = `${fs.size}px "Press Start 2P"`; // Анимация размера
+                ctx.fillText(fs.text, fs.x, fs.y);
+
+                fs.y += fs.vy;
+                fs.alpha -= 0.01; // Медленнее fade
+                fs.size += 0.2;
+                fs.vy -= 0.05; // Замедление подъема
+
+                if (fs.alpha <= 0) {
+                    floatingScores.splice(i, 1);
+                }
+            }
+            ctx.textAlign = 'left';
+        }
+
+        // --- Функции Управления Игрой ---
+        function resizeCanvas() {
+            canvas.width = window.innerWidth > 400 ? 400 : window.innerWidth;
+            canvas.height = window.innerHeight > 600 ? 600 : window.innerHeight;
+
+            ship.x = (canvas.width - ship.width) / 2;
+            ship.y = canvas.height - ship.height - 30;
+
+            controlsDiv.style.maxWidth = canvas.width + 'px';
+            createStars();
+        }
+
+        function startGame() {
+            initAudio();
+            if (currentGameState === GAME_STATE.PLAYING) return;
+
+            hideAllScreens();
+            pauseButton.style.display = 'block';
+            controlsDiv.style.display = 'flex';
+            currentGameState = GAME_STATE.PLAYING;
+            score = 0;
+            lives = 3;
+            level = 1;
+            objects = [];
+            difficulty = 1;
+            shieldActive = false;
+            shieldTimer = 0;
+            speedBoostActive = false;
+            speedBoostTimer = 0;
+            hitFlashTimer = 0;
+            scoreElement.textContent = 'ОЧКИ: 0';
+            livesElement.textContent = 'ЖИЗНИ: 3';
+            levelElement.textContent = 'УРОВЕНЬ: 1';
+            ship.x = (canvas.width - ship.width) / 2;
+            ship.y = canvas.height - ship.height - 30;
+            ship.speed = SHIP_SPEED_BASE;
+
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            gameLoop();
+        }
+
+        function pauseGame() {
+            if (currentGameState === GAME_STATE.PLAYING) {
+                currentGameState = GAME_STATE.PAUSED;
+                cancelAnimationFrame(animationFrameId);
+                showScreen(pauseScreen);
+                pauseButton.style.display = 'none';
+                controlsDiv.style.display = 'none';
+            }
+        }
+
+        function resumeGame() {
+            if (currentGameState === GAME_STATE.PAUSED) {
+                hideAllScreens();
+                pauseButton.style.display = 'block';
+                controlsDiv.style.display = 'flex';
+                currentGameState = GAME_STATE.PLAYING;
+                gameLoop();
+            }
+        }
+
+        function gameOver() {
+            currentGameState = GAME_STATE.GAME_OVER;
+            cancelAnimationFrame(animationFrameId);
+            finalScoreDisplay.textContent = 'ФИНАЛЬНЫЙ СЧЕТ: ' + score;
+            finalLevelDisplay.textContent = 'УРОВЕНЬ: ' + level;
+            showScreen(gameOverScreen);
+            pauseButton.style.display = 'none';
+            controlsDiv.style.display = 'none';
+            shieldProgress.style.display = 'none';
+
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                submitScoreButton.style.display = 'block';
+            } else {
+                submitScoreButton.style.display = 'none';
+            }
+            playSound(200, 500, 'sawtooth'); // Звук поражения
+        }
+
+        function restartGame() {
+            hideAllScreens();
+            startGame();
+        }
+
+        function submitScore() {
+            if (tg.CloudStorage && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                const userId = tg.initDataUnsafe.user.id;
+                const scoreKey = `user_score_${userId}`;
+
+                tg.CloudStorage.getItem(scoreKey, (error, currentHighScore) => {
+                    if (error) {
+                        console.error('CloudStorage getItem error:', error);
+                        return;
+                    }
+
+                    const currentScoreValue = parseInt(currentHighScore || '0');
+
+                    if (score > currentScoreValue) {
+                        tg.CloudStorage.setItem(scoreKey, String(score), (error, success) => {
+                            if (error) {
+                                console.error('CloudStorage setItem error:', error);
+                            } else if (success) {
+                                tg.showAlert(`НОВЫЙ РЕКОРД: ${score}!`);
+                            }
                         });
                     } else {
-                        showToast('Вы не подписались на канал', 'error');
+                        tg.showAlert(`ВАШ СЧЕТ: ${score}. РЕКОРД: ${currentHighScore}`);
                     }
-                }, 3000);
-            }
-        }
-
-        async function processTelegramPayment(product) {
-            if (window.Telegram && Telegram.WebApp) {
-                try {
-                    const result = await Telegram.WebApp.openInvoice({
-                        title: product.title,
-                        description: `Покупка ${product.spins} круток`,
-                        currency: 'XTR',
-                        prices: [
-                            {
-                                label: product.title,
-                                amount: product.price * 100 // В копейках
-                            }
-                        ]
-                    });
-                    
-                    if (result === 'succeeded') {
-                        // Payment successful
-                        state.paidSpins += product.spins;
-                        updateUI();
-                        showToast(`Успешно! Куплено ${product.spins} круток`);
-                        
-                        // Сохраняем в бэкенде
-                        await apiCall(API.ENDPOINTS.PAYMENT, 'POST', {
-                            userId: state.userId,
-                            amount: product.price,
-                            spins: product.spins,
-                            type: 'purchase'
-                        });
-                    }
-                } catch (error) {
-                    showToast('Ошибка оплаты', 'error');
-                }
-            }
-        }
-
-        async function processWithdrawal(amount) {
-            const result = await apiCall(API.ENDPOINTS.WITHDRAWAL, 'POST', {
-                userId: state.userId,
-                username: state.username,
-                amount: amount
-            });
-            
-            if (result && result.success) {
-                state.xtrBalance -= amount;
-                updateUI();
-                showToast('Запрос на вывод отправлен администратору');
-            }
-        }
-
-        async function activatePromoCode(code) {
-            const result = await apiCall(`${API.ENDPOINTS.PROMO}/activate`, 'POST', {
-                userId: state.userId,
-                code: code.toUpperCase()
-            });
-            
-            if (result && result.success) {
-                state.freeSpins += result.spins;
-                updateUI();
-                showToast(`Промокод активирован! +${result.spins} круток`);
+                });
             } else {
-                showToast('Неверный промокод', 'error');
+                tg.showAlert('Невозможно отправить рекорд');
             }
         }
 
-        async function createPromoCode(code, spins, uses) {
-            const result = await apiCall(API.ENDPOINTS.PROMO, 'POST', {
-                code: code.toUpperCase(),
-                spins: spins,
-                maxUses: uses
-            });
-            
-            if (result && result.success) {
-                showToast('Промокод создан успешно!');
-            }
+        function hideAllScreens() {
+            startScreen.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            pauseScreen.style.display = 'none';
         }
 
-        // Update verification UI
-        function updateVerificationUI() {
-            if (state.verification.botCheck) {
-                elements.botCheckStep.classList.add('step-completed');
-                elements.botCheckBtn.textContent = '✓ Выполнено';
-                elements.botCheckBtn.disabled = true;
-            }
-            
-            if (state.verification.channelSub) {
-                elements.channelSubStep.classList.add('step-completed');
-                elements.channelSubBtn.textContent = '✓ Выполнено';
-                elements.channelSubBtn.disabled = true;
-            }
-            
-            if (state.verification.botCheck && state.verification.channelSub) {
-                elements.completeStep.classList.add('step-completed');
-                elements.completeBtn.textContent = '✓ Завершено';
-                elements.openAppBtn.disabled = false;
-            }
+        function showScreen(screenElement) {
+            screenElement.style.display = 'flex';
         }
 
-        // Check if user came from referral link
-        function checkReferral() {
-            if (!window.Telegram || !Telegram.WebApp) return;
+        // --- Улучшенная Игровая Логика ---
+        function createObject() {
+            const types = ['crystal', 'rare_crystal', 'shield_bonus', 'speed_bonus', 'meteor', 'asteroid'];
+            const weights = [0.5, 0.1, 0.08, 0.07, 0.2, 0.05]; // Баланс
 
-            const tg = Telegram.WebApp;
-            const initData = tg.initData || '';
-            const params = new URLSearchParams(initData);
-            const startParam = params.get('start') || '';
+            let rand = Math.random();
+            let cumulativeWeight = 0;
+            let selectedType = types[0];
 
-            if (startParam.startsWith('ref_')) {
-                const referrerId = startParam.split('_')[1];
-                if (referrerId && referrerId !== state.userId) {
-                    // Сообщаем бэкенду о реферале
-                    apiCall(API.ENDPOINTS.REFERRAL, 'POST', {
-                        referrerId: referrerId,
-                        newUserId: state.userId,
-                        username: state.username
-                    });
-                    
-                    showToast('🎉 Вы зашли по ссылке друга!');
+            for (let i = 0; i < types.length; i++) {
+                cumulativeWeight += weights[i];
+                if (rand < cumulativeWeight) {
+                    selectedType = types[i];
+                    break;
                 }
             }
-        }
 
-        // Update UI based on state
-        function updateUI() {
-            elements.username.textContent = state.username;
-            elements.userAvatar.src = state.avatar;
-            elements.xtrBalance.textContent = state.xtrBalance;
-            elements.bonusBalance.textContent = state.bonusBalance;
-            
-            const totalSpins = state.freeSpins + state.friendSpins + state.paidSpins;
-            elements.spinsCount.textContent = `Доступно круток: ${totalSpins}`;
-            
-            elements.spinBtn.disabled = totalSpins <= 0 || state.isSpinning;
-            
-            elements.invitedCount.textContent = state.invitedCount;
-            elements.friendSpins.textContent = state.friendSpins;
-            
-            // Update ref link
-            if (state.userId) {
-                elements.refLink.textContent = `https://t.me/777slots_bot?start=ref_${state.userId}`;
+            let objWidth, objHeight, objSpeed;
+            switch (selectedType) {
+                case 'crystal':
+                    objWidth = CRYSTAL_SIZE; objHeight = CRYSTAL_SIZE; objSpeed = OBJECT_SPEED_CRYSTAL;
+                    break;
+                case 'rare_crystal':
+                    objWidth = RARE_CRYSTAL_SIZE; objHeight = RARE_CRYSTAL_SIZE; objSpeed = OBJECT_SPEED_RARE_CRYSTAL;
+                    break;
+                case 'shield_bonus':
+                case 'speed_bonus':
+                    objWidth = BONUS_SIZE; objHeight = BONUS_SIZE; objSpeed = OBJECT_SPEED_BONUS;
+                    break;
+                case 'meteor':
+                    objWidth = METEOR_SIZE; objHeight = METEOR_SIZE; objSpeed = OBJECT_SPEED_METEOR;
+                    break;
+                case 'asteroid':
+                    objWidth = ASTEROID_SIZE; objHeight = ASTEROID_SIZE; objSpeed = OBJECT_SPEED_ASTEROID;
+                    break;
             }
-            
-            // Show/hide admin panel
-            elements.adminNavItem.style.display = state.isAdmin ? 'flex' : 'none';
+
+            // Добавляем легкую кривизну траектории
+            const vx = (Math.random() - 0.5) * 1; // Легкое горизонтальное движение
+
+            objects.push({
+                x: Math.random() * (canvas.width - objWidth),
+                y: -objHeight,
+                vx: vx,
+                type: selectedType,
+                width: objWidth,
+                height: objHeight,
+                speed: objSpeed * difficulty
+            });
         }
 
-        // Render functions
-        function renderFriends() {
-            elements.friendsList.innerHTML = '';
-            
-            if (state.invitedFriends.length === 0) {
-                elements.friendsList.innerHTML = '<p style="text-align: center; opacity: 0.7;">Вы еще никого не пригласили</p>';
-                return;
+        function updateGameLogic() {
+            // Движение корабля
+            if (keys['ArrowLeft'] || keys['a'] || keys['KeyA'] || leftButton.isPressed) ship.x -= ship.speed;
+            if (keys['ArrowRight'] || keys['d'] || keys['KeyD'] || rightButton.isPressed) ship.x += ship.speed;
+
+            // Ограничение движения корабля
+            ship.x = Math.max(0, Math.min(canvas.width - ship.width, ship.x));
+
+            // Увеличение уровня
+            if (score >= level * LEVEL_UP_SCORE) {
+                level++;
+                difficulty += 0.2;
+                levelElement.textContent = 'УРОВЕНЬ: ' + level;
+                tg.showAlert(`УРОВЕНЬ ${level}! Сложность увеличена!`);
+                playSound(800, 200); // Звук уровня
             }
-            
-            state.invitedFriends.forEach(friend => {
-                const friendElement = document.createElement('div');
-                friendElement.className = 'friend-item';
-                
-                friendElement.innerHTML = `
-                    <div class="friend-avatar">
-                        <img src="${friend.avatar}" alt="${friend.username}">
-                    </div>
-                    <div class="friend-details">
-                        <div class="friend-name">@${friend.username}</div>
-                        <div class="friend-date">Присоединился: ${friend.date}</div>
-                    </div>
-                `;
-                
-                elements.friendsList.appendChild(friendElement);
-            });
-        }
 
-        function renderTasks() {
-            elements.taskList.innerHTML = '';
-            
-            state.tasks.forEach(task => {
-                const taskElement = document.createElement('div');
-                taskElement.className = 'task-item';
-                
-                taskElement.innerHTML = `
-                    <div class="task-title">
-                        <i class="fas fa-${task.completed ? 'check-circle' : 'circle'}"></i>
-                        ${task.title}
-                    </div>
-                    <a href="${task.url}" class="task-link" target="_blank">${task.url}</a>
-                    <button class="task-complete ${task.completed ? 'task-completed' : ''}" 
-                            data-task-id="${task.id}" 
-                            ${task.completed ? 'disabled' : ''}>
-                        ${task.completed ? 'Выполнено' : '✅ Готово'}
-                    </button>
-                `;
-                
-                elements.taskList.appendChild(taskElement);
-            });
-        }
-
-        function renderTaskManagement() {
-            elements.taskManagementList.innerHTML = '';
-            
-            state.tasks.forEach(task => {
-                const taskElement = document.createElement('div');
-                taskElement.className = 'task-management-item';
-                
-                taskElement.innerHTML = `
-                    <div class="task-management-title">${task.title}</div>
-                    <div class="task-management-actions">
-                        <button class="task-management-edit" data-task-id="${task.id}">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="task-management-delete" data-task-id="${task.id}">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-                
-                elements.taskManagementList.appendChild(taskElement);
-            });
-        }
-
-        function renderWithdrawals() {
-            elements.withdrawalList.innerHTML = '';
-            
-            state.withdrawals.forEach(withdrawal => {
-                if (withdrawal.status !== 'pending') return;
-                
-                const withdrawalElement = document.createElement('div');
-                withdrawalElement.className = 'withdrawal-item';
-                
-                withdrawalElement.innerHTML = `
-                    <div class="withdrawal-info">
-                        <div class="withdrawal-user">
-                            <div class="withdrawal-user-avatar">
-                                <img src="${withdrawal.avatar}" alt="${withdrawal.username}">
-                            </div>
-                            @${withdrawal.username}
-                        </div>
-                        <div class="withdrawal-amount">${withdrawal.amount} XTR</div>
-                    </div>
-                    <div class="withdrawal-actions">
-                        <button class="withdrawal-approve" data-withdrawal-id="${withdrawal.id}">
-                            <i class="fas fa-check"></i>
-                        </button>
-                        <button class="withdrawal-decline" data-withdrawal-id="${withdrawal.id}">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                `;
-                
-                elements.withdrawalList.appendChild(withdrawalElement);
-            });
-        }
-
-        function renderUsers() {
-            elements.usersList.innerHTML = '';
-            
-            state.users.forEach(user => {
-                const userElement = document.createElement('div');
-                userElement.className = 'user-item';
-                
-                userElement.innerHTML = `
-                    <div class="user-avatar">
-                        <img src="${user.avatar}" alt="${user.username}">
-                    </div>
-                    <div class="user-details">
-                        <div class="user-name">@${user.username}</div>
-                        <div class="user-id">ID: ${user.id}</div>
-                    </div>
-                    <div class="user-balance">
-                        <div class="user-stars">${user.xtrBalance} XTR</div>
-                    </div>
-                `;
-                
-                elements.usersList.appendChild(userElement);
-            });
-        }
-
-        // Game functions
-        async function spinSlots() {
-            if (state.isSpinning) return;
-            
-            const totalSpins = state.freeSpins + state.friendSpins + state.paidSpins;
-            if (totalSpins <= 0) {
-                showToast('У вас нет круток!', 'error');
-                return;
-            }
-            
-            state.isSpinning = true;
-            updateUI();
-            
-            // Clear previous result
-            elements.slotsResult.textContent = '';
-            elements.slotsResult.className = 'slots-result';
-            
-            // Different spin durations for each reel
-            const spinDurations = [1800, 2000, 2200];
-            const results = [];
-            
-            elements.reels.forEach((reel, index) => {
-                // Clear previous animation
-                reel.style.transform = 'translateY(0)';
-                reel.style.transition = 'none';
-                void reel.offsetHeight; // Trigger reflow
-                
-                // Generate random result
-                const isWin = Math.random() < 0.01; // 1% chance to win
-                let symbol;
-                
-                if (isWin && index === 0) {
-                    // First reel - choose a winning symbol
-                    const winSymbolIndex = Math.floor(Math.random() * state.winSymbols.length);
-                    symbol = state.winSymbols[winSymbolIndex];
-                } else if (isWin && index > 0) {
-                    // Other reels - match the first symbol
-                    symbol = results[0];
-                } else {
-                    // Random symbol
-                    const symbolIndex = Math.floor(Math.random() * state.symbols.length);
-                    symbol = state.symbols[symbolIndex];
+            // Щит
+            if (shieldActive) {
+                shieldTimer--;
+                shieldFill.style.width = `${(shieldTimer / SHIELD_DURATION_FRAMES) * 100}%`;
+                if (shieldTimer <= 0) {
+                    shieldActive = false;
+                    shieldProgress.style.display = 'none';
                 }
-                
-                results.push(symbol);
-                
-                // Calculate target position
-                const symbolIndex = state.symbols.indexOf(symbol);
-                const targetPosition = -symbolIndex * 80; // Each symbol is 80px tall
-                
-                // Apply different animations to each reel
-                reel.style.transform = `translateY(${targetPosition}px)`;
-                reel.style.transition = `transform ${spinDurations[index]}ms cubic-bezier(0.2, 0.8, 0.3, 1)`;
-            });
-            
-            // Check results after all reels stop
-            setTimeout(async () => {
-                state.isSpinning = false;
-                
-                // Check for win (all symbols match)
-                if (results[0] === results[1] && results[1] === results[2]) {
-                    const winAmount = 150; // WIN_REWARD in XTR
-                    state.xtrBalance += winAmount;
-                    elements.slotsResult.textContent = `🎉 Джекпот! +${winAmount} XTR`;
-                    elements.slotsResult.classList.add('slots-win');
-                    
-                    // Сохраняем выигрыш в бэкенде
-                    await apiCall(API.ENDPOINTS.SPIN, 'POST', {
-                        userId: state.userId,
-                        win: true,
-                        amount: winAmount
-                    });
-                } else {
-                    const coinsAmount = 10; // LOSS_REWARD in bonus coins
-                    state.bonusBalance += coinsAmount;
-                    elements.slotsResult.textContent = `😢 Вы проиграли, но +${coinsAmount} бонусных монет`;
-                    
-                    // Сохраняем результат в бэкенде
-                    await apiCall(API.ENDPOINTS.SPIN, 'POST', {
-                        userId: state.userId,
-                        win: false,
-                        amount: coinsAmount
-                    });
+            }
+
+            // Ускорение
+            if (speedBoostActive) {
+                speedBoostTimer--;
+                if (speedBoostTimer <= 0) {
+                    speedBoostActive = false;
+                    ship.speed = SHIP_SPEED_BASE;
                 }
-                
-                // Deduct spin
-                if (state.paidSpins > 0) {
-                    state.paidSpins--;
-                } else if (state.friendSpins > 0) {
-                    state.friendSpins--;
-                } else {
-                    state.freeSpins = Math.max(0, state.freeSpins - 1);
+            }
+
+            // Мигание при попадании
+            if (hitFlashTimer > 0) {
+                hitFlashTimer--;
+            }
+
+            // Создание объектов
+            if (Math.random() < OBJECT_SPAWN_RATE_BASE * difficulty) createObject();
+
+            // Обновление объектов и проверка столкновений
+            for (let i = objects.length - 1; i >= 0; i--) {
+                const obj = objects[i];
+                obj.y += obj.speed;
+                obj.x += obj.vx; // Добавлено горизонтальное движение
+
+                // Ограничение для объектов (чтобы не уходили за экран)
+                if (obj.x < 0 || obj.x > canvas.width - obj.width) {
+                    obj.vx = -obj.vx;
                 }
-                
-                updateUI();
-            }, Math.max(...spinDurations) + 100);
-        }
 
-        async function convertCoins() {
-            const amount = parseInt(elements.convertAmount.value);
-            if (isNaN(amount) || amount < 10) {
-                showToast('Минимальная сумма обмена - 10 монет', 'error');
-                return;
-            }
-            
-            if (state.bonusBalance < amount) {
-                showToast('Недостаточно бонусных монет', 'error');
-                return;
-            }
-            
-            const spins = Math.floor(amount / 10);
-            state.bonusBalance -= spins * 10;
-            state.freeSpins += spins;
-            
-            showToast(`Успешно! Обменяно ${amount} монет на ${spins} круток`);
-            elements.convertAmount.value = '';
-            
-            // Сохраняем в бэкенде
-            await apiCall(API.ENDPOINTS.BALANCE, 'POST', {
-                userId: state.userId,
-                bonusBalance: state.bonusBalance,
-                freeSpins: state.freeSpins
-            });
-            
-            updateUI();
-        }
-
-        async function buySpins(spins, price) {
-            if (state.xtrBalance < price) {
-                showToast('Недостаточно XTR', 'error');
-                return;
-            }
-            
-            // Process payment through Telegram
-            await processTelegramPayment({
-                title: `${spins} круток`,
-                spins: spins,
-                price: price
-            });
-        }
-
-        async function requestWithdrawal() {
-            const amount = parseInt(elements.withdrawAmount.value);
-            
-            if (state.xtrBalance < amount) {
-                showToast('Недостаточно XTR для вывода', 'error');
-                return;
-            }
-            
-            await processWithdrawal(amount);
-        }
-
-        async function redeemPromo() {
-            const code = elements.promoCode.value.trim();
-            
-            if (!code) {
-                showToast('Введите промокод', 'error');
-                return;
-            }
-            
-            await activatePromoCode(code);
-            elements.promoCode.value = '';
-        }
-
-        async function completeTask(taskId) {
-            const task = state.tasks.find(t => t.id === taskId);
-            if (!task || task.completed) return;
-            
-            task.completed = true;
-            state.freeSpins += 1;
-            
-            showToast('Задание выполнено! +1 крутка');
-            renderTasks();
-            
-            // Сохраняем в бэкенде
-            await apiCall(`${API.ENDPOINTS.TASKS}/complete`, 'POST', {
-                userId: state.userId,
-                taskId: taskId
-            });
-            
-            updateUI();
-        }
-
-        async function addNewTask() {
-            const title = document.getElementById('new-task-title').value.trim();
-            const url = document.getElementById('new-task-url').value.trim();
-            
-            if (!title || !url) {
-                showToast('Заполните все поля', 'error');
-                return;
-            }
-            
-            const newId = state.tasks.length + 1;
-            state.tasks.push({
-                id: newId,
-                title: title,
-                url: url,
-                completed: false
-            });
-            
-            document.getElementById('new-task-title').value = '';
-            document.getElementById('new-task-url').value = '';
-            document.getElementById('add-task-modal').classList.remove('active');
-            
-            showToast('Новое задание добавлено');
-            renderTasks();
-            renderTaskManagement();
-        }
-
-        // Utility functions
-        function showToast(message, type = 'success') {
-            elements.toast.textContent = message;
-            elements.toast.className = `toast ${type}`;
-            elements.toast.classList.add('show');
-            
-            setTimeout(() => {
-                elements.toast.classList.remove('show');
-            }, 3000);
-        }
-
-        function closeAllModals() {
-            document.querySelectorAll('.modal').forEach(modal => {
-                modal.classList.remove('active');
-            });
-            
-            // Reset active nav item
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-        }
-
-        function copyReferralLink() {
-            const link = elements.refLink.textContent;
-            navigator.clipboard.writeText(link)
-                .then(() => showToast('Ссылка скопирована в буфер обмена'))
-                .catch(() => showToast('Не удалось скопировать ссылку', 'error'));
-        }
-
-        function openApp() {
-            elements.welcomeScreen.style.display = 'none';
-            elements.appContainer.style.display = 'flex';
-            updateUI();
-        }
-
-        // Setup event listeners
-        function setupEventListeners() {
-            // Verification buttons
-            elements.botCheckBtn.addEventListener('click', verifyBot);
-            elements.channelSubBtn.addEventListener('click', subscribeToChannel);
-            elements.openAppBtn.addEventListener('click', openApp);
-            
-            // Refresh button
-            elements.refreshBtn.addEventListener('click', loadUserData);
-            
-            // Spin button
-            elements.spinBtn.addEventListener('click', spinSlots);
-            
-            // Convert coins
-            elements.convertBtn.addEventListener('click', convertCoins);
-            
-            // Buy spins options
-            elements.buySpinsOptions.forEach(option => {
-                option.addEventListener('click', () => {
-                    const spins = parseInt(option.dataset.spins);
-                    const price = parseInt(option.dataset.price);
-                    buySpins(spins, price);
-                });
-            });
-            
-            // Withdraw
-            elements.withdrawBtn.addEventListener('click', requestWithdrawal);
-            
-            // Promo code
-            elements.promoSumbit.addEventListener('click', redeemPromo);
-            
-            // Complete task (delegated event)
-            elements.taskList.addEventListener('click', (e) => {
-                if (e.target.classList.contains('task-complete') && !e.target.disabled) {
-                    const taskId = parseInt(e.target.dataset.taskId);
-                    completeTask(taskId);
+                // Удаление объектов за экраном
+                if (obj.y > canvas.height) {
+                    objects.splice(i, 1);
+                    continue;
                 }
-            });
-            
-            // Withdrawal actions (delegated events)
-            elements.withdrawalList.addEventListener('click', (e) => {
-                if (e.target.closest('.withdrawal-approve')) {
-                    const withdrawalId = parseInt(e.target.closest('.withdrawal-approve').dataset.withdrawalId);
-                    approveWithdrawal(withdrawalId);
-                } else if (e.target.closest('.withdrawal-decline')) {
-                    const withdrawalId = parseInt(e.target.closest('.withdrawal-decline').dataset.withdrawalId);
-                    declineWithdrawal(withdrawalId);
-                }
-            });
-            
-            // Task management actions (delegated events)
-            elements.taskManagementList.addEventListener('click', (e) => {
-                if (e.target.closest('.task-management-edit')) {
-                    const taskId = parseInt(e.target.closest('.task-management-edit').dataset.taskId);
-                    showToast(`Редактирование задания #${taskId} (в разработке)`);
-                } else if (e.target.closest('.task-management-delete')) {
-                    const taskId = parseInt(e.target.closest('.task-management-delete').dataset.taskId);
-                    state.tasks = state.tasks.filter(t => t.id !== taskId);
-                    showToast(`Задание #${taskId} удалено`);
-                    renderTasks();
-                    renderTaskManagement();
-                }
-            });
-            
-            // Navigation
-            elements.navItems.forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    
-                    // Update active nav item
-                    elements.navItems.forEach(nav => nav.classList.remove('active'));
-                    item.classList.add('active');
-                    
-                    // Show corresponding modal
-                    const modalId = item.dataset.modal + '-modal';
-                    document.getElementById(modalId).classList.add('active');
-                    
-                    // Show back button in Telegram WebApp
-                    if (window.Telegram && Telegram.WebApp) {
-                        Telegram.WebApp.BackButton.show();
-                    }
-                });
-            });
-            
-            // Close modals
-            elements.closeModalBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    closeAllModals();
-                    
-                    // Hide back button in Telegram WebApp
-                    if (window.Telegram && Telegram.WebApp) {
-                        Telegram.WebApp.BackButton.hide();
-                    }
-                });
-            });
-            
-            // Close modal when clicking outside
-            elements.modals.forEach(modal => {
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        closeAllModals();
-                        
-                        // Hide back button in Telegram WebApp
-                        if (window.Telegram && Telegram.WebApp) {
-                            Telegram.WebApp.BackButton.hide();
+
+                // Проверка столкновения
+                if (obj.x < ship.x + ship.width &&
+                    obj.x + obj.width > ship.x &&
+                    obj.y < ship.y + ship.height &&
+                    obj.y + obj.height > ship.y) {
+
+                    objects.splice(i, 1);
+
+                    if (obj.type === 'crystal' || obj.type === 'rare_crystal') {
+                        const points = obj.type === 'crystal' ? SCORE_CRYSTAL : SCORE_RARE_CRYSTAL;
+                        score += points;
+                        scoreElement.textContent = 'ОЧКИ: ' + score;
+                        floatingScores.push({
+                            x: ship.x + ship.width / 2,
+                            y: ship.y,
+                            text: `+${points}`,
+                            alpha: 1,
+                            vy: -2,
+                            size: 16
+                        });
+                        playSound(600, 100); // Звук сбора
+                    } else if (obj.type === 'shield_bonus') {
+                        shieldActive = true;
+                        shieldTimer = SHIELD_DURATION_FRAMES;
+                        shieldProgress.style.display = 'block';
+                        shieldFill.style.width = '100%';
+                        tg.showAlert('ЩИТ АКТИВИРОВАН!');
+                        playSound(700, 150);
+                    } else if (obj.type === 'speed_bonus') {
+                        speedBoostActive = true;
+                        speedBoostTimer = SPEED_BOOST_DURATION_FRAMES;
+                        ship.speed = SHIP_SPEED_BASE * 1.5;
+                        tg.showAlert('УСКОРЕНИЕ АКТИВИРОВАНО!');
+                        playSound(900, 150);
+                    } else if (obj.type === 'meteor' || obj.type === 'asteroid') {
+                        const damage = obj.type === 'meteor' ? 1 : 2; // Астероид наносит больше урона
+                        if (!shieldActive) {
+                            lives -= damage;
+                            livesElement.textContent = 'ЖИЗНИ: ' + lives;
+                            hitFlashTimer = HIT_FLASH_DURATION_FRAMES;
+                            playSound(300, 200, 'sawtooth'); // Звук удара
+                            if (lives <= 0) {
+                                gameOver();
+                                return;
+                            }
+                        } else {
+                            shieldActive = false;
+                            shieldTimer = 0;
+                            shieldProgress.style.display = 'none';
+                            tg.showAlert('ЩИТ ПОГЛОТИЛ УДАР!');
+                            playSound(400, 150);
                         }
                     }
-                });
-            });
-            
-            // Admin buttons
-            elements.createPromoBtn.addEventListener('click', async () => {
-                const code = document.getElementById('promo-code-input').value.trim();
-                const spins = parseInt(document.getElementById('promo-spins').value);
-                const uses = parseInt(document.getElementById('promo-uses').value);
-                
-                if (!code || isNaN(spins) || isNaN(uses)) {
-                    showToast('Заполните все поля корректно', 'error');
-                    return;
                 }
-                
-                await createPromoCode(code, spins, uses);
-            });
-            
-            elements.addTaskBtn.addEventListener('click', () => {
-                document.getElementById('add-task-modal').classList.add('active');
-                
-                // Show back button in Telegram WebApp
-                if (window.Telegram && Telegram.WebApp) {
-                    Telegram.WebApp.BackButton.show();
-                }
-            });
-            
-            elements.saveTaskBtn.addEventListener('click', addNewTask);
-            
-            // Copy referral link
-            elements.copyRefBtn.addEventListener('click', copyReferralLink);
+            }
         }
 
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', init);
+        function gameLoop() {
+            if (currentGameState === GAME_STATE.PLAYING) {
+                updateGameLogic();
+            }
+
+            // Отрисовка
+            ctx.fillStyle = '#000011';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            drawStars();
+            
+            for (const obj of objects) {
+                drawObject(obj);
+            }
+            
+            drawShip();
+            drawFloatingScores();
+
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        // --- Обработчики Событий ---
+        document.addEventListener('keydown', (e) => {
+            if (currentGameState === GAME_STATE.PLAYING) {
+                keys[e.key] = true;
+                if (e.key === 'Escape') {
+                    pauseGame();
+                }
+            } else if (e.key === 'Escape' && currentGameState === GAME_STATE.PAUSED) {
+                resumeGame();
+            }
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+
+        // Тач управление
+        canvas.addEventListener('touchstart', (e) => {
+            if (currentGameState !== GAME_STATE.PLAYING) return;
+            e.preventDefault();
+            touchStartX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (currentGameState !== GAME_STATE.PLAYING) return;
+            e.preventDefault();
+            const touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+            ship.x += (touchX - touchStartX) * TOUCH_MOVE_SENSITIVITY;
+            touchStartX = touchX;
+        }, { passive: false });
+
+        // Кнопки управления
+        leftButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            leftButton.isPressed = true;
+        }, { passive: false });
+        leftButton.addEventListener('touchend', () => { leftButton.isPressed = false; });
+        leftButton.addEventListener('touchcancel', () => { leftButton.isPressed = false; });
+
+        rightButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            rightButton.isPressed = true;
+        }, { passive: false });
+        rightButton.addEventListener('touchend', () => { rightButton.isPressed = false; });
+        rightButton.addEventListener('touchcancel', () => { rightButton.isPressed = false; });
+
+        // Инициализация
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        showScreen(startScreen);
     </script>
 </body>
 </html>
