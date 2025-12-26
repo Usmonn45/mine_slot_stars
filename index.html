@@ -1,115 +1,243 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Block Blast | Telegram Game</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            touch-action: manipulation;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-
-        body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
-        }
-
-        .container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 10px;
-        }
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Islamic Bot Web</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f3f4f6;
+        color: #1f2937;
+    }
+    .header {
+        display: flex;
+        align-items: center;
+        padding: 10px 20px;
+        background: #2563eb;
+        color: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .header img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+    .container {
+        max-width: 900px;
+        margin: 20px auto;
+        padding: 0 15px;
+    }
+    .card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    h1, h2 {
+        margin: 0 0 10px 0;
+    }
+    label {
+        display: block;
+        margin: 10px 0 5px 0;
+        font-weight: bold;
+    }
+    select, button {
+        width: 100%;
+        padding: 8px 10px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        font-size: 16px;
+    }
+    #prayers label {
+        display: inline-block;
+        margin-right: 10px;
+        font-weight: normal;
+    }
+    #output {
+        margin-top: 15px;
+        font-size: 16px;
+        line-height: 1.5;
+    }
+    @media (max-width: 600px) {
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            margin-bottom: 15px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #6a11cb 0%, #2575fc 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 18px;
-            border: 3px solid #00ff88;
-        }
-
-        .username {
-            font-size: 16px;
-            font-weight: 600;
-            color: #fff;
-        }
-
-        .score-container {
-            display: flex;
             flex-direction: column;
-            align-items: flex-end;
+            align-items: flex-start;
         }
-
-        .current-score {
-            font-size: 28px;
-            font-weight: bold;
-            color: #00ff88;
-            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        .header img {
+            margin-bottom: 5px;
         }
+    }
+</style>
+<script async src="https://telegram.org/js/telegram-widget.js?15"
+        data-telegram-login="YOUR_BOT_USERNAME"
+        data-size="large"
+        data-userpic="true"
+        data-radius="12"
+        data-request-access="write"
+        data-on-auth="onTelegramAuth(user)">
+</script>
+</head>
+<body>
 
-        .high-score {
-            font-size: 14px;
-            color: #ffcc00;
-            margin-top: 2px;
-        }
+<div class="header" id="header" style="display:none;">
+    <img id="avatar" src="" alt="avatar">
+    <span id="username"></span>
+</div>
 
-        .game-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 15px;
-            padding: 15px;
-            position: relative;
-        }
+<div class="container">
+    <div id="main-content" style="display:none;">
+        <h1>Islamic Bot Web</h1>
 
-        .game-board {
-            display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            grid-template-rows: repeat(20, 1fr);
-            gap: 2px;
-            width: 100%;
-            max-width: 300px;
-            aspect-ratio: 10/20;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            padding: 5px;
+        <div class="card">
+            <h2>Settings</h2>
+            <label>Language:</label>
+            <select id="language">
+                <option value="ru">Русский</option>
+                <option value="tj">Таджикский</option>
+                <option value="uz">Узбекский</option>
+                <option value="en">English</option>
+            </select>
+
+            <label>City:</label>
+            <select id="city">
+                <option value="Moscow">Moscow</option>
+                <option value="Saint Petersburg">Saint Petersburg</option>
+                <option value="Kazan">Kazan</option>
+                <option value="Ufa">Ufa</option>
+                <option value="Chechnya">Chechnya</option>
+                <option value="Makhachkala">Makhachkala</option>
+                <option value="Surgut">Surgut</option>
+                <option value="Dushanbe">Dushanbe</option>
+            </select>
+
+            <label>Prayers Notifications:</label>
+            <div id="prayers">
+                <label><input type="checkbox" value="Fajr"> Fajr</label>
+                <label><input type="checkbox" value="Dhuhr"> Dhuhr</label>
+                <label><input type="checkbox" value="Asr"> Asr</label>
+                <label><input type="checkbox" value="Maghrib"> Maghrib</label>
+                <label><input type="checkbox" value="Isha"> Isha</label>
+            </div>
+
+            <button id="save-settings">Save Settings</button>
+        </div>
+
+        <div class="card">
+            <h2>Actions</h2>
+            <button id="get-times">Get Prayer Times</button>
+            <button id="get-hadith">Get Random Hadith</button>
+            <div id="output"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const API_BASE = "http://YOUR_API_URL_HERE"; // сюда адрес Flask API
+let telegramUser = null;
+
+function onTelegramAuth(user) {
+    telegramUser = user; // id, username, first_name, photo_url, auth_date
+
+    document.getElementById("avatar").src = user.photo_url;
+    document.getElementById("username").textContent = user.username || user.first_name;
+    document.getElementById("header").style.display = "flex";
+    document.getElementById("main-content").style.display = "block";
+
+    loadUserData(user.id);
+}
+
+// Загрузка данных пользователя
+async function loadUserData(telegram_id) {
+    const res = await fetch(`${API_BASE}/api/user/${telegram_id}`);
+    const user = await res.json();
+
+    document.getElementById("language").value = user.language || "ru";
+    document.getElementById("city").value = user.city || "Moscow";
+
+    const prayersCheckboxes = document.querySelectorAll("#prayers input");
+    prayersCheckboxes.forEach(cb => {
+        cb.checked = user.prayers?.[cb.value] ?? true;
+    });
+}
+
+// Сохранение настроек
+document.getElementById("save-settings").addEventListener("click", async () => {
+    const telegram_id = telegramUser.id;
+    const language = document.getElementById("language").value;
+    const city = document.getElementById("city").value;
+
+    const prayers = {};
+    document.querySelectorAll("#prayers input").forEach(cb => {
+        prayers[cb.value] = cb.checked;
+    });
+
+    await fetch(`${API_BASE}/api/set_language`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ telegram_id, language })
+    });
+
+    await fetch(`${API_BASE}/api/set_city`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ telegram_id, city, timezone: "Asia/Dushanbe" })
+    });
+
+    await fetch(`${API_BASE}/api/set_prayers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ telegram_id, prayers })
+    });
+
+    alert("Settings saved");
+});
+
+// Время намаза
+document.getElementById("get-times").addEventListener("click", async () => {
+    const res = await fetch(`${API_BASE}/api/user/${telegramUser.id}`);
+    const user = await res.json();
+    if (!user.city) return alert("City not set");
+
+    const r = await fetch(`http://api.aladhan.com/v1/timingsByCity?city=${user.city}&country=Russia&method=3`);
+    const data = await r.json();
+    const t = data.data.timings;
+
+    document.getElementById("output").innerHTML = `
+        <strong>Prayer Times (${user.city}):</strong><br>
+        Fajr: ${t.Fajr}<br>
+        Dhuhr: ${t.Dhuhr}<br>
+        Asr: ${t.Asr}<br>
+        Maghrib: ${t.Maghrib}<br>
+        Isha: ${t.Isha}
+    `;
+});
+
+// Хадис
+document.getElementById("get-hadith").addEventListener("click", async () => {
+    const res = await fetch(`${API_BASE}/api/user/${telegramUser.id}`);
+    const user = await res.json();
+    const lang = user.language || "ru";
+
+    const hadiths = {
+        ru: ["Поистине, дела оцениваются по намерениям. (Бухари)", "Лучший из вас — лучший в нравах. (Тирмизи)", "Между человеком и неверием — оставление намаза. (Муслим)"],
+        tj: ["Ҳақиқат, амалиёт ниётҳо асосида баҳоланади. (Бухорий)", "Шумо беҳтарин кас ҳастед, ки ахлоқатон беҳтар аст. (Тирмизи)"],
+        uz: ["Haqiqatan ham ishlar niyatga qarab baholanadi. (Bukhari)", "Eng yaxshingiz — axloqingiz yaxshi bo‘lgan. (Tirmizi)"],
+        en: ["Indeed, deeds are judged by intentions. (Bukhari)", "The best among you is the one with the best character. (Tirmidhi)"]
+    };
+
+    const randomHadith = hadiths[lang][Math.floor(Math.random() * hadiths[lang].length)];
+    document.getElementById("output").innerHTML = `<strong>Random Hadith:</strong><br>${randomHadith}`;
+});
+</script>
+
+</body>
+</html>            padding: 5px;
             border: 2px solid rgba(255, 255, 255, 0.1);
         }
 
