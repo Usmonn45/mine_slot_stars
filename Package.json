@@ -1,8 +1,0 @@
-{
-  "name": "namaz-web-app",
-  "version": "1.0.0",
-  "description": "Telegram Web App for Prayer Times",
-  "scripts": {
-    "dev": "echo 'No build required'"
-  }
-}
