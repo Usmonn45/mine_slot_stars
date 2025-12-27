@@ -449,6 +449,9 @@
         let tasbihHistory = [];
         let currentTasbihTarget = 33;
         
+        // API URL - ВАЖНО: замени на свой PythonAnywhere URL
+        const API_BASE_URL = "http://usmonkhan408.pythonanywhere.com:5001";
+        
         // Initialize the app
         async function initApp() {
             // Expand the app to full height
@@ -507,11 +510,14 @@
         async function loadUserData() {
             try {
                 const userId = userData.id;
-                // Replace with your actual API URL from PythonAnywhere
-                const apiUrl = `https://yourusername.pythonanywhere.com/api/user/${userId}`;
+                const apiUrl = `${API_BASE_URL}/api/user/${userId}`;
+                
+                console.log('Loading user data from:', apiUrl);
                 
                 const response = await fetch(apiUrl);
                 const data = await response.json();
+                
+                console.log('User data loaded:', data);
                 
                 if (data.city) {
                     currentCity = data.city;
@@ -527,17 +533,18 @@
                 
             } catch (error) {
                 console.error('Error loading user data:', error);
+                document.getElementById('prayer-times').innerHTML = 
+                    '<div class="loading">Ошибка загрузки данных. Проверьте подключение.</div>';
             }
         }
         
         async function loadCities() {
             try {
-                // In a real app, you would fetch cities from your API
-                // For now, using a static list from your bot code
+                // Используем список городов из бота
                 const cities = [
-                    "Москва", "Санкт-Петербург", "Казань", "Уфа", "Душанбе",
-                    "Тверь", "Воронеж", "Краснодар", "Сочи", "Ростов-на-Дону"
-                    // ... add more cities as needed
+                    "Москва", "Санкт-Петербург", "Казань", "Уфа", "Чечня", "Махачкала", "Сургут", 
+                    "Душанбе", "Тверь", "Воронеж", "Краснодар", "Сочи", "Ростов-на-Дону", "Волгоград", 
+                    "Самара", "Нижний Новгород", "Екатеринбург", "Челябинск", "Омск", "Новосибирск"
                 ];
                 
                 const citySelect = document.getElementById('city-selector');
@@ -567,10 +574,14 @@
             }
             
             try {
-                const apiUrl = `https://yourusername.pythonanywhere.com/api/prayer-times/${encodeURIComponent(currentCity)}?lang=ru`;
+                const apiUrl = `${API_BASE_URL}/api/prayer-times/${encodeURIComponent(currentCity)}?lang=ru`;
+                
+                console.log('Loading prayer times from:', apiUrl);
                 
                 const response = await fetch(apiUrl);
                 const data = await response.json();
+                
+                console.log('Prayer times loaded:', data);
                 
                 if (data.error) {
                     document.getElementById('prayer-times').innerHTML = 
@@ -584,7 +595,7 @@
             } catch (error) {
                 console.error('Error loading prayer times:', error);
                 document.getElementById('prayer-times').innerHTML = 
-                    '<div class="loading">Ошибка загрузки времени намаза</div>';
+                    '<div class="loading">Ошибка загрузки времени намаза. Попробуйте позже.</div>';
             }
         }
         
@@ -629,4 +640,186 @@
             if (prayerData.progress) {
                 const progressContainer = document.getElementById('progress-container');
                 const progressFill = document.getElementById('progress-fill');
-                const nextPrayerText = document.getElementById('next-prayer
+                const nextPrayerText = document.getElementById('next-prayer-text');
+                const timeLeft = document.getElementById('time-left');
+                
+                progressContainer.classList.remove('hidden');
+                progressFill.style.width = `${prayerData.progress.progress_percent}%`;
+                
+                const nextPrayerName = prayerData.translations[prayerData.progress.next];
+                nextPrayerText.textContent = `Следующий намаз: ${nextPrayerName}`;
+                timeLeft.textContent = prayerData.progress.time_left;
+            }
+        }
+        
+        function setupEventListeners() {
+            // Tab switching
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    switchTab(tabId);
+                });
+            });
+            
+            // City selector
+            document.getElementById('city-selector').addEventListener('change', async (e) => {
+                currentCity = e.target.value;
+                if (currentCity) {
+                    // Save city to API
+                    await saveCity(currentCity);
+                    document.getElementById('user-city').textContent = currentCity;
+                    await updatePrayerTimes();
+                }
+            });
+            
+            // Tasbih buttons
+            document.getElementById('count-btn').addEventListener('click', () => {
+                tasbihHistory.push(tasbihCount);
+                tasbihCount++;
+                updateTasbihDisplay();
+                saveTasbihCount();
+            });
+            
+            document.getElementById('undo-btn').addEventListener('click', () => {
+                if (tasbihHistory.length > 0) {
+                    tasbihCount = tasbihHistory.pop();
+                    updateTasbihDisplay();
+                    saveTasbihCount();
+                }
+            });
+            
+            document.getElementById('reset-btn').addEventListener('click', () => {
+                tasbihHistory.push(tasbihCount);
+                tasbihCount = 0;
+                updateTasbihDisplay();
+                saveTasbihCount('reset');
+            });
+            
+            // Tasbih types
+            document.querySelectorAll('.tasbih-type').forEach(type => {
+                type.addEventListener('click', () => {
+                    document.querySelectorAll('.tasbih-type').forEach(t => t.classList.remove('active'));
+                    type.classList.add('active');
+                    currentTasbihTarget = parseInt(type.getAttribute('data-tasbih'));
+                    updateTasbihDisplay();
+                });
+            });
+        }
+        
+        function switchTab(tabId) {
+            currentTab = tabId;
+            
+            // Update active tab
+            document.querySelectorAll('.tab').forEach(tab => {
+                if (tab.getAttribute('data-tab') === tabId) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            // Update active card
+            document.querySelectorAll('.card').forEach(card => {
+                if (card.id === `${tabId}-card`) {
+                    card.classList.add('active');
+                } else {
+                    card.classList.remove('active');
+                }
+            });
+        }
+        
+        function updateTasbihDisplay() {
+            const countElement = document.getElementById('tasbih-count');
+            const progressElement = document.getElementById('tasbih-progress');
+            const progressBar = document.getElementById('tasbih-progress-bar');
+            
+            // Update count with animation
+            countElement.textContent = tasbihCount;
+            countElement.classList.add('pulse');
+            setTimeout(() => countElement.classList.remove('pulse'), 300);
+            
+            // Update progress
+            const progressPercent = Math.min((tasbihCount / currentTasbihTarget) * 100, 100);
+            progressElement.textContent = `${tasbihCount}/${currentTasbihTarget}`;
+            progressBar.style.width = `${progressPercent}%`;
+            
+            // Change color when target is reached
+            if (tasbihCount >= currentTasbihTarget) {
+                countElement.style.color = '#4CAF50';
+                progressBar.style.background = 'linear-gradient(90deg, #4CAF50, #8BC34A)';
+            } else {
+                countElement.style.color = '#FFD700';
+                progressBar.style.background = 'linear-gradient(90deg, #2E8B57, #FFD700)';
+            }
+        }
+        
+        async function saveCity(city) {
+            try {
+                const apiUrl = `${API_BASE_URL}/api/update-city`;
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: userData.id,
+                        city: city
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('City saved:', data);
+                
+            } catch (error) {
+                console.error('Error saving city:', error);
+            }
+        }
+        
+        async function loadTasbihCount() {
+            try {
+                const apiUrl = `${API_BASE_URL}/api/tasbih/${userData.id}`;
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                if (data.count !== undefined) {
+                    tasbihCount = data.count;
+                    updateTasbihDisplay();
+                }
+                
+            } catch (error) {
+                console.error('Error loading tasbih count:', error);
+            }
+        }
+        
+        async function saveTasbihCount(action = 'increment') {
+            try {
+                const apiUrl = `${API_BASE_URL}/api/tasbih/${userData.id}`;
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: action,
+                        count: tasbihCount
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('Tasbih saved:', data);
+                
+            } catch (error) {
+                console.error('Error saving tasbih count:', error);
+            }
+        }
+        
+        // Initialize the app when Telegram Web Apps is ready
+        if (tg.initData) {
+            initApp();
+        } else {
+            tg.ready();
+            tg.onEvent('viewportChanged', initApp);
+        }
+    </script>
+</body>
+    </html>
