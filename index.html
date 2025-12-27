@@ -3,823 +3,738 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Намаз Время & Тасбих</title>
+    <title>Тасбих - Мусульманский счётчик</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
         
         :root {
-            --primary: #2E8B57;
-            --primary-dark: #1E6B47;
-            --secondary: #FFD700;
-            --light: #F5F5F5;
-            --dark: #333;
-            --gray: #666;
-            --shadow: 0 4px 12px rgba(0,0,0,0.1);
-            --radius: 16px;
+            --primary-color: #1a5f23;
+            --secondary-color: #2d8c3c;
+            --accent-color: #c69c3c;
+            --light-color: #f5f5f5;
+            --dark-color: #0d3b13;
+            --text-color: #2c3e2d;
+            --shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
         }
         
         body {
-            background: linear-gradient(135deg, #1a2a3a, #2c3e50);
-            color: white;
+            font-family: 'Scheherazade New', serif;
+            background: linear-gradient(135deg, #f0f9f0 0%, #e6f4e6 100%);
+            color: var(--text-color);
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
+            direction: rtl;
         }
         
         .container {
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        
-        /* Header with user info */
-        .user-header {
-            display: flex;
-            align-items: center;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: var(--radius);
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-        }
-        
-        .user-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            overflow: hidden;
-            margin-right: 15px;
-            border: 3px solid var(--secondary);
-        }
-        
-        .user-avatar img {
+            max-width: 800px;
             width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .user-info h2 {
-            font-size: 1.3rem;
-            margin-bottom: 5px;
-        }
-        
-        .user-info p {
-            color: #ccc;
-            font-size: 0.9rem;
-        }
-        
-        /* Tabs */
-        .tabs {
-            display: flex;
-            background: rgba(255,255,255,0.1);
-            border-radius: var(--radius);
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-        
-        .tab {
-            flex: 1;
             text-align: center;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
+            padding: 20px;
         }
         
-        .tab.active {
-            background: var(--primary);
+        header {
+            margin-bottom: 30px;
         }
         
-        .tab:hover {
-            background: rgba(46, 139, 87, 0.3);
+        h1 {
+            font-family: 'Amiri', serif;
+            font-size: 2.8rem;
+            color: var(--dark-color);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
         
-        /* Prayer Times Card */
-        .card {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: var(--radius);
-            padding: 25px;
+        .subtitle {
+            font-size: 1.4rem;
+            color: var(--primary-color);
             margin-bottom: 20px;
+            font-weight: 700;
+        }
+        
+        .tasbih-counter {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border-radius: 25px;
+            padding: 40px 30px;
             box-shadow: var(--shadow);
-            display: none;
-        }
-        
-        .card.active {
-            display: block;
-            animation: fadeIn 0.5s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .card-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-        
-        .city-selector {
-            background: rgba(255,255,255,0.15);
-            border: none;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-        }
-        
-        .city-selector option {
-            background: #2c3e50;
-            color: white;
-        }
-        
-        /* Prayer Items */
-        .prayer-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            margin-bottom: 10px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 12px;
-            transition: all 0.3s;
-        }
-        
-        .prayer-item.current {
-            background: var(--primary);
-            transform: scale(1.02);
-            box-shadow: 0 4px 15px rgba(46, 139, 87, 0.3);
-        }
-        
-        .prayer-item.passed {
-            opacity: 0.7;
-        }
-        
-        .prayer-name {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .prayer-icon {
-            font-size: 1.5rem;
-        }
-        
-        .prayer-time {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--secondary);
-        }
-        
-        /* Progress Bar */
-        .progress-container {
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .progress-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        
-        .progress-bar {
-            height: 12px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 6px;
+            margin-bottom: 30px;
+            border: 2px solid #e0e0e0;
+            position: relative;
             overflow: hidden;
         }
         
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            border-radius: 6px;
-            transition: width 1s ease-in-out;
+        .tasbih-counter::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 10px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
         }
         
-        /* Tasbih Counter */
-        .tasbih-container {
-            text-align: center;
-            padding: 20px 0;
-        }
-        
-        .tasbih-count {
-            font-size: 5rem;
-            font-weight: 900;
-            color: var(--secondary);
+        .counter-display {
+            font-size: 7rem;
+            font-weight: 700;
+            color: var(--primary-color);
             margin: 20px 0;
-            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+            font-family: 'Amiri', serif;
         }
         
-        .tasbih-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 30px;
+        .counter-animation {
+            animation: pulse 0.5s ease;
         }
         
-        .btn {
-            padding: 15px 30px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-        
-        .btn-secondary {
-            background: rgba(255,255,255,0.15);
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.25);
-        }
-        
-        .btn-reset {
-            background: rgba(220, 53, 69, 0.8);
-            color: white;
-        }
-        
-        .btn-reset:hover {
-            background: rgba(220, 53, 69, 1);
-        }
-        
-        /* Tasbih Types */
-        .tasbih-types {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .tasbih-type {
-            padding: 10px 20px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .tasbih-type.active {
-            background: var(--primary);
-        }
-        
-        /* Loading */
-        .loading {
-            text-align: center;
-            padding: 40px;
-            font-size: 1.2rem;
-            color: #ccc;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        /* Footer */
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            color: #aaa;
-            font-size: 0.9rem;
-        }
-        
-        /* Animation for tasbih */
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
         
-        .pulse {
-            animation: pulse 0.3s ease-in-out;
+        .zikr-text {
+            font-size: 2rem;
+            color: var(--dark-color);
+            margin-bottom: 25px;
+            min-height: 60px;
+            font-weight: 700;
+            transition: var(--transition);
         }
         
-        /* Responsive */
-        @media (max-width: 500px) {
-            body {
-                padding: 10px;
+        .zikr-animation {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            border: none;
+            border-radius: 50px;
+            padding: 15px 30px;
+            font-family: 'Scheherazade New', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-width: 180px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(44, 62, 45, 0.3);
+        }
+        
+        .count-btn {
+            background: linear-gradient(145deg, var(--primary-color), var(--dark-color));
+            color: white;
+            font-size: 1.5rem;
+            padding: 20px 40px;
+            min-width: 220px;
+        }
+        
+        .count-btn:hover {
+            background: linear-gradient(145deg, var(--secondary-color), var(--primary-color));
+            transform: translateY(-3px);
+        }
+        
+        .reset-btn {
+            background: linear-gradient(145deg, #f0f0f0, #e0e0e0);
+            color: var(--dark-color);
+        }
+        
+        .reset-btn:hover {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            transform: translateY(-3px);
+        }
+        
+        .settings-btn {
+            background: linear-gradient(145deg, var(--accent-color), #b38a36);
+            color: white;
+        }
+        
+        .settings-btn:hover {
+            background: linear-gradient(145deg, #d4b04a, var(--accent-color));
+            transform: translateY(-3px);
+        }
+        
+        .btn i {
+            font-size: 1.4rem;
+        }
+        
+        .progress-container {
+            margin-top: 30px;
+            background-color: #e8f5e9;
+            border-radius: 20px;
+            height: 15px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            width: 0%;
+            border-radius: 20px;
+            transition: width 0.5s ease;
+        }
+        
+        .target-info {
+            margin-top: 15px;
+            font-size: 1.2rem;
+            color: var(--dark-color);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .settings-panel {
+            background-color: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: var(--shadow);
+            display: none;
+            text-align: right;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .settings-panel.active {
+            display: block;
+            animation: slideDown 0.4s ease;
+        }
+        
+        @keyframes slideDown {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        .setting-item {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        
+        .setting-item label {
+            font-size: 1.3rem;
+            color: var(--dark-color);
+            margin-left: 15px;
+        }
+        
+        .setting-item input, .setting-item select {
+            padding: 12px 20px;
+            border-radius: 50px;
+            border: 2px solid #e0e0e0;
+            font-family: 'Scheherazade New', serif;
+            font-size: 1.2rem;
+            color: var(--text-color);
+            background-color: #f9f9f9;
+            width: 200px;
+            transition: var(--transition);
+        }
+        
+        .setting-item input:focus, .setting-item select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(26, 95, 35, 0.1);
+        }
+        
+        .zikr-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .zikr-item {
+            background-color: #f9f9f9;
+            border-radius: 15px;
+            padding: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid #e0e0e0;
+            text-align: center;
+        }
+        
+        .zikr-item:hover {
+            background-color: #f0f9f0;
+            transform: translateY(-5px);
+        }
+        
+        .zikr-item.active {
+            background-color: #e8f5e9;
+            border-color: var(--primary-color);
+            box-shadow: 0 5px 15px rgba(26, 95, 35, 0.1);
+        }
+        
+        .zikr-item .arabic {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 10px;
+        }
+        
+        .zikr-item .meaning {
+            font-size: 1.2rem;
+            color: var(--text-color);
+        }
+        
+        footer {
+            margin-top: 40px;
+            font-size: 1.1rem;
+            color: var(--dark-color);
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            width: 100%;
+        }
+        
+        .instructions {
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: right;
+            border-right: 5px solid var(--accent-color);
+        }
+        
+        .instructions h3 {
+            color: var(--dark-color);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .instructions ul {
+            list-style-position: inside;
+            font-size: 1.2rem;
+            line-height: 1.8;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
             }
             
-            .tasbih-count {
-                font-size: 4rem;
+            .subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .counter-display {
+                font-size: 5rem;
+            }
+            
+            .zikr-text {
+                font-size: 1.6rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
             }
             
             .btn {
-                padding: 12px 20px;
-                font-size: 1rem;
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .setting-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .setting-item input, .setting-item select {
+                width: 100%;
+                margin-top: 10px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- User Header -->
-        <div class="user-header">
-            <div class="user-avatar">
-                <img id="user-avatar" src="" alt="Avatar">
-            </div>
-            <div class="user-info">
-                <h2 id="user-name">Загрузка...</h2>
-                <p id="user-city">Город не выбран</p>
-            </div>
-        </div>
+        <header>
+            <h1>تسبيح</h1>
+            <div class="subtitle">Мусульманский счётчик тазбих</div>
+        </header>
         
-        <!-- Tabs -->
-        <div class="tabs">
-            <div class="tab active" data-tab="prayer">
-                <i class="fas fa-mosque"></i> Время намаза
-            </div>
-            <div class="tab" data-tab="tasbih">
-                <i class="fas fa-pray"></i> Тасбих
-            </div>
-        </div>
-        
-        <!-- Prayer Times Card -->
-        <div class="card active" id="prayer-card">
-            <div class="card-header">
-                <h2 class="card-title">Сегодня</h2>
-                <select class="city-selector" id="city-selector">
-                    <option value="">Выберите город</option>
-                </select>
-            </div>
-            
-            <div id="prayer-times">
-                <div class="loading">
-                    <i class="fas fa-spinner fa-spin"></i> Загрузка времени намаза...
+        <main>
+            <div class="tasbih-counter">
+                <div class="zikr-text" id="zikrText">سبحان الله</div>
+                <div class="counter-display" id="counter">0</div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="target-info">
+                    <span>Текущее значение: <span id="currentCount">0</span></span>
+                    <span>Цель: <span id="targetCount">33</span></span>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn count-btn" id="countBtn">
+                        <i class="fas fa-plus"></i>
+                        <span>Увеличить</span>
+                    </button>
+                    <button class="btn reset-btn" id="resetBtn">
+                        <i class="fas fa-redo"></i>
+                        <span>Сбросить</span>
+                    </button>
+                    <button class="btn settings-btn" id="settingsBtn">
+                        <i class="fas fa-cog"></i>
+                        <span>Настройки</span>
+                    </button>
                 </div>
             </div>
             
-            <div class="progress-container hidden" id="progress-container">
-                <div class="progress-info">
-                    <span id="next-prayer-text">Следующий намаз: </span>
-                    <span id="time-left">00:00</span>
+            <div class="settings-panel" id="settingsPanel">
+                <h2 style="color: var(--dark-color); margin-bottom: 20px; text-align: center;">Настройки тасбиха</h2>
+                
+                <div class="setting-item">
+                    <label for="targetInput">Целевое количество:</label>
+                    <input type="number" id="targetInput" min="1" max="1000" value="33">
                 </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                
+                <div class="setting-item">
+                    <label for="autoReset">Автосброс при достижении цели:</label>
+                    <select id="autoReset">
+                        <option value="yes">Да</option>
+                        <option value="no">Нет</option>
+                    </select>
+                </div>
+                
+                <div class="setting-item">
+                    <label for="vibration">Вибрация при нажатии:</label>
+                    <select id="vibration">
+                        <option value="yes">Да</option>
+                        <option value="no">Нет</option>
+                    </select>
+                </div>
+                
+                <h3 style="color: var(--dark-color); margin: 25px 0 15px; text-align: center;">Выбор зикра</h3>
+                <div class="zikr-list" id="zikrList">
+                    <!-- Zikr items will be added by JavaScript -->
                 </div>
             </div>
-        </div>
-        
-        <!-- Tasbih Counter Card -->
-        <div class="card" id="tasbih-card">
-            <div class="tasbih-container">
-                <h2 class="card-title">Счётчик Тасбиха</h2>
-                <p>Произносите зикр и считайте</p>
-                
-                <div class="tasbih-count" id="tasbih-count">0</div>
-                
-                <div class="tasbih-types">
-                    <div class="tasbih-type active" data-tasbih="33">Субханаллах (33)</div>
-                    <div class="tasbih-type" data-tasbih="33">Альхамдулиллях (33)</div>
-                    <div class="tasbih-type" data-tasbih="34">Аллаху Акбар (34)</div>
-                    <div class="tasbih-type" data-tasbih="100">Ля иляха илляллах (100)</div>
-                </div>
-                
-                <div class="tasbih-buttons">
-                    <button class="btn btn-primary" id="count-btn">
-                        <i class="fas fa-plus"></i> Добавить
-                    </button>
-                    <button class="btn btn-secondary" id="undo-btn">
-                        <i class="fas fa-undo"></i> Назад
-                    </button>
-                    <button class="btn btn-reset" id="reset-btn">
-                        <i class="fas fa-redo"></i> Сбросить
-                    </button>
-                </div>
-                
-                <div class="progress-container" style="margin-top: 30px;">
-                    <div class="progress-info">
-                        <span>Прогресс: </span>
-                        <span id="tasbih-progress">0/33</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="tasbih-progress-bar" style="width: 0%"></div>
-                    </div>
-                </div>
+            
+            <div class="instructions">
+                <h3>Как использовать тасбих:</h3>
+                <ul>
+                    <li>Нажимайте кнопку "Увеличить" для подсчёта каждого произнесения зикра</li>
+                    <li>Когда счётчик достигнет целевого значения (по умолчанию 33), он автоматически сбросится</li>
+                    <li>Используйте настройки для изменения целевого количества и выбора разных зикров</li>
+                    <li>Тасбих помогает в поминании Аллаха и совершении зикра</li>
+                </ul>
             </div>
-        </div>
+        </main>
         
-        <div class="footer">
-            <p>© 2024 Намаз Время & Тасбих</p>
-            <p>Обновляется автоматически</p>
-        </div>
+        <footer>
+            <p>Тасбих - инструмент для поминания Аллаха. Пусть Аллах примет наши зикры и дуа.</p>
+            <p style="margin-top: 10px; font-size: 1rem;">© 2023 Мусульманский счётчик тазбих</p>
+        </footer>
     </div>
 
     <script>
-        // Telegram Web Apps initialization
-        const tg = window.Telegram.WebApp;
-        
-        // User data from Telegram
-        let userData = null;
-        let prayerData = null;
-        let currentCity = null;
-        let currentTab = 'prayer';
-        let tasbihCount = 0;
-        let tasbihHistory = [];
-        let currentTasbihTarget = 33;
-        
-        // API URL - ВАЖНО: замени на свой PythonAnywhere URL
-        const API_BASE_URL = "http://usmonkhan408.pythonanywhere.com:5001";
-        
-        // Initialize the app
-        async function initApp() {
-            // Expand the app to full height
-            tg.expand();
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const counterElement = document.getElementById('counter');
+            const zikrTextElement = document.getElementById('zikrText');
+            const countBtn = document.getElementById('countBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const settingsBtn = document.getElementById('settingsBtn');
+            const settingsPanel = document.getElementById('settingsPanel');
+            const progressBar = document.getElementById('progressBar');
+            const currentCountElement = document.getElementById('currentCount');
+            const targetCountElement = document.getElementById('targetCount');
+            const targetInput = document.getElementById('targetInput');
+            const autoResetSelect = document.getElementById('autoReset');
+            const vibrationSelect = document.getElementById('vibration');
+            const zikrListElement = document.getElementById('zikrList');
             
-            // Get user data from Telegram
-            const initData = tg.initDataUnsafe;
-            userData = {
-                id: initData.user?.id,
-                firstName: initData.user?.first_name,
-                lastName: initData.user?.last_name,
-                username: initData.user?.username,
-                photoUrl: initData.user?.photo_url
-            };
+            // State
+            let count = 0;
+            let target = parseInt(targetInput.value) || 33;
+            let currentZikrIndex = 0;
             
-            // Update user info in header
-            updateUserHeader();
+            // Zikr data
+            const zikrData = [
+                { arabic: 'سبحان الله', meaning: 'Слава Аллаху', count: 33 },
+                { arabic: 'الحمد لله', meaning: 'Хвала Аллаху', count: 33 },
+                { arabic: 'الله أكبر', meaning: 'Аллах Велик', count: 34 },
+                { arabic: 'لا إله إلا الله', meaning: 'Нет божества, кроме Аллаха', count: 33 },
+                { arabic: 'أستغفر الله', meaning: 'Прошу прощения у Аллаха', count: 100 },
+                { arabic: 'لا حول ولا قوة إلا بالله', meaning: 'Нет мощи и силы кроме как от Аллаха', count: 100 }
+            ];
             
-            // Load user data from our API
-            await loadUserData();
-            
-            // Set up event listeners
-            setupEventListeners();
-            
-            // Start prayer times update loop
-            updatePrayerTimes();
-            setInterval(updatePrayerTimes, 60000); // Update every minute
-            
-            // Load tasbih count
-            loadTasbihCount();
-        }
-        
-        function updateUserHeader() {
-            const userName = document.getElementById('user-name');
-            const userAvatar = document.getElementById('user-avatar');
-            const userCity = document.getElementById('user-city');
-            
-            // Set name
-            let displayName = userData.firstName || 'Пользователь';
-            if (userData.lastName) displayName += ' ' + userData.lastName;
-            userName.textContent = displayName;
-            
-            // Set avatar
-            if (userData.photoUrl) {
-                userAvatar.src = userData.photoUrl;
-            } else {
-                userAvatar.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(displayName) + '&background=2E8B57&color=fff&size=128';
+            // Initialize
+            function init() {
+                updateCounter();
+                updateTargetInfo();
+                renderZikrList();
+                setupEventListeners();
             }
             
-            // Set city if available
-            if (currentCity) {
-                userCity.textContent = currentCity;
+            // Render zikr list
+            function renderZikrList() {
+                zikrListElement.innerHTML = '';
+                
+                zikrData.forEach((zikr, index) => {
+                    const zikrItem = document.createElement('div');
+                    zikrItem.className = `zikr-item ${index === currentZikrIndex ? 'active' : ''}`;
+                    zikrItem.innerHTML = `
+                        <div class="arabic">${zikr.arabic}</div>
+                        <div class="meaning">${zikr.meaning}</div>
+                        <div style="margin-top: 8px; font-size: 1.1rem; color: var(--secondary-color);">Рекомендуемое количество: ${zikr.count}</div>
+                    `;
+                    
+                    zikrItem.addEventListener('click', () => {
+                        selectZikr(index);
+                    });
+                    
+                    zikrListElement.appendChild(zikrItem);
+                });
             }
-        }
-        
-        async function loadUserData() {
-            try {
-                const userId = userData.id;
-                const apiUrl = `${API_BASE_URL}/api/user/${userId}`;
+            
+            // Select zikr
+            function selectZikr(index) {
+                currentZikrIndex = index;
+                const selectedZikr = zikrData[index];
                 
-                console.log('Loading user data from:', apiUrl);
+                // Update zikr text
+                zikrTextElement.textContent = selectedZikr.arabic;
+                zikrTextElement.classList.add('zikr-animation');
                 
-                const response = await fetch(apiUrl);
-                const data = await response.json();
+                // Update target
+                target = selectedZikr.count;
+                targetInput.value = target;
                 
-                console.log('User data loaded:', data);
+                // Update display
+                updateTargetInfo();
                 
-                if (data.city) {
-                    currentCity = data.city;
-                    document.getElementById('user-city').textContent = currentCity;
-                    await loadCities();
-                    document.getElementById('city-selector').value = currentCity;
-                }
+                // Reset count
+                resetCounter();
                 
-                if (data.tasbih_count !== undefined) {
-                    tasbihCount = data.tasbih_count;
-                    updateTasbihDisplay();
-                }
-                
-            } catch (error) {
-                console.error('Error loading user data:', error);
-                document.getElementById('prayer-times').innerHTML = 
-                    '<div class="loading">Ошибка загрузки данных. Проверьте подключение.</div>';
-            }
-        }
-        
-        async function loadCities() {
-            try {
-                // Используем список городов из бота
-                const cities = [
-                    "Москва", "Санкт-Петербург", "Казань", "Уфа", "Чечня", "Махачкала", "Сургут", 
-                    "Душанбе", "Тверь", "Воронеж", "Краснодар", "Сочи", "Ростов-на-Дону", "Волгоград", 
-                    "Самара", "Нижний Новгород", "Екатеринбург", "Челябинск", "Омск", "Новосибирск"
-                ];
-                
-                const citySelect = document.getElementById('city-selector');
-                citySelect.innerHTML = '<option value="">Выберите город</option>';
-                
-                cities.forEach(city => {
-                    const option = document.createElement('option');
-                    option.value = city;
-                    option.textContent = city;
-                    citySelect.appendChild(option);
+                // Update active zikr in list
+                document.querySelectorAll('.zikr-item').forEach((item, i) => {
+                    if (i === index) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
                 });
                 
-                if (currentCity) {
-                    citySelect.value = currentCity;
+                // Remove animation class after animation completes
+                setTimeout(() => {
+                    zikrTextElement.classList.remove('zikr-animation');
+                }, 500);
+            }
+            
+            // Update counter display
+            function updateCounter() {
+                counterElement.textContent = count;
+                currentCountElement.textContent = count;
+                
+                // Update progress bar
+                const progressPercentage = Math.min((count / target) * 100, 100);
+                progressBar.style.width = `${progressPercentage}%`;
+                
+                // Add animation
+                counterElement.classList.add('counter-animation');
+                
+                // Remove animation class after animation completes
+                setTimeout(() => {
+                    counterElement.classList.remove('counter-animation');
+                }, 500);
+            }
+            
+            // Update target info
+            function updateTargetInfo() {
+                targetCountElement.textContent = target;
+                targetInput.value = target;
+            }
+            
+            // Increase count
+            function increaseCount() {
+                count++;
+                
+                // Check if vibration is enabled
+                if (vibrationSelect.value === 'yes' && navigator.vibrate) {
+                    navigator.vibrate(10);
                 }
                 
-            } catch (error) {
-                console.error('Error loading cities:', error);
-            }
-        }
-        
-        async function updatePrayerTimes() {
-            if (!currentCity) {
-                document.getElementById('prayer-times').innerHTML = 
-                    '<div class="loading">Пожалуйста, выберите город</div>';
-                return;
-            }
-            
-            try {
-                const apiUrl = `${API_BASE_URL}/api/prayer-times/${encodeURIComponent(currentCity)}?lang=ru`;
+                updateCounter();
                 
-                console.log('Loading prayer times from:', apiUrl);
-                
-                const response = await fetch(apiUrl);
-                const data = await response.json();
-                
-                console.log('Prayer times loaded:', data);
-                
-                if (data.error) {
-                    document.getElementById('prayer-times').innerHTML = 
-                        `<div class="loading">${data.error}</div>`;
-                    return;
+                // Check if target reached
+                if (count >= target) {
+                    if (autoResetSelect.value === 'yes') {
+                        setTimeout(() => {
+                            resetCounter();
+                            showCompletionMessage();
+                        }, 300);
+                    } else {
+                        showCompletionMessage();
+                    }
                 }
-                
-                prayerData = data;
-                renderPrayerTimes();
-                
-            } catch (error) {
-                console.error('Error loading prayer times:', error);
-                document.getElementById('prayer-times').innerHTML = 
-                    '<div class="loading">Ошибка загрузки времени намаза. Попробуйте позже.</div>';
             }
-        }
-        
-        function renderPrayerTimes() {
-            const container = document.getElementById('prayer-times');
-            const prayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
-            const icons = {
-                'Fajr': '🌅',
-                'Dhuhr': '☀️',
-                'Asr': '⛅',
-                'Maghrib': '🌇',
-                'Isha': '🌙'
-            };
             
-            let html = '';
+            // Reset counter
+            function resetCounter() {
+                count = 0;
+                updateCounter();
+            }
             
-            prayers.forEach(prayer => {
-                const time = prayerData.times[prayer];
-                const name = prayerData.translations[prayer];
-                const isCurrent = prayerData.progress?.current === prayer;
-                const isPassed = prayerData.progress?.current !== prayer && 
-                                prayers.indexOf(prayer) < prayers.indexOf(prayerData.progress?.current || '');
-                
-                let className = 'prayer-item';
-                if (isCurrent) className += ' current';
-                if (isPassed) className += ' passed';
-                
-                html += `
-                    <div class="${className}">
-                        <div class="prayer-name">
-                            <span class="prayer-icon">${icons[prayer]}</span>
-                            <span>${name}</span>
-                        </div>
-                        <div class="prayer-time">${time}</div>
-                    </div>
+            // Show completion message
+            function showCompletionMessage() {
+                // Create a temporary completion message
+                const completionMsg = document.createElement('div');
+                completionMsg.textContent = 'Тасбих завершён! Альхамдулиллях!';
+                completionMsg.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: linear-gradient(145deg, var(--primary-color), var(--dark-color));
+                    color: white;
+                    padding: 20px 40px;
+                    border-radius: 15px;
+                    font-size: 1.5rem;
+                    font-weight: bold;
+                    z-index: 1000;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                    animation: fadeInOut 2s ease;
                 `;
-            });
-            
-            container.innerHTML = html;
-            
-            // Update progress bar
-            if (prayerData.progress) {
-                const progressContainer = document.getElementById('progress-container');
-                const progressFill = document.getElementById('progress-fill');
-                const nextPrayerText = document.getElementById('next-prayer-text');
-                const timeLeft = document.getElementById('time-left');
                 
-                progressContainer.classList.remove('hidden');
-                progressFill.style.width = `${prayerData.progress.progress_percent}%`;
+                document.body.appendChild(completionMsg);
                 
-                const nextPrayerName = prayerData.translations[prayerData.progress.next];
-                nextPrayerText.textContent = `Следующий намаз: ${nextPrayerName}`;
-                timeLeft.textContent = prayerData.progress.time_left;
+                // Remove message after animation
+                setTimeout(() => {
+                    completionMsg.remove();
+                }, 2000);
+                
+                // Add CSS for fade in/out animation
+                if (!document.querySelector('#completionAnimation')) {
+                    const style = document.createElement('style');
+                    style.id = 'completionAnimation';
+                    style.textContent = `
+                        @keyframes fadeInOut {
+                            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+                            40% { transform: translate(-50%, -50%) scale(1); }
+                            80% { opacity: 1; }
+                            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
             }
-        }
-        
-        function setupEventListeners() {
-            // Tab switching
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const tabId = tab.getAttribute('data-tab');
-                    switchTab(tabId);
-                });
-            });
             
-            // City selector
-            document.getElementById('city-selector').addEventListener('change', async (e) => {
-                currentCity = e.target.value;
-                if (currentCity) {
-                    // Save city to API
-                    await saveCity(currentCity);
-                    document.getElementById('user-city').textContent = currentCity;
-                    await updatePrayerTimes();
-                }
-            });
-            
-            // Tasbih buttons
-            document.getElementById('count-btn').addEventListener('click', () => {
-                tasbihHistory.push(tasbihCount);
-                tasbihCount++;
-                updateTasbihDisplay();
-                saveTasbihCount();
-            });
-            
-            document.getElementById('undo-btn').addEventListener('click', () => {
-                if (tasbihHistory.length > 0) {
-                    tasbihCount = tasbihHistory.pop();
-                    updateTasbihDisplay();
-                    saveTasbihCount();
-                }
-            });
-            
-            document.getElementById('reset-btn').addEventListener('click', () => {
-                tasbihHistory.push(tasbihCount);
-                tasbihCount = 0;
-                updateTasbihDisplay();
-                saveTasbihCount('reset');
-            });
-            
-            // Tasbih types
-            document.querySelectorAll('.tasbih-type').forEach(type => {
-                type.addEventListener('click', () => {
-                    document.querySelectorAll('.tasbih-type').forEach(t => t.classList.remove('active'));
-                    type.classList.add('active');
-                    currentTasbihTarget = parseInt(type.getAttribute('data-tasbih'));
-                    updateTasbihDisplay();
-                });
-            });
-        }
-        
-        function switchTab(tabId) {
-            currentTab = tabId;
-            
-            // Update active tab
-            document.querySelectorAll('.tab').forEach(tab => {
-                if (tab.getAttribute('data-tab') === tabId) {
-                    tab.classList.add('active');
-                } else {
-                    tab.classList.remove('active');
-                }
-            });
-            
-            // Update active card
-            document.querySelectorAll('.card').forEach(card => {
-                if (card.id === `${tabId}-card`) {
-                    card.classList.add('active');
-                } else {
-                    card.classList.remove('active');
-                }
-            });
-        }
-        
-        function updateTasbihDisplay() {
-            const countElement = document.getElementById('tasbih-count');
-            const progressElement = document.getElementById('tasbih-progress');
-            const progressBar = document.getElementById('tasbih-progress-bar');
-            
-            // Update count with animation
-            countElement.textContent = tasbihCount;
-            countElement.classList.add('pulse');
-            setTimeout(() => countElement.classList.remove('pulse'), 300);
-            
-            // Update progress
-            const progressPercent = Math.min((tasbihCount / currentTasbihTarget) * 100, 100);
-            progressElement.textContent = `${tasbihCount}/${currentTasbihTarget}`;
-            progressBar.style.width = `${progressPercent}%`;
-            
-            // Change color when target is reached
-            if (tasbihCount >= currentTasbihTarget) {
-                countElement.style.color = '#4CAF50';
-                progressBar.style.background = 'linear-gradient(90deg, #4CAF50, #8BC34A)';
-            } else {
-                countElement.style.color = '#FFD700';
-                progressBar.style.background = 'linear-gradient(90deg, #2E8B57, #FFD700)';
+            // Toggle settings panel
+            function toggleSettingsPanel() {
+                settingsPanel.classList.toggle('active');
             }
-        }
-        
-        async function saveCity(city) {
-            try {
-                const apiUrl = `${API_BASE_URL}/api/update-city`;
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        user_id: userData.id,
-                        city: city
-                    })
+            
+            // Setup event listeners
+            function setupEventListeners() {
+                // Count button
+                countBtn.addEventListener('click', increaseCount);
+                
+                // Reset button
+                resetBtn.addEventListener('click', resetCounter);
+                
+                // Settings button
+                settingsBtn.addEventListener('click', toggleSettingsPanel);
+                
+                // Target input change
+                targetInput.addEventListener('change', function() {
+                    target = parseInt(this.value) || 33;
+                    updateTargetInfo();
+                    
+                    // Reset if current count is higher than new target
+                    if (count > target) {
+                        resetCounter();
+                    } else {
+                        updateCounter();
+                    }
                 });
                 
-                const data = await response.json();
-                console.log('City saved:', data);
-                
-            } catch (error) {
-                console.error('Error saving city:', error);
-            }
-        }
-        
-        async function loadTasbihCount() {
-            try {
-                const apiUrl = `${API_BASE_URL}/api/tasbih/${userData.id}`;
-                const response = await fetch(apiUrl);
-                const data = await response.json();
-                
-                if (data.count !== undefined) {
-                    tasbihCount = data.count;
-                    updateTasbihDisplay();
-                }
-                
-            } catch (error) {
-                console.error('Error loading tasbih count:', error);
-            }
-        }
-        
-        async function saveTasbihCount(action = 'increment') {
-            try {
-                const apiUrl = `${API_BASE_URL}/api/tasbih/${userData.id}`;
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: action,
-                        count: tasbihCount
-                    })
+                // Keyboard shortcuts
+                document.addEventListener('keydown', function(e) {
+                    // Space or Enter to increase count
+                    if (e.code === 'Space' || e.code === 'Enter') {
+                        e.preventDefault();
+                        increaseCount();
+                    }
+                    
+                    // Escape to close settings
+                    if (e.code === 'Escape' && settingsPanel.classList.contains('active')) {
+                        toggleSettingsPanel();
+                    }
+                    
+                    // R key to reset
+                    if (e.code === 'KeyR' && !e.ctrlKey) {
+                        resetCounter();
+                    }
                 });
                 
-                const data = await response.json();
-                console.log('Tasbih saved:', data);
-                
-            } catch (error) {
-                console.error('Error saving tasbih count:', error);
+                // Prevent default focus styles
+                document.querySelectorAll('button, input, select').forEach(element => {
+                    element.addEventListener('mousedown', function(e) {
+                        e.preventDefault();
+                    });
+                    
+                    element.addEventListener('focus', function() {
+                        if (this.id !== 'targetInput') {
+                            this.style.outline = 'none';
+                            this.style.boxShadow = '0 0 0 3px rgba(44, 62, 45, 0.3)';
+                        }
+                    });
+                    
+                    element.addEventListener('blur', function() {
+                        this.style.boxShadow = '';
+                    });
+                });
             }
-        }
-        
-        // Initialize the app when Telegram Web Apps is ready
-        if (tg.initData) {
-            initApp();
-        } else {
-            tg.ready();
-            tg.onEvent('viewportChanged', initApp);
-        }
+            
+            // Initialize the app
+            init();
+            
+            // Set initial zikr
+            selectZikr(0);
+        });
     </script>
 </body>
     </html>
