@@ -1,240 +1,632 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Islamic Bot Web</title>
-<style>
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        margin: 0;
-        padding: 0;
-        background: #f3f4f6;
-        color: #1f2937;
-    }
-    .header {
-        display: flex;
-        align-items: center;
-        padding: 10px 20px;
-        background: #2563eb;
-        color: white;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .header img {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        margin-right: 10px;
-    }
-    .container {
-        max-width: 900px;
-        margin: 20px auto;
-        padding: 0 15px;
-    }
-    .card {
-        background: white;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    h1, h2 {
-        margin: 0 0 10px 0;
-    }
-    label {
-        display: block;
-        margin: 10px 0 5px 0;
-        font-weight: bold;
-    }
-    select, button {
-        width: 100%;
-        padding: 8px 10px;
-        margin-bottom: 10px;
-        border-radius: 8px;
-        border: 1px solid #d1d5db;
-        font-size: 16px;
-    }
-    #prayers label {
-        display: inline-block;
-        margin-right: 10px;
-        font-weight: normal;
-    }
-    #output {
-        margin-top: 15px;
-        font-size: 16px;
-        line-height: 1.5;
-    }
-    @media (max-width: 600px) {
-        .header {
-            flex-direction: column;
-            align-items: flex-start;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Намаз Время & Тасбих</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .header img {
+        
+        :root {
+            --primary: #2E8B57;
+            --primary-dark: #1E6B47;
+            --secondary: #FFD700;
+            --light: #F5F5F5;
+            --dark: #333;
+            --gray: #666;
+            --shadow: 0 4px 12px rgba(0,0,0,0.1);
+            --radius: 16px;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a3a, #2c3e50);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        /* Header with user info */
+        .user-header {
+            display: flex;
+            align-items: center;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+        
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 15px;
+            border: 3px solid var(--secondary);
+        }
+        
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .user-info h2 {
+            font-size: 1.3rem;
             margin-bottom: 5px;
         }
-    }
-</style>
-<script async src="https://telegram.org/js/telegram-widget.js?15"
-        data-telegram-login="YOUR_BOT_USERNAME"
-        data-size="large"
-        data-userpic="true"
-        data-radius="12"
-        data-request-access="write"
-        data-on-auth="onTelegramAuth(user)">
-</script>
+        
+        .user-info p {
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: rgba(255,255,255,0.1);
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .tab.active {
+            background: var(--primary);
+        }
+        
+        .tab:hover {
+            background: rgba(46, 139, 87, 0.3);
+        }
+        
+        /* Prayer Times Card */
+        .card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+        
+        .card.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .city-selector {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        
+        .city-selector option {
+            background: #2c3e50;
+            color: white;
+        }
+        
+        /* Prayer Items */
+        .prayer-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+        
+        .prayer-item.current {
+            background: var(--primary);
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(46, 139, 87, 0.3);
+        }
+        
+        .prayer-item.passed {
+            opacity: 0.7;
+        }
+        
+        .prayer-name {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .prayer-icon {
+            font-size: 1.5rem;
+        }
+        
+        .prayer-time {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+        
+        /* Progress Bar */
+        .progress-container {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .progress-bar {
+            height: 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 6px;
+            transition: width 1s ease-in-out;
+        }
+        
+        /* Tasbih Counter */
+        .tasbih-container {
+            text-align: center;
+            padding: 20px 0;
+        }
+        
+        .tasbih-count {
+            font-size: 5rem;
+            font-weight: 900;
+            color: var(--secondary);
+            margin: 20px 0;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+        
+        .tasbih-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.25);
+        }
+        
+        .btn-reset {
+            background: rgba(220, 53, 69, 0.8);
+            color: white;
+        }
+        
+        .btn-reset:hover {
+            background: rgba(220, 53, 69, 1);
+        }
+        
+        /* Tasbih Types */
+        .tasbih-types {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tasbih-type {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tasbih-type.active {
+            background: var(--primary);
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #ccc;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        /* Animation for tasbih */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 0.3s ease-in-out;
+        }
+        
+        /* Responsive */
+        @media (max-width: 500px) {
+            body {
+                padding: 10px;
+            }
+            
+            .tasbih-count {
+                font-size: 4rem;
+            }
+            
+            .btn {
+                padding: 12px 20px;
+                font-size: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<div class="header" id="header" style="display:none;">
-    <img id="avatar" src="" alt="avatar">
-    <span id="username"></span>
-</div>
-
-<div class="container">
-    <div id="main-content" style="display:none;">
-        <h1>Islamic Bot Web</h1>
-
-        <div class="card">
-            <h2>Settings</h2>
-            <label>Language:</label>
-            <select id="language">
-                <option value="ru">Русский</option>
-                <option value="tj">Таджикский</option>
-                <option value="uz">Узбекский</option>
-                <option value="en">English</option>
-            </select>
-
-            <label>City:</label>
-            <select id="city">
-                <option value="Moscow">Moscow</option>
-                <option value="Saint Petersburg">Saint Petersburg</option>
-                <option value="Kazan">Kazan</option>
-                <option value="Ufa">Ufa</option>
-                <option value="Chechnya">Chechnya</option>
-                <option value="Makhachkala">Makhachkala</option>
-                <option value="Surgut">Surgut</option>
-                <option value="Dushanbe">Dushanbe</option>
-            </select>
-
-            <label>Prayers Notifications:</label>
-            <div id="prayers">
-                <label><input type="checkbox" value="Fajr"> Fajr</label>
-                <label><input type="checkbox" value="Dhuhr"> Dhuhr</label>
-                <label><input type="checkbox" value="Asr"> Asr</label>
-                <label><input type="checkbox" value="Maghrib"> Maghrib</label>
-                <label><input type="checkbox" value="Isha"> Isha</label>
+    <div class="container">
+        <!-- User Header -->
+        <div class="user-header">
+            <div class="user-avatar">
+                <img id="user-avatar" src="" alt="Avatar">
             </div>
-
-            <button id="save-settings">Save Settings</button>
+            <div class="user-info">
+                <h2 id="user-name">Загрузка...</h2>
+                <p id="user-city">Город не выбран</p>
+            </div>
         </div>
-
-        <div class="card">
-            <h2>Actions</h2>
-            <button id="get-times">Get Prayer Times</button>
-            <button id="get-hadith">Get Random Hadith</button>
-            <div id="output"></div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" data-tab="prayer">
+                <i class="fas fa-mosque"></i> Время намаза
+            </div>
+            <div class="tab" data-tab="tasbih">
+                <i class="fas fa-pray"></i> Тасбих
+            </div>
+        </div>
+        
+        <!-- Prayer Times Card -->
+        <div class="card active" id="prayer-card">
+            <div class="card-header">
+                <h2 class="card-title">Сегодня</h2>
+                <select class="city-selector" id="city-selector">
+                    <option value="">Выберите город</option>
+                </select>
+            </div>
+            
+            <div id="prayer-times">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Загрузка времени намаза...
+                </div>
+            </div>
+            
+            <div class="progress-container hidden" id="progress-container">
+                <div class="progress-info">
+                    <span id="next-prayer-text">Следующий намаз: </span>
+                    <span id="time-left">00:00</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tasbih Counter Card -->
+        <div class="card" id="tasbih-card">
+            <div class="tasbih-container">
+                <h2 class="card-title">Счётчик Тасбиха</h2>
+                <p>Произносите зикр и считайте</p>
+                
+                <div class="tasbih-count" id="tasbih-count">0</div>
+                
+                <div class="tasbih-types">
+                    <div class="tasbih-type active" data-tasbih="33">Субханаллах (33)</div>
+                    <div class="tasbih-type" data-tasbih="33">Альхамдулиллях (33)</div>
+                    <div class="tasbih-type" data-tasbih="34">Аллаху Акбар (34)</div>
+                    <div class="tasbih-type" data-tasbih="100">Ля иляха илляллах (100)</div>
+                </div>
+                
+                <div class="tasbih-buttons">
+                    <button class="btn btn-primary" id="count-btn">
+                        <i class="fas fa-plus"></i> Добавить
+                    </button>
+                    <button class="btn btn-secondary" id="undo-btn">
+                        <i class="fas fa-undo"></i> Назад
+                    </button>
+                    <button class="btn btn-reset" id="reset-btn">
+                        <i class="fas fa-redo"></i> Сбросить
+                    </button>
+                </div>
+                
+                <div class="progress-container" style="margin-top: 30px;">
+                    <div class="progress-info">
+                        <span>Прогресс: </span>
+                        <span id="tasbih-progress">0/33</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="tasbih-progress-bar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2024 Намаз Время & Тасбих</p>
+            <p>Обновляется автоматически</p>
         </div>
     </div>
-</div>
 
-<script>
-const API_BASE = "http://YOUR_API_URL_HERE"; // сюда адрес Flask API
-let telegramUser = null;
-
-function onTelegramAuth(user) {
-    telegramUser = user; // id, username, first_name, photo_url, auth_date
-
-    document.getElementById("avatar").src = user.photo_url;
-    document.getElementById("username").textContent = user.username || user.first_name;
-    document.getElementById("header").style.display = "flex";
-    document.getElementById("main-content").style.display = "block";
-
-    loadUserData(user.id);
-}
-
-// Загрузка данных пользователя
-async function loadUserData(telegram_id) {
-    const res = await fetch(`${API_BASE}/api/user/${telegram_id}`);
-    const user = await res.json();
-
-    document.getElementById("language").value = user.language || "ru";
-    document.getElementById("city").value = user.city || "Moscow";
-
-    const prayersCheckboxes = document.querySelectorAll("#prayers input");
-    prayersCheckboxes.forEach(cb => {
-        cb.checked = user.prayers?.[cb.value] ?? true;
-    });
-}
-
-// Сохранение настроек
-document.getElementById("save-settings").addEventListener("click", async () => {
-    const telegram_id = telegramUser.id;
-    const language = document.getElementById("language").value;
-    const city = document.getElementById("city").value;
-
-    const prayers = {};
-    document.querySelectorAll("#prayers input").forEach(cb => {
-        prayers[cb.value] = cb.checked;
-    });
-
-    await fetch(`${API_BASE}/api/set_language`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ telegram_id, language })
-    });
-
-    await fetch(`${API_BASE}/api/set_city`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ telegram_id, city, timezone: "Asia/Dushanbe" })
-    });
-
-    await fetch(`${API_BASE}/api/set_prayers`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ telegram_id, prayers })
-    });
-
-    alert("Settings saved");
-});
-
-// Время намаза
-document.getElementById("get-times").addEventListener("click", async () => {
-    const res = await fetch(`${API_BASE}/api/user/${telegramUser.id}`);
-    const user = await res.json();
-    if (!user.city) return alert("City not set");
-
-    const r = await fetch(`http://api.aladhan.com/v1/timingsByCity?city=${user.city}&country=Russia&method=3`);
-    const data = await r.json();
-    const t = data.data.timings;
-
-    document.getElementById("output").innerHTML = `
-        <strong>Prayer Times (${user.city}):</strong><br>
-        Fajr: ${t.Fajr}<br>
-        Dhuhr: ${t.Dhuhr}<br>
-        Asr: ${t.Asr}<br>
-        Maghrib: ${t.Maghrib}<br>
-        Isha: ${t.Isha}
-    `;
-});
-
-// Хадис
-document.getElementById("get-hadith").addEventListener("click", async () => {
-    const res = await fetch(`${API_BASE}/api/user/${telegramUser.id}`);
-    const user = await res.json();
-    const lang = user.language || "ru";
-
-    const hadiths = {
-        ru: ["Поистине, дела оцениваются по намерениям. (Бухари)", "Лучший из вас — лучший в нравах. (Тирмизи)", "Между человеком и неверием — оставление намаза. (Муслим)"],
-        tj: ["Ҳақиқат, амалиёт ниётҳо асосида баҳоланади. (Бухорий)", "Шумо беҳтарин кас ҳастед, ки ахлоқатон беҳтар аст. (Тирмизи)"],
-        uz: ["Haqiqatan ham ishlar niyatga qarab baholanadi. (Bukhari)", "Eng yaxshingiz — axloqingiz yaxshi bo‘lgan. (Tirmizi)"],
-        en: ["Indeed, deeds are judged by intentions. (Bukhari)", "The best among you is the one with the best character. (Tirmidhi)"]
-    };
-
-    const randomHadith = hadiths[lang][Math.floor(Math.random() * hadiths[lang].length)];
-    document.getElementById("output").innerHTML = `<strong>Random Hadith:</strong><br>${randomHadith}`;
-});
-</script>
-
-</body>
-</html>
+    <script>
+        // Telegram Web Apps initialization
+        const tg = window.Telegram.WebApp;
+        
+        // User data from Telegram
+        let userData = null;
+        let prayerData = null;
+        let currentCity = null;
+        let currentTab = 'prayer';
+        let tasbihCount = 0;
+        let tasbihHistory = [];
+        let currentTasbihTarget = 33;
+        
+        // Initialize the app
+        async function initApp() {
+            // Expand the app to full height
+            tg.expand();
+            
+            // Get user data from Telegram
+            const initData = tg.initDataUnsafe;
+            userData = {
+                id: initData.user?.id,
+                firstName: initData.user?.first_name,
+                lastName: initData.user?.last_name,
+                username: initData.user?.username,
+                photoUrl: initData.user?.photo_url
+            };
+            
+            // Update user info in header
+            updateUserHeader();
+            
+            // Load user data from our API
+            await loadUserData();
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Start prayer times update loop
+            updatePrayerTimes();
+            setInterval(updatePrayerTimes, 60000); // Update every minute
+            
+            // Load tasbih count
+            loadTasbihCount();
+        }
+        
+        function updateUserHeader() {
+            const userName = document.getElementById('user-name');
+            const userAvatar = document.getElementById('user-avatar');
+            const userCity = document.getElementById('user-city');
+            
+            // Set name
+            let displayName = userData.firstName || 'Пользователь';
+            if (userData.lastName) displayName += ' ' + userData.lastName;
+            userName.textContent = displayName;
+            
+            // Set avatar
+            if (userData.photoUrl) {
+                userAvatar.src = userData.photoUrl;
+            } else {
+                userAvatar.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(displayName) + '&background=2E8B57&color=fff&size=128';
+            }
+            
+            // Set city if available
+            if (currentCity) {
+                userCity.textContent = currentCity;
+            }
+        }
+        
+        async function loadUserData() {
+            try {
+                const userId = userData.id;
+                // Replace with your actual API URL from PythonAnywhere
+                const apiUrl = `https://yourusername.pythonanywhere.com/api/user/${userId}`;
+                
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                if (data.city) {
+                    currentCity = data.city;
+                    document.getElementById('user-city').textContent = currentCity;
+                    await loadCities();
+                    document.getElementById('city-selector').value = currentCity;
+                }
+                
+                if (data.tasbih_count !== undefined) {
+                    tasbihCount = data.tasbih_count;
+                    updateTasbihDisplay();
+                }
+                
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+        
+        async function loadCities() {
+            try {
+                // In a real app, you would fetch cities from your API
+                // For now, using a static list from your bot code
+                const cities = [
+                    "Москва", "Санкт-Петербург", "Казань", "Уфа", "Душанбе",
+                    "Тверь", "Воронеж", "Краснодар", "Сочи", "Ростов-на-Дону"
+                    // ... add more cities as needed
+                ];
+                
+                const citySelect = document.getElementById('city-selector');
+                citySelect.innerHTML = '<option value="">Выберите город</option>';
+                
+                cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    citySelect.appendChild(option);
+                });
+                
+                if (currentCity) {
+                    citySelect.value = currentCity;
+                }
+                
+            } catch (error) {
+                console.error('Error loading cities:', error);
+            }
+        }
+        
+        async function updatePrayerTimes() {
+            if (!currentCity) {
+                document.getElementById('prayer-times').innerHTML = 
+                    '<div class="loading">Пожалуйста, выберите город</div>';
+                return;
+            }
+            
+            try {
+                const apiUrl = `https://yourusername.pythonanywhere.com/api/prayer-times/${encodeURIComponent(currentCity)}?lang=ru`;
+                
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                if (data.error) {
+                    document.getElementById('prayer-times').innerHTML = 
+                        `<div class="loading">${data.error}</div>`;
+                    return;
+                }
+                
+                prayerData = data;
+                renderPrayerTimes();
+                
+            } catch (error) {
+                console.error('Error loading prayer times:', error);
+                document.getElementById('prayer-times').innerHTML = 
+                    '<div class="loading">Ошибка загрузки времени намаза</div>';
+            }
+        }
+        
+        function renderPrayerTimes() {
+            const container = document.getElementById('prayer-times');
+            const prayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+            const icons = {
+                'Fajr': '🌅',
+                'Dhuhr': '☀️',
+                'Asr': '⛅',
+                'Maghrib': '🌇',
+                'Isha': '🌙'
+            };
+            
+            let html = '';
+            
+            prayers.forEach(prayer => {
+                const time = prayerData.times[prayer];
+                const name = prayerData.translations[prayer];
+                const isCurrent = prayerData.progress?.current === prayer;
+                const isPassed = prayerData.progress?.current !== prayer && 
+                                prayers.indexOf(prayer) < prayers.indexOf(prayerData.progress?.current || '');
+                
+                let className = 'prayer-item';
+                if (isCurrent) className += ' current';
+                if (isPassed) className += ' passed';
+                
+                html += `
+                    <div class="${className}">
+                        <div class="prayer-name">
+                            <span class="prayer-icon">${icons[prayer]}</span>
+                            <span>${name}</span>
+                        </div>
+                        <div class="prayer-time">${time}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            
+            // Update progress bar
+            if (prayerData.progress) {
+                const progressContainer = document.getElementById('progress-container');
+                const progressFill = document.getElementById('progress-fill');
+                const nextPrayerText = document.getElementById('next-prayer
