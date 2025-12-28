@@ -1,151 +1,249 @@
+
 <!DOCTYPE html>
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-<title>Tasbih Premium</title>
-<link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Tasbih Realistic Fixed</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Amiri&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',sans-serif;}
-body, html{height:100%;width:100%;display:flex;flex-direction:column;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;background:#f0f0f0}
 
-/* LOADING */
-#loading{
-  position:fixed; inset:0; background:linear-gradient(160deg,#0f5132,#1b8a5a);
-  display:flex; align-items:center; justify-content:center; font-family:'Amiri',serif; font-size:36px; color:#fff; z-index:999;
+/* SWITCH */
+.switch-btn{
+  position:fixed;top:16px;right:16px;
+  width:48px;height:48px;border-radius:50%;
+  border:none;font-size:22px;color:#fff;
+  background:linear-gradient(145deg,#1b8a5a,#0b3d0b);
+  box-shadow:0 8px 25px rgba(0,0,0,.45);
+  z-index:2000
 }
 
-/* Верхняя панель */
-.top-panel{
-  height:30%;
+/* MODAL */
+.modal{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.55);
+  display:none;align-items:center;justify-content:center;
+  z-index:1500
+}
+.modal-content{
+  background:#fff;border-radius:24px;
+  padding:20px;width:85%;max-width:320px
+}
+.modal-content button{
+  width:100%;padding:16px;margin:10px 0;
+  border:none;border-radius:18px;
+  font-size:18px;color:#fff;
+  background:linear-gradient(145deg,#1b8a5a,#0b3d0b)
+}
+
+/* INTERFACE */
+.interface{width:100%;height:100%;display:none}
+
+/* CLASSIC */
+#classic{display:flex;flex-direction:column}
+.classic-top{
+  height:32%;
   background:linear-gradient(160deg,#0b3d0b,#2ecc71);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:0 20px;
-  color:#fff;
-  box-shadow:0 5px 15px rgba(0,0,0,.3);
-  position:relative;
+  padding:22px;display:flex;
+  justify-content:space-between;align-items:center;color:#fff
 }
-
-/* Арабский текст */
-.arabic{
-  font-family:'Amiri',serif;
-  font-size:53px;
-  opacity:0;
-  transform:translateX(-10px);
-  transition:opacity 0.8s, transform 0.8s;
-}
-
-/* Счётчик */
+.arabic{font-family:'Amiri',serif;font-size:52px;opacity:0;transition:.8s}
+.arabic.show{opacity:1}
 .progress{
-  width:120px;
-  height:120px;
-  border-radius:50%;
-  background:conic-gradient(#7dffb3 0deg, rgba(255,255,255,.2) 0deg);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  box-shadow:0 5px 15px rgba(0,0,0,.3);
+  width:130px;height:130px;border-radius:50%;
+  background:conic-gradient(#7dffb3 0deg,#ffffff33 0deg);
+  display:flex;align-items:center;justify-content:center
 }
-
 .progress span{
-  width:80px;
-  height:80px;
-  border-radius:50%;
-  background:#0b3d0b;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-size:20px;
-  font-weight:600;
-  color:#fff;
-  box-shadow:inset 0 0 10px rgba(0,0,0,.5);
+  width:86px;height:86px;border-radius:50%;
+  background:#0b3d0b;color:#fff;
+  display:flex;align-items:center;justify-content:center
 }
-
-/* Нижняя панель */
-.bottom-panel{
-  flex:1;
-  background:#fff;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  border-top-left-radius:30px;
-  border-top-right-radius:30px;
-  box-shadow:0 -5px 15px rgba(0,0,0,.2);
-}
-
-/* Кнопка */
-.tap{
-  width:180px;
-  height:180px;
-  border-radius:50%;
+.classic-bottom{flex:1;display:flex;align-items:center;justify-content:center}
+.tap-btn{
+  width:200px;height:200px;border-radius:50%;
+  border:none;font-size:50px;
   background:radial-gradient(circle at top,#7dffb3,#1b8a5a);
-  border:none;
-  color:#0b3d0b;
-  font-size:48px;
-  font-weight:bold;
-  box-shadow:0 15px 35px rgba(0,0,0,.4);
-  transition:transform 0.1s, box-shadow 0.2s;
+  box-shadow:0 20px 45px rgba(0,0,0,.45)
 }
 
-.tap:hover{box-shadow:0 20px 40px rgba(0,0,0,.5);}
-.tap:active{transform:scale(0.95);}
+/* DIGITAL */
+#digital{
+  background:radial-gradient(circle at top,#111,#000);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center
+}
+.gadget{
+  width:320px;height:180px;border-radius:24px;
+  background:linear-gradient(145deg,#2a2a2a,#0a0a0a);
+  padding:25px;
+  box-shadow:0 25px 60px rgba(0,0,0,.8)
+}
+.screen{
+  height:90px;border-radius:12px;
+  background:#001a13;
+  display:flex;align-items:center;justify-content:center;
+  color:#00ffcc;font-size:72px;
+  font-family:'Orbitron',monospace;
+  text-shadow:0 0 20px #00ffcc
+}
+.touch{
+  margin:40px auto 0;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,#004438,#001a13);
+  box-shadow:0 25px 60px rgba(0,0,0,.9)
+}
 
-/* Анимация арабских слов */
-.show{opacity:1; transform:translateX(0);}
-.hide{opacity:0; transform:translateX(-10px);}
+/* MANUAL */
+#manual{
+  background:linear-gradient(135deg,#e8d5b5,#d4b98a);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center
+}
+.manual-counter{font-size:26px;margin-bottom:20px}
+.frame{
+  width:140px;height:360px;
+  border-radius:30px;
+  background:#5a3921;
+  overflow:hidden;position:relative;
+  box-shadow:0 15px 40px rgba(0,0,0,.4)
+}
+.bead-column{
+  position:absolute;top:0;left:0;right:0;
+  display:flex;flex-direction:column;
+  align-items:center;
+}
+.bead{
+  width:100px;height:100px;border-radius:50%;
+  margin:12px 0;
+  background:radial-gradient(circle at top,#e8c782,#8b6f47);
+  box-shadow:0 12px 28px rgba(0,0,0,.45)
+}
+.move{transition:transform .22s ease-out}
 </style>
 </head>
+
 <body>
 
-<div id="loading">السلام عليكم</div>
+<button class="switch-btn" onclick="openModal()">☰</button>
 
-<div class="top-panel">
-  <div class="arabic" id="arabic">الحمد لله</div>
-  <div class="progress" id="progress"><span id="progressText">0 / 33</span></div>
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <button onclick="switchUI('classic')">Классический</button>
+    <button onclick="switchUI('digital')">Электронный</button>
+    <button onclick="switchUI('manual')">Ручной</button>
+  </div>
 </div>
 
-<div class="bottom-panel">
-  <button class="tap" id="btn">0</button>
+<div class="interface" id="classic">
+  <div class="classic-top">
+    <div class="arabic" id="arabicText">الحمد لله</div>
+    <div class="progress" id="progress"><span id="ptext">0 / 33</span></div>
+  </div>
+  <div class="classic-bottom">
+    <button class="tap-btn" id="tapBtn">0</button>
+  </div>
+</div>
+
+<div class="interface" id="digital">
+  <div class="gadget">
+    <div class="screen" id="digitalCount">00</div>
+  </div>
+  <div class="touch" id="digitalTouch"></div>
+</div>
+
+<div class="interface" id="manual">
+  <div class="manual-counter" id="manualCounter">0 / 33</div>
+  <div class="frame" id="frame">
+    <div class="bead-column" id="beadColumn"></div>
+  </div>
 </div>
 
 <script>
-setTimeout(()=>document.getElementById('loading').style.display='none',1500);
-
-let count=0;
-const limit=33;
-
-const btn=document.getElementById('btn');
-const progress=document.getElementById('progress');
-const progressText=document.getElementById('progressText');
-const arabic=document.getElementById('arabic');
-
+let count = Number(localStorage.getItem("tasbih")) || 0;
+const limit = 33;
 const words=["الحمد لله","الله أكبر","سبحان الله"];
-let i=0;
+let w=0;
 
-function rotateWords(){
-  arabic.classList.remove('show');
-  arabic.classList.add('hide');
-  setTimeout(()=>{
-    arabic.innerText=words[i];
-    arabic.classList.remove('hide');
-    arabic.classList.add('show');
-    i=(i+1)%words.length;
-  },800);
+/* UI */
+function openModal(){modal.style.display="flex"}
+function switchUI(id){
+  modal.style.display="none";
+  document.querySelectorAll(".interface").forEach(i=>i.style.display="none");
+  document.getElementById(id).style.display="flex";
+  updateUI();
 }
-rotateWords();
-setInterval(rotateWords,2000);
+switchUI("classic");
 
-btn.onclick=()=>{
-  count++;
-  if(count>limit) count=1;
-  btn.innerText=count;
-  progressText.innerText=`${count} / ${limit}`;
-  let deg=(count/limit)*360;
-  progress.style.background=`conic-gradient(#7dffb3 ${deg}deg, rgba(255,255,255,.2) ${deg}deg)`;
-  navigator.vibrate?.(30);
-};
+/* COUNTER */
+function increment(){
+  count++; if(count>limit) count=1;
+  localStorage.setItem("tasbih",count);
+  navigator.vibrate?.(20);
+  updateUI();
+}
+tapBtn.onclick=increment;
+digitalTouch.onclick=increment;
+
+/* UPDATE */
+function updateUI(){
+  tapBtn.innerText=count;
+  digitalCount.innerText=String(count).padStart(2,"0");
+  manualCounter.innerText=`${count} / ${limit}`;
+  ptext.innerText=`${count} / ${limit}`;
+  progress.style.background=`conic-gradient(#7dffb3 ${(count/limit)*360}deg,#ffffff33 0deg)`;
+}
+
+/* TEXT */
+setInterval(()=>{
+  arabicText.classList.remove("show");
+  setTimeout(()=>{
+    arabicText.innerText=words[w];
+    arabicText.classList.add("show");
+    w=(w+1)%words.length;
+  },400);
+},2000);
+
+/* MANUAL INIT */
+for(let i=0;i<6;i++) addBead();
+function addBead(){
+  const b=document.createElement("div");
+  b.className="bead";
+  beadColumn.appendChild(b);
+}
+
+/* SWIPE DOWN */
+let startY=0,startTime=0;
+frame.addEventListener("touchstart",e=>{
+  startY=e.touches[0].clientY;
+  startTime=Date.now();
+});
+frame.addEventListener("touchend",e=>{
+  const dy=e.changedTouches[0].clientY-startY;
+  const dt=Date.now()-startTime;
+  if(dy>25||dt<150){
+    scrollBeads();
+    increment();
+  }
+});
+function scrollBeads(){
+  beadColumn.classList.add("move");
+  beadColumn.style.transform="translateY(124px)";
+  setTimeout(()=>{
+    beadColumn.classList.remove("move");
+    beadColumn.style.transform="translateY(0)";
+    beadColumn.removeChild(beadColumn.lastChild);
+    const b=document.createElement("div");
+    b.className="bead";
+    beadColumn.insertBefore(b,beadColumn.firstChild);
+  },220);
+}
+
+updateUI();
 </script>
 
 </body>
